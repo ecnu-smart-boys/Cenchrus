@@ -51,8 +51,12 @@ const rules = reactive({
   password: [{ required: true, message: "请输入密码", trigger: "blur" }],
   captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }]
 });
-const changeCaptcha = function () {};
-const loginSubmit = function () {};
+const changeCaptcha = function () {
+  // TODO
+};
+const loginSubmit = function () {
+  // TODO
+};
 const reset = function () {
   // this.$refs["login_form"].resetFields();
   changeCaptcha();

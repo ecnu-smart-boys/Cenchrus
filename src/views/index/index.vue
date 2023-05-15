@@ -14,13 +14,8 @@
         </el-menu></el-header
       >
       <el-container>
-        <el-aside width="200px"
-          ><el-menu
-            default-active="2"
-            class="el-menu-vertical-demo"
-            @open="handleOpen"
-            @close="handleClose"
-          >
+        <el-aside width="200px">
+          <el-menu default-active="1" @open="handleOpen">
             <el-menu-item index="1">
               <el-icon><location /></el-icon>
               <span>首页</span>
@@ -54,17 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting
-} from "@element-plus/icons-vue";
+import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
 const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath);
-};
-const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);
 };
 

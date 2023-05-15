@@ -16,6 +16,18 @@ const routes = [
       {
         path: "consult-record",
         component: () => import("@/views/consultRecord/index.vue")
+      },
+      {
+        path: "supervisor-manager",
+        component: () => import("@/views/supervisorManager/index.vue")
+      },
+      {
+        path: "consultant-manager",
+        component: () => import("@/views/consultantManager/index.vue")
+      },
+      {
+        path: "visitor-manager",
+        component: () => import("@/views/visitorManager/index.vue")
       }
     ]
   },
