@@ -18,10 +18,10 @@
 
 <script setup lang="ts">
 import ScheduleCalendar from "@/views/home/components/schedule-calendar.vue";
-import SupervisorInfo from "@/views/home/components/supervisor-info.vue";
-import SupervisorStatistic from "@/views/home/components/supervisor-statistic.vue";
+import SupervisorInfo from "@/views/home/components/supervisor/supervisor-info.vue";
+import SupervisorStatistic from "@/views/home/components/supervisor/supervisor-statistic.vue";
 import SupervisorOnline from "@/views/home/components/supervisor-online.vue";
-import ConsultantRecently from "@/views/home/components/consultant-recently.vue";
+import ConsultantRecently from "@/views/home/components/consultant/consultant-recently.vue";
 </script>
 
 <style scoped lang="scss"></style>

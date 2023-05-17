@@ -2,7 +2,7 @@
   <el-card class="box-card" body-style="padding: 0;">
     <template #header>
       <div class="card-header">
-        <span>在线督导</span>
+        <span>在线咨询师</span>
         <el-pagination background layout="prev, pager, next" :total="30" />
       </div>
     </template>
@@ -10,19 +10,43 @@
       <div class="online-wrapper">
         <div class="online-row-wrapper">
           <div class="online-cell-wrapper">
-            <div>督导</div>
+            <div>咨询师</div>
+            <el-tag>空闲</el-tag>
+          </div>
+          <div class="online-cell-wrapper">
+            <div>咨询师</div>
+            <el-tag>空闲</el-tag>
+          </div>
+          <div class="online-cell-wrapper">
+            <div>咨询师</div>
             <el-tag>空闲</el-tag>
           </div>
         </div>
         <div class="online-row-wrapper">
           <div class="online-cell-wrapper">
-            <div>督导</div>
+            <div>咨询师</div>
+            <el-tag>空闲</el-tag>
+          </div>
+          <div class="online-cell-wrapper">
+            <div>咨询师</div>
+            <el-tag>空闲</el-tag>
+          </div>
+          <div class="online-cell-wrapper">
+            <div>咨询师</div>
             <el-tag>空闲</el-tag>
           </div>
         </div>
         <div class="online-row-wrapper">
           <div class="online-cell-wrapper">
-            <div>督导</div>
+            <div>咨询师</div>
+            <el-tag>空闲</el-tag>
+          </div>
+          <div class="online-cell-wrapper">
+            <div>咨询师</div>
+            <el-tag>空闲</el-tag>
+          </div>
+          <div class="online-cell-wrapper">
+            <div>咨询师</div>
             <el-tag>空闲</el-tag>
           </div>
         </div>
@@ -40,8 +64,8 @@
 <style scoped lang="scss">
 .box-card {
   height: 240px;
-  min-width: 410px;
-  margin: 0 10px 20px 10px;
+  min-width: 688px;
+  margin: 0 10px 20px 0;
 }
 
 .card-header {

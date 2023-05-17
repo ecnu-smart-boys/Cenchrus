@@ -15,9 +15,9 @@
 
 <script setup lang="ts">
 import ScheduleCalendar from "@/views/home/components/schedule-calendar.vue";
-import ConsultantInfo from "@/views/home/components/consultant-info.vue";
-import ConsultantStatistic from "@/views/home/components/consultant-statistic.vue";
-import ConsultantRecently from "@/views/home/components/consultant-recently.vue";
+import ConsultantInfo from "@/views/home/components/consultant/consultant-info.vue";
+import ConsultantStatistic from "@/views/home/components/consultant/consultant-statistic.vue";
+import ConsultantRecently from "@/views/home/components/consultant/consultant-recently.vue";
 </script>
 
 <style scoped lang="scss"></style>
