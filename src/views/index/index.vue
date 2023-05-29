@@ -14,7 +14,7 @@
         </el-menu></el-header
       >
       <el-container>
-        <el-aside width="200px">
+        <el-aside width="250px">
           <el-menu default-active="1" @open="handleOpen">
             <el-menu-item index="1">
               <el-icon><location /></el-icon>
@@ -41,6 +41,7 @@
               <span>用户管理</span>
             </el-menu-item>
           </el-menu>
+          <conversation-list />
         </el-aside>
         <el-main body-style="padding: 0;"><router-view /></el-main>
       </el-container>
@@ -51,6 +52,7 @@
 <script setup lang="ts">
 import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
+import ConversationList from "@/views/conversation/components/conversation-list.vue";
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);
 };
@@ -64,5 +66,10 @@ const handleSelect = (key: string, keyPath: string[]) => {
 <style scoped lang="scss">
 .flex-grow {
   flex-grow: 1;
+}
+</style>
+<style>
+.el-aside {
+  overflow-y: hidden;
 }
 </style>

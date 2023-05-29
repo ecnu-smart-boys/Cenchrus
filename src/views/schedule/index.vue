@@ -19,30 +19,144 @@
         </div>
       </template>
     </el-calendar>
-    <div style="flex: 1">
+    <div
+      style="
+        width: 230px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      "
+    >
+      <el-menu
+        :default-active="activeIndex"
+        style="margin-bottom: 20px; width: 100%"
+        mode="horizontal"
+        @select="handleSelect"
+      >
+        <el-menu-item index="1">咨询师</el-menu-item>
+        <el-menu-item index="2">督导</el-menu-item>
+      </el-menu>
+      <el-button
+        v-if="activeIndex == '1'"
+        type="plain"
+        text
+        :icon="Plus"
+        @click="addConsultantDialogVisible = true"
+      >
+        添加咨询师
+      </el-button>
+      <el-button
+        v-if="activeIndex == '2'"
+        type="plain"
+        text
+        :icon="Plus"
+        @click="addSupervisorDialogVisible = true"
+      >
+        添加督导
+      </el-button>
       <el-table :data="tableData" :show-header="false">
-        <el-table-column prop="name" label="姓名" width="120">
+        <el-table-column prop="name" label="姓名" width="150">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <img
                 src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
                 class="avatar"
               />
-              <div style="margin-left: 10px">{{ scope.row.name }}</div>
+              <div style="margin-left: 20px">{{ scope.row.name }}</div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="160">
-          <template #default>
-            <el-button link type="primary" size="small">移除</el-button>
+        <el-table-column fixed="right" label="操作" width="80">
+          <template #default="scope">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="handleRemove(scope.$index, scope.row)"
+              >移除</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
     </div>
+    <el-dialog
+      v-model="addConsultantDialogVisible"
+      title="添加咨询师"
+      width="400px"
+    >
+      <form-add-schedule :is-consultant="true" />
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="addConsultantDialogVisible = false">
+            取消
+          </el-button>
+          <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
+    <el-dialog
+      v-model="addSupervisorDialogVisible"
+      title="添加督导"
+      width="400px"
+    >
+      <form-add-schedule :is-consultant="false" />
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="addSupervisorDialogVisible = false">
+            取消
+          </el-button>
+          <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { Plus } from "@element-plus/icons-vue";
+import { reactive, ref } from "vue";
+import FormAddSchedule from "@/components/form-add-schedule.vue";
+import { ElMessageBox } from "element-plus";
+
+let activeIndex = ref("1");
+
+const handleSelect = (key: string) => {
+  activeIndex.value = key;
+};
+
+const tableData = reactive([
+  {
+    name: "aaa"
+  },
+  {
+    name: "bbb"
+  },
+  {
+    name: "ccc"
+  }
+]);
+
+const addConsultantDialogVisible = ref(false);
+const addSupervisorDialogVisible = ref(false);
+
+const submitAddForm = () => {
+  // TODO API
+};
+
+const handleRemove = (index, row) => {
+  ElMessageBox.confirm("确定移除排班吗？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning"
+  })
+    .then(() => {
+      // TODO DISABLE API
+    })
+    .catch(() => {
+      // catch error
+    });
+};
+</script>
 
 <style scoped lang="scss">
 .avatar {

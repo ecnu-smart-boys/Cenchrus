@@ -11,7 +11,7 @@
       >
         <div style="margin-bottom: 10px">搜索姓名</div>
         <el-input
-          v-model="input2"
+          v-model="searchName"
           placeholder="输入姓名进行搜索"
           :prefix-icon="Search"
         />
@@ -41,8 +41,14 @@
       <el-table-column prop="time" label="注册时间" width="120" />
       <el-table-column prop="state" label="状态" width="120" />
       <el-table-column fixed="right" label="操作" width="120">
-        <template #default>
-          <el-button link type="primary" size="small">禁用</el-button>
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="handleDisable(scope.$index, scope.row)"
+            >禁用</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -60,6 +66,17 @@
 
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
+import { ref, watch } from "vue";
+import { ElMessageBox } from "element-plus";
+
+let searchName = ref("");
+
+watch(
+  () => searchName.value,
+  (oldName, newName) => {
+    // TODO SEARCH API
+  }
+);
 
 const tableData = [
   {
@@ -73,6 +90,20 @@ const tableData = [
     state: "正常"
   }
 ];
+
+const handleDisable = (index, row) => {
+  ElMessageBox.confirm("确定禁用该访客吗？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning"
+  })
+    .then(() => {
+      // TODO DISABLE API
+    })
+    .catch(() => {
+      // catch error
+    });
+};
 </script>
 
 <style scoped lang="scss">

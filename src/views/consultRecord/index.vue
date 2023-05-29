@@ -11,7 +11,7 @@
       >
         <div style="margin-bottom: 10px">搜索姓名</div>
         <el-input
-          v-model="input2"
+          v-model="searchName"
           placeholder="输入姓名进行搜索"
           :prefix-icon="Search"
         />
@@ -65,7 +65,9 @@
 
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
+import { ref } from "vue";
 
+let searchName = ref("");
 const tableData = [
   {
     visitor: "Tom",
