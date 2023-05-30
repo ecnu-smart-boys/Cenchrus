@@ -72,7 +72,7 @@
               link
               type="primary"
               size="small"
-              @click="handleRemove(scope.$index, scope.row)"
+              @click="handleRemove(scope.row)"
               >移除</el-button
             >
           </template>
@@ -143,7 +143,7 @@ const submitAddForm = () => {
   // TODO API
 };
 
-const handleRemove = (index, row) => {
+const handleRemove = (row) => {
   ElMessageBox.confirm("确定移除排班吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",

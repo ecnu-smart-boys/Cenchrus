@@ -21,7 +21,7 @@ const props = defineProps<{
 }>();
 
 const checkboxGroup = ref([]);
-const scheduleData: boolean[] = reactive(new Array(7).fill(false));
+const scheduleNewData: boolean[] = reactive(new Array(7).fill(false));
 const weeks = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 watch(
@@ -39,15 +39,15 @@ watch(
 
 watchEffect(() => {
   for (let i = 0; i < 7; i++) {
-    scheduleData[i] = false;
+    scheduleNewData[i] = false;
   }
   checkboxGroup.value.forEach((item) => {
-    scheduleData[weeks.indexOf(item)] = true;
+    scheduleNewData[weeks.indexOf(item)] = true;
   });
 });
 
 const getScheduleData = () => {
-  return toNumSchedule(scheduleData);
+  return toNumSchedule(scheduleNewData);
 };
 
 defineExpose({ getScheduleData });
