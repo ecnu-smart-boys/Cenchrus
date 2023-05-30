@@ -79,7 +79,7 @@
     <el-row :gutter="20">
       <el-col :span="12">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" maxlength="20" show-word-limit />
+          <el-input v-model="form.username" maxlength="32" show-word-limit />
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -91,30 +91,33 @@
     <el-row :gutter="20">
       <el-col :span="12">
         <el-form-item label="工作单位" prop="workPlace">
-          <el-input v-model="form.workPlace" maxlength="30" show-word-limit />
+          <el-input v-model="form.workPlace" maxlength="32" show-word-limit />
         </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item label="职称" prop="title">
-          <el-input v-model="form.title" maxlength="30" show-word-limit />
+          <el-input v-model="form.title" maxlength="32" show-word-limit />
         </el-form-item>
       </el-col>
     </el-row>
     <el-row v-if="!props.isConsultant" :gutter="20">
       <el-col :span="12">
         <el-form-item label="督导资质" prop="workPlace">
-          <el-input
-            v-model="form.qualification"
-            maxlength="30"
-            show-word-limit
-          />
+          <el-select v-model="form.qualification" style="width: 100%">
+            <el-option
+              v-for="item in qualificationOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item label="资质编号" prop="title">
           <el-input
             v-model="form.qualificationNumber"
-            maxlength="30"
+            maxlength="255"
             show-word-limit
           />
         </el-form-item>
@@ -124,11 +127,30 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, reactive, ref } from "vue";
+import { defineProps, defineEmits, reactive, ref } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
+import { AddFormData } from "@/components/schema";
 
+const qualificationOptions = [
+  {
+    value: "1级",
+    label: "1级"
+  },
+  {
+    value: "2级",
+    label: "2级"
+  },
+  {
+    value: "3级",
+    label: "3级"
+  }
+];
 const props = defineProps<{
   isConsultant: boolean;
+}>();
+
+const emits = defineEmits<{
+  (event: "onSubmit", formData: AddFormData): void;
 }>();
 
 let activeIndex = ref("1");
@@ -137,7 +159,7 @@ const handleSelect = (key: string) => {
   activeIndex.value = key;
 };
 
-const defaultFormData = {
+const defaultFormData: AddFormData = {
   name: "",
   gender: "",
   age: "",
@@ -152,7 +174,7 @@ const defaultFormData = {
   qualification: "",
   qualificationNumber: ""
 };
-const form = reactive({
+const form = reactive<AddFormData>({
   ...defaultFormData
 });
 const options: {
@@ -231,7 +253,7 @@ const rules = reactive<FormRules>({
   username: [
     { required: true, message: "请输入用户名", trigger: "blur" },
     {
-      validator: (rule, value) => /^[a-zA-Z_]{3,10}$/.test(value),
+      validator: (rule, value) => /^[a-zA-Z_]{1,32}$/.test(value),
       message: "请输入合法用户名",
       trigger: "blur"
     }
@@ -261,6 +283,7 @@ const submitForm = async () => {
       throw Error();
     }
   });
+  emits("onSubmit", form);
 };
 
 const changeToDefault = () => {

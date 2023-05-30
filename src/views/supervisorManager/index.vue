@@ -23,12 +23,13 @@
       >
     </div>
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column fixed prop="name" label="姓名" width="120">
+      <el-table-column fixed prop="name" label="姓名" width="150">
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <img
-              src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
+              :src="scope.row.avatar"
               class="avatar"
+              onerror="this.src='/src/assets/defaultAvatar.jpg'"
             />
             <div style="margin-left: 10px">{{ scope.row.name }}</div>
           </div>
@@ -38,7 +39,7 @@
       <el-table-column prop="duration" label="总咨询时长" width="150" />
       <el-table-column prop="count" label="总咨询次数" width="150" />
       <el-table-column prop="consultant" label="绑定咨询师" width="200" />
-      <el-table-column prop="schedule" label="排班" width="200" />
+      <el-table-column prop="schedule" label="排班" width="280" />
       <el-table-column prop="state" label="状态" width="120" />
       <el-table-column fixed="right" label="操作" width="180">
         <template #default="scope">
@@ -53,30 +54,34 @@
             link
             type="primary"
             size="small"
-            @click="handleSchedule(scope.$index, scope.row)"
+            @click="handleSchedule(scope.row)"
             >排班</el-button
           >
           <el-button
             link
             type="primary"
             size="small"
-            @click="handleDisable(scope.$index, scope.row)"
-            >禁用</el-button
+            @click="handleDisable(scope.row)"
+            >{{ scope.row.state == "正常" ? "禁用" : "启用" }}</el-button
           >
         </template>
       </el-table-column>
     </el-table>
     <el-pagination
-      v-model:current-page="currentPage3"
-      v-model:page-size="pageSize3"
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
       style="float: right; margin: 20px"
       background
       layout="prev, pager, next, jumper"
-      :total="20"
+      :total="totalPage"
       @current-change="handleCurrentChange"
     />
     <el-dialog v-model="addDialogVisible" title="添加督导" width="700px">
-      <form-add-employee ref="addSupervisorForm" :is-consultant="false" />
+      <form-add-employee
+        ref="addSupervisorForm"
+        :is-consultant="false"
+        @on-submit="handleAddSubmit"
+      />
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="addDialogVisible = false"> 取消 </el-button>
@@ -117,35 +122,53 @@
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
 import FormAddEmployee from "@/components/form-add-employee.vue";
-import { reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import FormSchedule from "@/components/form-schedule.vue";
 import FormEditEmployee from "@/components/form-edit-employee.vue";
-import { ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
+import {
+  addSupervisor,
+  getSupervisors
+} from "@/apis/userArrange/supervisor/superivisor";
+import { md5, parseSchedule, parseTime, toBoolArraySchedule } from "@/utils";
+import { AddFormData } from "@/components/schema";
+import { disable, enable, updateArrangement } from "@/apis/userArrange/user";
 
 let searchName = ref("");
 
+interface FormSupervisor {
+  id: string;
+  name: string;
+  avatar: string;
+  gender: string;
+  count: number;
+  duration: string;
+  consultant: string;
+  _schedule: number;
+  schedule: string;
+  state: string;
+}
 watch(
   () => searchName.value,
-  (oldName, newName) => {
-    // TODO SEARCH API
+  async () => {
+    currentPage.value = 1;
+    await refreshData();
   }
 );
+
+let currentPage = ref(1);
+let pageSize = ref(10);
+let totalPage = ref(10);
+const handleCurrentChange = async (val) => {
+  currentPage.value = val;
+  await refreshData();
+};
 
 const addDialogVisible = ref(false);
 const editDialogVisible = ref(false);
 const scheduleDialogVisible = ref(false);
 
-const tableData = [
-  {
-    name: "Tom",
-    gender: "男",
-    count: 100,
-    duration: "00:12:39",
-    consultant: "111,222,333",
-    schedule: "111,222,333",
-    state: "正常"
-  }
-];
+const tableData: FormSupervisor[] = reactive([]);
 
 const addSupervisorForm: any = ref(null);
 const editSupervisorForm: any = ref(null);
@@ -157,9 +180,31 @@ const submitAddForm = async () => {
   } catch (e) {
     return;
   }
-  // TODO submit api
+};
+
+const handleAddSubmit = async (data: AddFormData) => {
+  await addSupervisor({
+    age: Number(data.age),
+    department: data.workPlace,
+    email: data.email,
+    gender: data.gender == "男" ? 1 : 2,
+    idNumber: data.idNumber,
+    name: data.name,
+    password: md5(data.password),
+    phone: data.phone,
+    qualification: data.qualification,
+    qualificationCode: data.qualificationNumber,
+    title: data.title,
+    username: data.username
+  });
   addDialogVisible.value = false;
   addSupervisorForm.value.changeToDefault();
+  ElMessage({
+    message: "添加成功",
+    type: "success",
+    duration: 5 * 1000
+  });
+  await refreshData();
 };
 
 let editData = reactive({
@@ -201,33 +246,84 @@ const submitEditForm = async () => {
   editDialogVisible.value = false;
 };
 
-let scheduleData = reactive({
-  schedule: [false, false, false, false, false, false, false]
+let scheduleData = reactive<{
+  schedule: any[];
+  id: string;
+}>({
+  schedule: [],
+  id: ""
 });
-const handleSchedule = async (index, row) => {
-  scheduleData = await {
-    schedule: [false, true, false, false, true, true, false]
+const handleSchedule = (row) => {
+  scheduleData = {
+    schedule: toBoolArraySchedule(row._schedule),
+    id: row.id
   };
   scheduleDialogVisible.value = true;
 };
 
 const submitScheduleForm = async () => {
-  // TODO API
+  await updateArrangement({
+    id: scheduleData.id,
+    arrangement: scheduleSupervisorForm.value.getScheduleData()
+  });
+  ElMessage({
+    message: "修改成功",
+    type: "success",
+    duration: 5 * 1000
+  });
+  scheduleDialogVisible.value = false;
+  await refreshData();
 };
 
-const handleDisable = (index, row) => {
-  ElMessageBox.confirm("确定禁用该督导吗？", "警告", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  })
-    .then(() => {
-      // TODO DISABLE API
-    })
-    .catch(() => {
-      // catch error
+const handleDisable = async (row) => {
+  await ElMessageBox.confirm(
+    `确定${row.state == "正常" ? "禁用" : "启用"}该咨询师吗？`,
+    "警告",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    }
+  );
+  if (row.state == "正常") {
+    await disable({
+      id: row.id
     });
+  } else {
+    await enable({
+      id: row.id
+    });
+  }
+  await refreshData();
 };
+
+const refreshData = async () => {
+  const data = await getSupervisors({
+    current: currentPage.value,
+    name: searchName.value,
+    size: pageSize.value
+  });
+  totalPage.value = data.total;
+  tableData.splice(0);
+  data.supervisors.forEach((c) => {
+    const i = {
+      id: c.id,
+      name: c.name,
+      avatar: c.avatar,
+      gender: c.gender == 1 ? "男" : "女",
+      count: c.consultTimes,
+      duration: parseTime(c.totalTime),
+      consultant: c.consultantList.map((i) => i.name).join(", "),
+      _schedule: c.arrangement,
+      schedule: parseSchedule(c.arrangement),
+      state: c.disabled ? "禁用" : "正常"
+    };
+    tableData.push(i);
+  });
+};
+onMounted(async () => {
+  await refreshData();
+});
 </script>
 
 <style scoped lang="scss">

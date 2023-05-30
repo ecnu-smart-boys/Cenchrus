@@ -53,13 +53,14 @@
 import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import ConversationList from "@/views/conversation/components/conversation-list.vue";
+
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);
 };
 
 const activeIndex = ref("1");
-const handleSelect = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath);
+const handleSelect = (key: string) => {
+  console.log(key);
 };
 </script>
 

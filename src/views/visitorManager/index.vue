@@ -22,8 +22,9 @@
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <img
-              src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
+              :src="scope.row.avatar"
               class="avatar"
+              onerror="this.src='/src/assets/defaultAvatar.jpg'"
             />
             <div style="margin-left: 10px">{{ scope.row.name }}</div>
           </div>
@@ -46,19 +47,19 @@
             link
             type="primary"
             size="small"
-            @click="handleDisable(scope.$index, scope.row)"
-            >禁用</el-button
+            @click="handleDisable(scope.row)"
+            >{{ scope.row.state == "正常" ? "禁用" : "启用" }}</el-button
           >
         </template>
       </el-table-column>
     </el-table>
     <el-pagination
-      v-model:current-page="currentPage3"
-      v-model:page-size="pageSize3"
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
       style="float: right; margin: 20px"
       background
       layout="prev, pager, next, jumper"
-      :total="20"
+      :total="totalPage"
       @current-change="handleCurrentChange"
     />
   </div>
@@ -66,44 +67,92 @@
 
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
-import { ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { ElMessageBox } from "element-plus";
+import { getVisitors } from "@/apis/userArrange/visitor/visitor";
+import { disable, enable } from "@/apis/userArrange/user";
 
 let searchName = ref("");
 
+interface FormVisitor {
+  id: string;
+  name: string;
+  avatar: string;
+  gender: string;
+  username: string;
+  phone: string;
+  emergencyName: string;
+  emergencyPhone: string;
+  time: string;
+  state: string;
+}
 watch(
   () => searchName.value,
-  (oldName, newName) => {
-    // TODO SEARCH API
+  async () => {
+    currentPage.value = 1;
+    await refreshData();
   }
 );
 
-const tableData = [
-  {
-    name: "Tom",
-    gender: "男",
-    username: "1231",
-    phone: "15800000000",
-    emergencyName: "Jerry",
-    emergencyPhone: "15800000000",
-    time: "00:12:39",
-    state: "正常"
-  }
-];
-
-const handleDisable = (index, row) => {
-  ElMessageBox.confirm("确定禁用该访客吗？", "警告", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning"
-  })
-    .then(() => {
-      // TODO DISABLE API
-    })
-    .catch(() => {
-      // catch error
-    });
+let currentPage = ref(1);
+let pageSize = ref(10);
+let totalPage = ref(10);
+const handleCurrentChange = async (val) => {
+  currentPage.value = val;
+  await refreshData();
 };
+
+const tableData: FormVisitor[] = reactive([]);
+
+const handleDisable = async (row) => {
+  await ElMessageBox.confirm(
+    `确定${row.state == "正常" ? "禁用" : "启用"}该咨询师吗？`,
+    "警告",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    }
+  );
+  if (row.state == "正常") {
+    await disable({
+      id: row.id
+    });
+  } else {
+    await enable({
+      id: row.id
+    });
+  }
+  await refreshData();
+};
+
+const refreshData = async () => {
+  const data = await getVisitors({
+    current: currentPage.value,
+    name: searchName.value,
+    size: pageSize.value
+  });
+  totalPage.value = data.total;
+  tableData.splice(0);
+  data.visitorInfos.forEach((c) => {
+    const i = {
+      id: c.id,
+      name: c.name,
+      avatar: c.avatar,
+      gender: c.gender == 1 ? "男" : "女",
+      phone: c.phone,
+      username: c.username,
+      emergencyName: c.emergencyContact,
+      emergencyPhone: c.emergencyPhone,
+      time: "",
+      state: c.disabled ? "禁用" : "正常"
+    };
+    tableData.push(i);
+  });
+};
+onMounted(async () => {
+  await refreshData();
+});
 </script>
 
 <style scoped lang="scss">
