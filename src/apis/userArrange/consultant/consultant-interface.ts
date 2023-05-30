@@ -43,3 +43,14 @@ export interface AddConsultantReq {
   title: string;
   username: string;
 }
+
+export interface UpdateConsultantReq {
+  age: number;
+  department: string;
+  gender: number;
+  id: string;
+  idNumber: string;
+  name: string;
+  supervisorIds: string[];
+  title: string;
+}

@@ -83,8 +83,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, defineProps, watchEffect } from "vue";
+import { reactive, ref, defineProps, watchEffect, defineEmits } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
+import { FormData } from "@/components/schema";
+import { availableSupervisors } from "@/apis/userArrange/user";
 
 const qualificationOptions = [
   {
@@ -102,21 +104,16 @@ const qualificationOptions = [
 ];
 
 const props = defineProps<{
-  editData: {
-    name: string;
-    gender: string;
-    age: number | string;
-    idNumber: string;
-    supervisor?: any[];
-    workPlace: string;
-    title: string;
-    qualification?: string;
-    qualificationNumber?: string;
-  };
+  editData: FormData;
   isConsultant: boolean;
 }>();
 
-const form = reactive({
+const emits = defineEmits<{
+  (event: "onSubmit", formData: FormData): void;
+}>();
+
+const form = reactive<FormData>({
+  id: "",
   name: "",
   gender: "",
   age: "",
@@ -129,6 +126,7 @@ const form = reactive({
 });
 
 watchEffect(() => {
+  form.id = props.editData.id;
   form.name = props.editData.name;
   form.gender = props.editData.gender;
   form.age = String(props.editData.age);
@@ -145,12 +143,7 @@ watchEffect(() => {
 const options: {
   value: string;
   label: string;
-}[] = [
-  {
-    value: "Option1",
-    label: "Option1"
-  }
-];
+}[] = reactive([]);
 
 const ruleFormRef: any = ref<FormInstance>();
 
@@ -174,8 +167,7 @@ const rules = reactive<FormRules>({
   age: [
     { required: true, message: "请输入年龄", trigger: "blur" },
     {
-      validator: (rule, value) =>
-        /^(?:[1-9][0-9]?|1[01][0-9]|120)$/.test(value),
+      validator: (rule, value) => /^(?:[1-9]\d|100)$/.test(value),
       message: "请输入合法年龄",
       trigger: "blur"
     }
@@ -193,7 +185,13 @@ const rules = reactive<FormRules>({
   ],
   supervisor: [{ required: true, message: "请绑定督导", trigger: "change" }],
   workPlace: [{ required: true, message: "请输入工作单位", trigger: "blur" }],
-  title: [{ required: true, message: "请输入职称", trigger: "blur" }]
+  title: [{ required: true, message: "请输入职称", trigger: "blur" }],
+  qualification: [
+    { required: true, message: "请输入督导资质", trigger: "blur" }
+  ],
+  qualificationNumber: [
+    { required: true, message: "请输入资质编号", trigger: "blur" }
+  ]
 });
 
 const submitForm = async () => {
@@ -202,9 +200,21 @@ const submitForm = async () => {
       throw Error();
     }
   });
+  emits("onSubmit", form);
 };
 
-defineExpose({ submitForm });
+const getAvailableSupervisors = async () => {
+  options.splice(0);
+  const data = await availableSupervisors();
+  data.forEach((i) => {
+    options.push({
+      value: i.id,
+      label: i.name
+    });
+  });
+};
+
+defineExpose({ submitForm, getAvailableSupervisors });
 </script>
 
 <style scoped lang="scss"></style>

@@ -1,7 +1,8 @@
 import request from "@/apis/http";
 import {
   AddSupervisorReq,
-  GetSupervisorsResp
+  GetSupervisorsResp,
+  UpdateSupervisorReq
 } from "@/apis/userArrange/supervisor/supervisor-interface";
 import { GetPageReq } from "@/apis/userArrange/user-interface";
 
@@ -22,5 +23,15 @@ export function addSupervisor(
     method: "post",
     url: "/user_arrange/addSupervisor",
     data: addSupervisorReq
+  });
+}
+
+export function updateSupervisor(
+  updateSupervisorReq: UpdateSupervisorReq
+): Promise<any> {
+  return request({
+    method: "put",
+    url: "/user_arrange/updateSupervisor",
+    data: updateSupervisorReq
   });
 }

@@ -12,3 +12,9 @@ export interface UpdateArrangementReq {
   arrangement: number;
   id: string;
 }
+
+export interface AvailableSupervisorResp {
+  avatar: string;
+  id: string;
+  name: string;
+}

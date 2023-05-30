@@ -1,4 +1,5 @@
 import {
+  AvailableSupervisorResp,
   DisableReq,
   UpdateArrangementReq
 } from "@/apis/userArrange/user-interface";
@@ -27,5 +28,12 @@ export function updateArrangement(
     method: "post",
     url: "/user_arrange/updateArrangement",
     data: updateArrangementReq
+  });
+}
+
+export function availableSupervisors(): Promise<AvailableSupervisorResp[]> {
+  return request({
+    method: "get",
+    url: "/user_arrange/availableSupervisors"
   });
 }

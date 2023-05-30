@@ -1,7 +1,8 @@
 import request from "@/apis/http";
 import {
   AddConsultantReq,
-  GetConsultantsResp
+  GetConsultantsResp,
+  UpdateConsultantReq
 } from "@/apis/userArrange/consultant/consultant-interface";
 import { GetPageReq } from "@/apis/userArrange/user-interface";
 
@@ -22,5 +23,15 @@ export function addConsultant(
     method: "post",
     url: "/user_arrange/addConsultant",
     data: addConsultantReq
+  });
+}
+
+export function updateConsultant(
+  updateConsultantReq: UpdateConsultantReq
+): Promise<any> {
+  return request({
+    method: "put",
+    url: "/user_arrange/updateConsultant",
+    data: updateConsultantReq
   });
 }

@@ -94,6 +94,7 @@
         ref="editSupervisorForm"
         :edit-data="editData"
         :is-consultant="false"
+        @on-submit="handleEditSubmit"
       />
       <template #footer>
         <span class="dialog-footer">
@@ -128,10 +129,11 @@ import FormEditEmployee from "@/components/form-edit-employee.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
   addSupervisor,
-  getSupervisors
+  getSupervisors,
+  updateSupervisor
 } from "@/apis/userArrange/supervisor/superivisor";
 import { md5, parseSchedule, parseTime, toBoolArraySchedule } from "@/utils";
-import { AddFormData } from "@/components/schema";
+import { FormData } from "@/components/schema";
 import { disable, enable, updateArrangement } from "@/apis/userArrange/user";
 
 let searchName = ref("");
@@ -189,20 +191,20 @@ const submitAddForm = async () => {
   }
 };
 
-const handleAddSubmit = async (data: AddFormData) => {
+const handleAddSubmit = async (data: FormData) => {
   await addSupervisor({
     age: Number(data.age),
     department: data.workPlace,
-    email: data.email,
+    email: data.email ? data.email : "",
     gender: data.gender == "男" ? 1 : 2,
     idNumber: data.idNumber,
     name: data.name,
-    password: md5(data.password),
-    phone: data.phone,
+    password: md5(data.password ? data.password : ""),
+    phone: data.phone ? data.phone : "",
     qualification: data.qualification,
     qualificationCode: data.qualificationNumber,
     title: data.title,
-    username: data.username
+    username: data.username ? data.username : ""
   });
   addDialogVisible.value = false;
   addSupervisorForm.value.changeToDefault();
@@ -214,11 +216,29 @@ const handleAddSubmit = async (data: AddFormData) => {
   await refreshData();
 };
 
-let editData = reactive({});
+let editData: FormData = reactive({
+  id: "",
+  name: "",
+  gender: "",
+  age: "",
+  idNumber: "",
+  supervisor: null,
+  workPlace: "",
+  title: "",
+  qualification: "",
+  qualificationNumber: ""
+});
 
 const handleEdit = (row) => {
-  // TODO get infomation api
-  editData = row;
+  editData.id = row.id;
+  editData.name = row.name;
+  editData.gender = row.gender;
+  editData.age = row.age;
+  editData.idNumber = row.idNumber;
+  editData.workPlace = row.workPlace;
+  editData.title = row.title;
+  editData.qualification = row.qualification;
+  editData.qualificationNumber = row.qualificationNumber;
   editDialogVisible.value = true;
 };
 
@@ -228,8 +248,27 @@ const submitEditForm = async () => {
   } catch (e) {
     return;
   }
-  // TODO API
+};
+
+const handleEditSubmit = async (data) => {
+  await updateSupervisor({
+    id: data.id,
+    age: Number(data.age),
+    department: data.workPlace,
+    gender: data.gender == "男" ? 1 : 2,
+    idNumber: data.idNumber,
+    name: data.name,
+    qualification: data.qualification,
+    qualificationCode: data.qualificationNumber,
+    title: data.title
+  });
   editDialogVisible.value = false;
+  ElMessage({
+    message: "修改成功",
+    type: "success",
+    duration: 5 * 1000
+  });
+  await refreshData();
 };
 
 let scheduleData = reactive<{

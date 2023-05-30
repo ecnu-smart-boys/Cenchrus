@@ -129,7 +129,8 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, reactive, ref } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { AddFormData } from "@/components/schema";
+import { FormData } from "@/components/schema";
+import { availableSupervisors } from "@/apis/userArrange/user";
 
 const qualificationOptions = [
   {
@@ -145,12 +146,13 @@ const qualificationOptions = [
     label: "3级"
   }
 ];
+
 const props = defineProps<{
   isConsultant: boolean;
 }>();
 
 const emits = defineEmits<{
-  (event: "onSubmit", formData: AddFormData): void;
+  (event: "onSubmit", formData: FormData): void;
 }>();
 
 let activeIndex = ref("1");
@@ -159,7 +161,7 @@ const handleSelect = (key: string) => {
   activeIndex.value = key;
 };
 
-const defaultFormData: AddFormData = {
+const defaultFormData: FormData = {
   name: "",
   gender: "",
   age: "",
@@ -174,18 +176,13 @@ const defaultFormData: AddFormData = {
   qualification: "",
   qualificationNumber: ""
 };
-const form = reactive<AddFormData>({
+const form = reactive<FormData>({
   ...defaultFormData
 });
 const options: {
   value: string;
   label: string;
-}[] = [
-  {
-    value: "Option1",
-    label: "Option1"
-  }
-];
+}[] = reactive([]);
 
 const ruleForm1Ref: any = ref<FormInstance>();
 const ruleForm2Ref: any = ref<FormInstance>();
@@ -210,8 +207,7 @@ const rules = reactive<FormRules>({
   age: [
     { required: true, message: "请输入年龄", trigger: "blur" },
     {
-      validator: (rule, value) =>
-        /^(?:[1-9][0-9]?|1[01][0-9]|120)$/.test(value),
+      validator: (rule, value) => /^(?:[1-9]\d|100)$/.test(value),
       message: "请输入合法年龄",
       trigger: "blur"
     }
@@ -249,7 +245,14 @@ const rules = reactive<FormRules>({
       trigger: "blur"
     }
   ],
-  supervisor: [{ required: true, message: "请绑定督导", trigger: "change" }],
+  supervisor: [
+    { required: true, message: "请绑定督导", trigger: "change" },
+    {
+      validator: (rule, value) => value && value.length <= 7,
+      message: "请绑定合法数量督导",
+      trigger: "blur"
+    }
+  ],
   username: [
     { required: true, message: "请输入用户名", trigger: "blur" },
     {
@@ -301,7 +304,18 @@ const changeToDefault = () => {
   form.qualification = defaultFormData.qualification;
   form.qualificationNumber = defaultFormData.qualificationNumber;
 };
-defineExpose({ submitForm, changeToDefault });
+
+const getAvailableSupervisors = async () => {
+  options.splice(0);
+  const data = await availableSupervisors();
+  data.forEach((i) => {
+    options.push({
+      value: i.id,
+      label: i.name
+    });
+  });
+};
+defineExpose({ submitForm, changeToDefault, getAvailableSupervisors });
 </script>
 
 <style scoped lang="scss"></style>

@@ -18,9 +18,7 @@
           :prefix-icon="Search"
         />
       </div>
-      <el-button type="primary" @click="addDialogVisible = true"
-        >添加咨询师</el-button
-      >
+      <el-button type="primary" @click="handleAdd">添加咨询师</el-button>
     </div>
     <el-table :data="tableData" style="width: 100%">
       <el-table-column fixed prop="name" label="姓名" width="150">
@@ -38,7 +36,7 @@
       <el-table-column prop="gender" label="性别" width="80" />
       <el-table-column prop="duration" label="总咨询时长" width="120" />
       <el-table-column prop="count" label="总咨询次数" width="120" />
-      <el-table-column prop="supervisor" label="绑定督导" width="180" />
+      <el-table-column prop="supervisor" label="绑定督导" width="220" />
       <el-table-column prop="schedule" label="排班" width="280" />
       <el-table-column prop="rate" label="咨询评级" width="180">
         <template #default="scope">
@@ -100,6 +98,7 @@
       ref="editConsultantForm"
       :edit-data="editData"
       :is-consultant="true"
+      @on-submit="handleEditSubmit"
     />
     <template #footer>
       <span class="dialog-footer">
@@ -121,17 +120,18 @@
 
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
-import { onMounted, reactive, ref, watch } from "vue";
+import { nextTick, onMounted, reactive, ref, watch } from "vue";
 import FormAddEmployee from "@/components/form-add-employee.vue";
 import FormEditEmployee from "@/components/form-edit-employee.vue";
 import FormSchedule from "@/components/form-schedule.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
   addConsultant,
-  getConsultants
+  getConsultants,
+  updateConsultant
 } from "@/apis/userArrange/consultant/consultant";
 import { md5, parseSchedule, parseTime, toBoolArraySchedule } from "@/utils";
-import { AddFormData } from "@/components/schema";
+import { FormData } from "@/components/schema";
 import { disable, enable, updateArrangement } from "@/apis/userArrange/user";
 
 let searchName = ref("");
@@ -143,6 +143,7 @@ interface FormConsultant {
   gender: string;
   count: number;
   duration: string;
+  _supervisor: any[];
   supervisor: string;
   _schedule: number;
   schedule: string;
@@ -184,19 +185,26 @@ const submitAddForm = async () => {
   }
 };
 
-const handleAddSubmit = async (data: AddFormData) => {
+const handleAdd = () => {
+  addDialogVisible.value = true;
+  nextTick(() => {
+    addConsultantForm.value.getAvailableSupervisors();
+  });
+};
+
+const handleAddSubmit = async (data: FormData) => {
   await addConsultant({
     age: Number(data.age),
     department: data.workPlace,
-    email: data.email,
+    email: data.email ? data.email : "",
     gender: data.gender == "男" ? 1 : 2,
     idNumber: data.idNumber,
     name: data.name,
-    password: md5(data.password),
-    phone: data.phone,
-    supervisorIds: [],
+    password: md5(data.password ? data.password : ""),
+    phone: data.phone ? data.phone : "",
+    supervisorIds: data.supervisor ? data.supervisor : [],
     title: data.title,
-    username: data.username
+    username: data.username ? data.username : ""
   });
   addDialogVisible.value = false;
   addConsultantForm.value.changeToDefault();
@@ -208,20 +216,31 @@ const handleAddSubmit = async (data: AddFormData) => {
   await refreshData();
 };
 
-let editData = reactive({
+let editData: FormData = reactive({
+  id: "",
   name: "",
   gender: "",
-  age: 0,
+  age: "",
   idNumber: "",
   supervisor: [],
   workPlace: "",
-  title: ""
+  title: "",
+  qualification: "",
+  qualificationNumber: ""
 });
 const handleEdit = (row) => {
-  // TODO get infomation api
-  // just get like this
-  editData = row;
+  editData.id = row.id;
+  editData.name = row.name;
+  editData.gender = row.gender;
+  editData.age = row.age;
+  editData.idNumber = row.idNumber;
+  editData.supervisor = row._supervisor;
+  editData.workPlace = row.workPlace;
+  editData.title = row.title;
   editDialogVisible.value = true;
+  nextTick(() => {
+    editConsultantForm.value.getAvailableSupervisors();
+  });
 };
 
 const submitEditForm = async () => {
@@ -230,8 +249,26 @@ const submitEditForm = async () => {
   } catch (e) {
     return;
   }
-  // TODO API
+};
+
+const handleEditSubmit = async (data) => {
+  await updateConsultant({
+    id: data.id,
+    age: Number(data.age),
+    department: data.workPlace,
+    gender: data.gender == "男" ? 1 : 2,
+    idNumber: data.idNumber,
+    name: data.name,
+    supervisorIds: data.supervisor.map((i) => (i.value ? i.value : i)),
+    title: data.title
+  });
   editDialogVisible.value = false;
+  ElMessage({
+    message: "修改成功",
+    type: "success",
+    duration: 5 * 1000
+  });
+  await refreshData();
 };
 
 let scheduleData = reactive<{
@@ -301,11 +338,19 @@ const refreshData = async () => {
       gender: c.gender == 1 ? "男" : "女",
       count: c.consultTimes,
       duration: parseTime(c.totalTime),
+      _supervisor: c.supervisorList.map((i) => ({
+        value: i.id,
+        label: i.name
+      })),
       supervisor: c.supervisorList.map((i) => i.name).join(", "),
       schedule: parseSchedule(c.arrangement),
       _schedule: c.arrangement,
       state: c.disabled ? "禁用" : "正常",
-      rate: c.avgComment
+      rate: c.avgComment,
+      age: c.age,
+      idNumber: c.idNumber,
+      workPlace: c.department,
+      title: c.title
     };
     tableData.push(i);
   });

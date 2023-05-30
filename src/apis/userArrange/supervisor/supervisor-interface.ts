@@ -1,9 +1,3 @@
-export interface GetSupervisorsReq {
-  current?: number;
-  name?: string;
-  size?: number;
-}
-
 export interface GetSupervisorsResp {
   supervisors: Supervisor[];
   total: number;
@@ -50,4 +44,16 @@ export interface AddSupervisorReq {
   qualificationCode: string;
   title: string;
   username: string;
+}
+
+export interface UpdateSupervisorReq {
+  age: number;
+  department: string;
+  gender: number;
+  id: string;
+  idNumber: string;
+  name: string;
+  qualification: string;
+  qualificationCode: string;
+  title: string;
 }
