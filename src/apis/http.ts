@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { BaseResponse } from "@/apis/schema";
 import useStore from "@/store";

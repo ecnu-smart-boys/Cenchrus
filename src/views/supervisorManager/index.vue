@@ -47,7 +47,7 @@
             link
             type="primary"
             size="small"
-            @click="handleEdit(scope.$index, scope.row)"
+            @click="handleEdit(scope.row)"
             >修改</el-button
           >
           <el-button
@@ -147,6 +147,13 @@ interface FormSupervisor {
   _schedule: number;
   schedule: string;
   state: string;
+
+  age: number;
+  idNumber: string;
+  workPlace: string;
+  title: string;
+  qualification: string;
+  qualificationNumber: string;
 }
 watch(
   () => searchName.value,
@@ -207,32 +214,11 @@ const handleAddSubmit = async (data: AddFormData) => {
   await refreshData();
 };
 
-let editData = reactive({
-  name: "",
-  gender: "",
-  age: 0,
-  idNumber: "",
-  supervisor: [],
-  workPlace: "",
-  title: "",
-  qualification: "",
-  qualificationNumber: ""
-});
+let editData = reactive({});
 
-const handleEdit = async (index, row) => {
+const handleEdit = (row) => {
   // TODO get infomation api
-  // just get like this
-  editData = await {
-    name: "111",
-    gender: "男",
-    age: 111,
-    idNumber: "111",
-    supervisor: [],
-    workPlace: "111",
-    title: "111",
-    qualification: "ABC",
-    qualificationNumber: "123456789"
-  };
+  editData = row;
   editDialogVisible.value = true;
 };
 
@@ -316,7 +302,13 @@ const refreshData = async () => {
       consultant: c.consultantList.map((i) => i.name).join(", "),
       _schedule: c.arrangement,
       schedule: parseSchedule(c.arrangement),
-      state: c.disabled ? "禁用" : "正常"
+      state: c.disabled ? "禁用" : "正常",
+      age: c.age,
+      idNumber: c.idNumber,
+      workPlace: c.department,
+      title: c.title,
+      qualification: c.qualification,
+      qualificationNumber: c.qualificationCode
     };
     tableData.push(i);
   });

@@ -59,11 +59,14 @@
     <el-row v-if="!props.isConsultant" :gutter="20">
       <el-col :span="12">
         <el-form-item label="督导资质" prop="workPlace">
-          <el-input
-            v-model="form.qualification"
-            maxlength="30"
-            show-word-limit
-          />
+          <el-select v-model="form.qualification" style="width: 100%">
+            <el-option
+              v-for="item in qualificationOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -82,6 +85,21 @@
 <script setup lang="ts">
 import { reactive, ref, defineProps, watchEffect } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
+
+const qualificationOptions = [
+  {
+    value: "1级",
+    label: "1级"
+  },
+  {
+    value: "2级",
+    label: "2级"
+  },
+  {
+    value: "3级",
+    label: "3级"
+  }
+];
 
 const props = defineProps<{
   editData: {

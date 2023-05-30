@@ -26,7 +26,7 @@
       >
         <div style="margin-bottom: 10px">搜索日期</div>
         <el-date-picker
-          v-model="default"
+          v-model="selectDate"
           type="date"
           placeholder="请选择日期"
         />
@@ -52,12 +52,12 @@
       </el-table-column>
     </el-table>
     <el-pagination
-      v-model:current-page="currentPage3"
-      v-model:page-size="pageSize3"
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
       style="float: right; margin: 20px"
       background
       layout="prev, pager, next, jumper"
-      :total="20"
+      :total="totalPage"
       @current-change="handleCurrentChange"
     />
   </div>
@@ -68,6 +68,14 @@ import { Search } from "@element-plus/icons-vue";
 import { ref } from "vue";
 
 let searchName = ref("");
+
+let currentPage = ref(1);
+let pageSize = ref(10);
+let totalPage = ref(10);
+const handleCurrentChange = async (val) => {
+  currentPage.value = val;
+};
+
 const tableData = [
   {
     visitor: "Tom",
@@ -91,6 +99,8 @@ const tableData = [
     comment: "好好好"
   }
 ];
+
+let selectDate = ref("");
 </script>
 
 <style scoped lang="scss"></style>

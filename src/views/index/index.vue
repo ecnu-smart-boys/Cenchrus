@@ -6,7 +6,6 @@
           :default-active="activeIndex"
           class="el-menu-demo"
           mode="horizontal"
-          @select="handleSelect"
         >
           <el-menu-item index="0">心理学院热线咨询</el-menu-item>
           <div class="flex-grow" />
@@ -15,7 +14,7 @@
       >
       <el-container>
         <el-aside width="250px">
-          <el-menu default-active="1" @open="handleOpen">
+          <el-menu default-active="1" @select="handleSelect">
             <el-menu-item index="1">
               <el-icon><location /></el-icon>
               <span>首页</span>
@@ -41,7 +40,6 @@
               <span>用户管理</span>
             </el-menu-item>
           </el-menu>
-          <conversation-list />
         </el-aside>
         <el-main body-style="padding: 0;"><router-view /></el-main>
       </el-container>
@@ -52,16 +50,32 @@
 <script setup lang="ts">
 import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
-import ConversationList from "@/views/conversation/components/conversation-list.vue";
+import router from "@/router";
 
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath);
+const handleSelect = (key: string) => {
+  switch (key) {
+    case "1":
+      router.push("supervisor-manager");
+      break;
+    case "2":
+      router.push("consult-record");
+      break;
+    case "3":
+      router.push("schedule");
+      break;
+    case "4":
+      router.push("consultant-manager");
+      break;
+    case "5":
+      router.push("supervisor-manager");
+      break;
+    case "6":
+      router.push("visitor-manager");
+      break;
+  }
 };
 
 const activeIndex = ref("1");
-const handleSelect = (key: string) => {
-  console.log(key);
-};
 </script>
 
 <style scoped lang="scss">

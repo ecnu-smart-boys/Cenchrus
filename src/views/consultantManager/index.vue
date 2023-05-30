@@ -52,7 +52,7 @@
             link
             type="primary"
             size="small"
-            @click="handleEdit(scope.$index, scope.row)"
+            @click="handleEdit(scope.row)"
             >修改</el-button
           >
           <el-button
@@ -217,18 +217,10 @@ let editData = reactive({
   workPlace: "",
   title: ""
 });
-const handleEdit = async (index, row) => {
+const handleEdit = (row) => {
   // TODO get infomation api
   // just get like this
-  editData = await {
-    name: "111",
-    gender: "男",
-    age: 111,
-    idNumber: "111",
-    supervisor: [],
-    workPlace: "111",
-    title: "111"
-  };
+  editData = row;
   editDialogVisible.value = true;
 };
 
