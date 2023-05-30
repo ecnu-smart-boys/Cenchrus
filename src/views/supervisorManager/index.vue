@@ -22,7 +22,7 @@
         >添加督导</el-button
       >
     </div>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
       <el-table-column fixed prop="name" label="姓名" width="150">
         <template #default="scope">
           <div style="display: flex; align-items: center">
@@ -38,7 +38,7 @@
       <el-table-column prop="gender" label="性别" width="100" />
       <el-table-column prop="duration" label="总咨询时长" width="150" />
       <el-table-column prop="count" label="总咨询次数" width="150" />
-      <el-table-column prop="consultant" label="绑定咨询师" width="200" />
+      <el-table-column prop="consultant" label="绑定咨询师" width="280" />
       <el-table-column prop="schedule" label="排班" width="280" />
       <el-table-column prop="state" label="状态" width="120" />
       <el-table-column fixed="right" label="操作" width="180">
@@ -136,6 +136,7 @@ import { md5, parseSchedule, parseTime, toBoolArraySchedule } from "@/utils";
 import { FormData } from "@/components/schema";
 import { disable, enable, updateArrangement } from "@/apis/userArrange/user";
 
+let isLoading = ref(false);
 let searchName = ref("");
 
 interface FormSupervisor {
@@ -323,6 +324,7 @@ const handleDisable = async (row) => {
 };
 
 const refreshData = async () => {
+  isLoading.value = true;
   const data = await getSupervisors({
     current: currentPage.value,
     name: searchName.value,
@@ -351,6 +353,7 @@ const refreshData = async () => {
     };
     tableData.push(i);
   });
+  isLoading.value = false;
 };
 onMounted(async () => {
   await refreshData();

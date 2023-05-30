@@ -17,8 +17,8 @@
         />
       </div>
     </div>
-    <el-table :data="tableData" style="width: 100%">
-      <el-table-column fixed prop="name" label="姓名" width="120">
+    <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
+      <el-table-column fixed prop="name" label="姓名" width="150">
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <img
@@ -31,17 +31,17 @@
         </template>
       </el-table-column>
       <el-table-column prop="gender" label="性别" width="100" />
-      <el-table-column prop="username" label="用户名" width="150" />
-      <el-table-column prop="phone" label="联系电话" width="150" />
+      <el-table-column prop="username" label="用户名" width="200" />
+      <el-table-column prop="phone" label="联系电话" width="180" />
       <el-table-column prop="emergencyName" label="紧急联系人" width="150" />
       <el-table-column
         prop="emergencyPhone"
         label="紧急联系人电话"
         width="200"
       />
-      <el-table-column prop="time" label="注册时间" width="120" />
+      <el-table-column prop="time" label="注册时间" width="150" />
       <el-table-column prop="state" label="状态" width="120" />
-      <el-table-column fixed="right" label="操作" width="120">
+      <el-table-column fixed="right" label="操作" width="180">
         <template #default="scope">
           <el-button
             link
@@ -72,6 +72,7 @@ import { ElMessageBox } from "element-plus";
 import { getVisitors } from "@/apis/userArrange/visitor/visitor";
 import { disable, enable } from "@/apis/userArrange/user";
 
+let isLoading = ref(false);
 let searchName = ref("");
 
 interface FormVisitor {
@@ -106,7 +107,7 @@ const tableData: FormVisitor[] = reactive([]);
 
 const handleDisable = async (row) => {
   await ElMessageBox.confirm(
-    `确定${row.state == "正常" ? "禁用" : "启用"}该咨询师吗？`,
+    `确定${row.state == "正常" ? "禁用" : "启用"}该访客吗？`,
     "警告",
     {
       confirmButtonText: "确定",
@@ -127,6 +128,7 @@ const handleDisable = async (row) => {
 };
 
 const refreshData = async () => {
+  isLoading.value = true;
   const data = await getVisitors({
     current: currentPage.value,
     name: searchName.value,
@@ -149,6 +151,7 @@ const refreshData = async () => {
     };
     tableData.push(i);
   });
+  isLoading.value = false;
 };
 onMounted(async () => {
   await refreshData();

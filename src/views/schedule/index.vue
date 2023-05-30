@@ -1,6 +1,18 @@
 <template>
   <div style="display: flex">
-    <el-calendar style="flex: 4">
+    <el-calendar ref="calendar" v-model="currentDate" style="flex: 4">
+      <template #header="{ date }">
+        <span>{{ date }}</span>
+        <el-button-group>
+          <el-button size="small" @click="selectDate('prev-month')">
+            上个月
+          </el-button>
+          <el-button size="small" @click="selectDate('today')">今日</el-button>
+          <el-button size="small" @click="selectDate('next-month')">
+            下个月
+          </el-button>
+        </el-button-group>
+      </template>
       <template #date-cell="{ data }">
         <div
           style="
@@ -14,8 +26,15 @@
           "
         >
           <div class="calendar-date">{{ data.day.split("-")[2] }}</div>
-          <div>管理员 2</div>
-          <div>督导 2</div>
+          <div v-if="data.type === 'current-month'">
+            <div>
+              咨询师
+              {{ monthData[data.day.split("-")[2] - 1]?.consultants || 0 }}
+            </div>
+            <div>
+              督导 {{ monthData[data.day.split("-")[2] - 1]?.supervisors || 0 }}
+            </div>
+          </div>
         </div>
       </template>
     </el-calendar>
@@ -54,13 +73,14 @@
       >
         添加督导
       </el-button>
-      <el-table :data="tableData" :show-header="false">
+      <el-table v-loading="isLoading" :data="tableData" :show-header="false">
         <el-table-column prop="name" label="姓名" width="150">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <img
-                src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
+                :src="scope.row.avatar"
                 class="avatar"
+                onerror="this.src='/src/assets/defaultAvatar.jpg'"
               />
               <div style="margin-left: 20px">{{ scope.row.name }}</div>
             </div>
@@ -114,27 +134,27 @@
 
 <script setup lang="ts">
 import { Plus } from "@element-plus/icons-vue";
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch, watchEffect } from "vue";
 import FormAddSchedule from "@/components/form-add-schedule.vue";
 import { ElMessageBox } from "element-plus";
+import {
+  consultantArrangement,
+  monthArrangement,
+  supervisorArrangement
+} from "@/apis/arrangement/arrangement";
+import {
+  ArrangementResp,
+  MonthArrangementResp
+} from "@/apis/arrangement/arrangement-interface";
 
+let isLoading = ref(false);
 let activeIndex = ref("1");
 
 const handleSelect = (key: string) => {
   activeIndex.value = key;
 };
 
-const tableData = reactive([
-  {
-    name: "aaa"
-  },
-  {
-    name: "bbb"
-  },
-  {
-    name: "ccc"
-  }
-]);
+const tableData: ArrangementResp[] = reactive([]);
 
 const addConsultantDialogVisible = ref(false);
 const addSupervisorDialogVisible = ref(false);
@@ -143,19 +163,68 @@ const submitAddForm = () => {
   // TODO API
 };
 
-const handleRemove = (row) => {
-  ElMessageBox.confirm("确定移除排班吗？", "警告", {
+const handleRemove = async (row) => {
+  await ElMessageBox.confirm("确定移除排班吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
-  })
-    .then(() => {
-      // TODO DISABLE API
-    })
-    .catch(() => {
-      // catch error
-    });
+  });
 };
+
+let currentDate = ref(new Date());
+let currentYear = ref(new Date().getFullYear());
+let currentMonth = ref(new Date().getMonth() + 1);
+let monthData: MonthArrangementResp[] = reactive([]);
+const refreshData = async () => {
+  monthData.splice(0);
+  const data = await monthArrangement({
+    year: currentYear.value,
+    month: currentMonth.value
+  });
+  data.forEach((i) => monthData.push(i));
+};
+
+watch(() => currentYear.value, refreshData);
+watch(() => currentMonth.value, refreshData);
+watchEffect(async () => {
+  isLoading.value = true;
+  tableData.splice(0);
+  if (activeIndex.value == "1") {
+    const data = await consultantArrangement({
+      timestamp: currentDate.value.getTime()
+    });
+    data.forEach((i) => tableData.push(i));
+  } else {
+    const data = await supervisorArrangement({
+      timestamp: currentDate.value.getTime()
+    });
+    data.forEach((i) => tableData.push(i));
+  }
+  isLoading.value = false;
+});
+const calendar = ref();
+const selectDate = (val: string) => {
+  if (val === "prev-month") {
+    currentMonth.value--;
+    if (currentMonth.value < 0) {
+      currentYear.value--;
+      currentMonth.value = 12;
+    }
+  } else if (val === "next-month") {
+    currentMonth.value++;
+    if (currentMonth.value > 12) {
+      currentYear.value++;
+      currentMonth.value = 1;
+    }
+  } else {
+    currentMonth.value = new Date().getMonth() + 1;
+  }
+  calendar.value.selectDate(val);
+};
+
+onMounted(async () => {
+  await refreshData();
+});
 </script>
 
 <style scoped lang="scss">

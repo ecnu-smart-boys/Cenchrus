@@ -36,6 +36,10 @@ const routes = [
       {
         path: "schedule",
         component: () => import("@/views/schedule/index.vue")
+      },
+      {
+        path: "conversation",
+        component: () => import("@/views/conversation/index.vue")
       }
     ]
   },

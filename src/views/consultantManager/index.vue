@@ -20,7 +20,7 @@
       </div>
       <el-button type="primary" @click="handleAdd">添加咨询师</el-button>
     </div>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
       <el-table-column fixed prop="name" label="姓名" width="150">
         <template #default="scope">
           <div style="display: flex; align-items: center">
@@ -134,6 +134,7 @@ import { md5, parseSchedule, parseTime, toBoolArraySchedule } from "@/utils";
 import { FormData } from "@/components/schema";
 import { disable, enable, updateArrangement } from "@/apis/userArrange/user";
 
+let isLoading = ref(false);
 let searchName = ref("");
 
 interface FormConsultant {
@@ -228,6 +229,7 @@ let editData: FormData = reactive({
   qualification: "",
   qualificationNumber: ""
 });
+
 const handleEdit = (row) => {
   editData.id = row.id;
   editData.name = row.name;
@@ -323,6 +325,7 @@ const handleDisable = async (row) => {
 };
 
 const refreshData = async () => {
+  isLoading.value = true;
   const data = await getConsultants({
     current: currentPage.value,
     name: searchName.value,
@@ -354,7 +357,9 @@ const refreshData = async () => {
     };
     tableData.push(i);
   });
+  isLoading.value = false;
 };
+
 onMounted(async () => {
   await refreshData();
 });
