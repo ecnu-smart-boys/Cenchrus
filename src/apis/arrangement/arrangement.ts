@@ -44,7 +44,7 @@ export function addArrangement(
   return request({
     method: "post",
     url: "/arrangement/addArrangement",
-    params: addArrangementReq
+    data: addArrangementReq
   });
 }
 
@@ -52,9 +52,9 @@ export function removeArrangement(
   addArrangementReq: AddArrangementReq
 ): Promise<any> {
   return request({
-    method: "delete",
+    method: "put",
     url: "/arrangement/removeArrangement",
-    params: addArrangementReq
+    data: addArrangementReq
   });
 }
 

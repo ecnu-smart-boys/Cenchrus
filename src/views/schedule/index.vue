@@ -218,10 +218,18 @@ const submitAddForm = async () => {
   }
 };
 
-const handleSubmit = async () => {
+const handleSubmit = async (data) => {
   await addArrangement({
-    timestamp: currentDate.value.getTime()
+    timestamp: currentDate.value.getTime(),
+    userId: data.value.id
   });
+  ElMessage({
+    message: "添加成功",
+    type: "success",
+    duration: 5 * 1000
+  });
+  addConsultantDialogVisible.value = false;
+  await refreshTableData();
 };
 const handleRemove = async (row) => {
   await ElMessageBox.confirm("确定移除排班吗？", "警告", {

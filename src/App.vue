@@ -3,23 +3,34 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onUnmounted, watchEffect } from "vue";
 import createStore from "@/store/index";
-const { token } = createStore();
+const store = createStore();
 let timer;
 
 let websocket;
-onMounted(() => {
-  websocket = new WebSocket(
-    `${process.env.VUE_APP_WS_BASE_URL}/ws?x-freud=${token}`
-  );
-  timer = setTimeout(() => {
-    websocket.send("");
-  }, 1000);
+let isOpen = false;
+watchEffect(() => {
+  if (store.token !== "" && !isOpen) {
+    isOpen = true;
+    websocket = new WebSocket(
+      `${process.env.VUE_APP_WS_BASE_URL}/ws?x-freud=${store.token}`
+    );
+    timer = setInterval(() => {
+      websocket.send("");
+    }, 1000);
+  }
+  if (store.token == "" && isOpen) {
+    isOpen = false;
+    clearInterval(timer);
+    websocket.close();
+  }
 });
 onUnmounted(() => {
-  clearTimeout(timer);
-  websocket.close();
+  if (isOpen) {
+    clearInterval(timer);
+    websocket.close();
+  }
 });
 </script>
 

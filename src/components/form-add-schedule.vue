@@ -13,7 +13,7 @@
         prop="name"
       >
         <el-autocomplete
-          v-model="form.name"
+          v-model="form.value"
           :fetch-suggestions="querySearch"
           :trigger-on-focus="false"
           clearable
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, reactive, ref, toRaw, watchEffect } from "vue";
+import { defineEmits, reactive, ref, watchEffect } from "vue";
 import type { FormInstance } from "element-plus";
 import { Search } from "@element-plus/icons-vue";
 import { FormRules } from "element-plus";
@@ -49,13 +49,13 @@ const emits = defineEmits<{
 }>();
 
 const form = reactive({
-  name: ""
+  value: ""
 });
 
 const ruleFormRef: any = ref<FormInstance>();
 
 const rules = reactive<FormRules>({
-  name: [
+  value: [
     {
       required: true,
       message: props.isConsultant ? "请选择咨询师" : "请选择督导",
@@ -69,25 +69,35 @@ const submitForm = async () => {
       throw Error();
     }
   });
+  console.log(form);
   emits("onSubmit", form);
 };
 
 const employeeList = ref([]);
 watchEffect(() => {
   employeeList.value.splice(0);
-  props.optionsData.forEach((i) => employeeList.value.push(toRaw(i)));
+  props.optionsData.forEach((i) =>
+    employeeList.value.push({
+      id: i.id,
+      name: i.name,
+      value: {
+        id: i.id,
+        toString: function () {
+          return i.name;
+        },
+        valueOf: function () {
+          return i.id;
+        }
+      }
+    })
+  );
 });
 const querySearch = (queryString: string, cb: any) => {
-  const results = queryString
+  let results = queryString
     ? employeeList.value.filter((item) => {
         return item.name.indexOf(queryString) >= 0;
       })
     : employeeList.value;
-  console.log(
-    employeeList.value.filter((item) => {
-      return item.name.indexOf(queryString) >= 0;
-    })
-  );
   cb(results);
 };
 
