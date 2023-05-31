@@ -18,3 +18,13 @@ export interface ArrangementResp {
   id: string;
   name: string;
 }
+
+export interface AddArrangementReq {
+  timestamp: number;
+  userId?: string;
+}
+
+export interface NotArrangedEmployeesReq {
+  timestamp: number;
+  name: string;
+}

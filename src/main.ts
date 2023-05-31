@@ -14,6 +14,6 @@ createApp(App)
   .use(ElementPlus, {
     locale: zhCn
   })
-  .use(router)
   .use(createPinia())
+  .use(router)
   .mount("#app");

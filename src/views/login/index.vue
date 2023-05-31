@@ -6,7 +6,7 @@
       </div>
       <div style="height: 60px; width: 100%"></div>
       <el-form
-        ref="login-form"
+        ref="loginForm"
         label-width="80px"
         class="login-form"
         :model="form"
@@ -25,7 +25,7 @@
           <img
             :src="captchaUrl"
             style="width: 120px; height: 40px"
-            @click="changeCaptcha"
+            @click="refreshCaptcha"
           />
         </div>
         <div class="login-button">
@@ -39,7 +39,15 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
+import { captcha } from "@/apis/captcha/captcha";
+import { login } from "@/apis/auth/auth";
+import { md5 } from "@/utils";
+import useStore from "@/store";
+import router from "@/router";
+import { ElMessage } from "element-plus";
+const { setUserInfo } = useStore();
 
+let captchaId;
 let captchaUrl = ref("");
 const form = reactive({
   username: "",
@@ -51,18 +59,44 @@ const rules = reactive({
   password: [{ required: true, message: "请输入密码", trigger: "blur" }],
   captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }]
 });
-const changeCaptcha = function () {
-  // TODO
+const loginForm: any = ref(null);
+const loginSubmit = async () => {
+  await loginForm.value.validate((valid) => {
+    if (!valid) {
+      throw Error();
+    }
+  });
+  try {
+    const data = await login({
+      username: form.username,
+      password: md5(form.password),
+      captchaId,
+      captcha: form.captcha
+    });
+    setUserInfo(data);
+    ElMessage({
+      message: "登录成功",
+      type: "success",
+      duration: 5 * 1000
+    });
+    router.push({ path: "/" });
+  } catch (e) {
+    await refreshCaptcha();
+  }
 };
-const loginSubmit = function () {
-  // TODO
-};
-const reset = function () {
-  // this.$refs["login_form"].resetFields();
-  changeCaptcha();
+const reset = async () => {
+  loginForm.value.resetFields();
+  await refreshCaptcha();
 };
 
-onMounted({});
+const refreshCaptcha = async () => {
+  const data = await captcha();
+  captchaId = data.captchaId;
+  captchaUrl.value = data.entity;
+};
+onMounted(async () => {
+  await refreshCaptcha();
+});
 </script>
 
 <style lang="scss" scoped>

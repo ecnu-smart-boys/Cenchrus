@@ -23,19 +23,19 @@
               <el-icon><icon-menu /></el-icon>
               <span>咨询记录</span>
             </el-menu-item>
-            <el-menu-item index="3">
+            <el-menu-item v-if="role == 'admin'" index="3">
               <el-icon><icon-menu /></el-icon>
               <span>排班表</span>
             </el-menu-item>
-            <el-menu-item index="4">
+            <el-menu-item v-if="role == 'admin'" index="4">
               <el-icon><icon-menu /></el-icon>
               <span>咨询师管理</span>
             </el-menu-item>
-            <el-menu-item index="5">
+            <el-menu-item v-if="role == 'admin'" index="5">
               <el-icon><icon-menu /></el-icon>
               <span>督导管理</span>
             </el-menu-item>
-            <el-menu-item index="6">
+            <el-menu-item v-if="role == 'admin'" index="6">
               <el-icon><icon-menu /></el-icon>
               <span>用户管理</span>
             </el-menu-item>
@@ -51,11 +51,12 @@
 import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import router from "@/router";
-
+import createStore from "@/store/index";
+const { role } = createStore();
 const handleSelect = (key: string) => {
   switch (key) {
     case "1":
-      router.push("supervisor-manager");
+      router.push("/");
       break;
     case "2":
       router.push("consult-record");

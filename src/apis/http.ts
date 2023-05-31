@@ -1,9 +1,8 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { BaseResponse } from "@/apis/schema";
-import useStore from "@/store";
-const store = useStore();
-const { token, clearToken } = store;
+import createStore from "@/store";
+const { token, clearToken, setToken } = createStore();
 
 const pendingMap = new Map();
 
@@ -50,16 +49,16 @@ function removePending(config: InternalAxiosRequestConfig<any>) {
 }
 
 const request = axios.create({
-  baseURL: "http://192.168.31.62:5508/",
+  baseURL: process.env.VUE_APP_API_BASE_URL,
   timeout: 5000
 });
 
 request.interceptors.request.use(
   (config) => {
     // 删除重复的请求
-    removePending(config);
+    // removePending(config);
     // 如果repeatRequest不配置，那么该请求则不能多次请求
-    !(config as any).repeatRequest && addPending(config);
+    // !(config as any).repeatRequest && addPending(config);
 
     if (token !== "") {
       config.headers["x-freud"] = token;
@@ -76,6 +75,10 @@ request.interceptors.response.use(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   (response) => {
+    const currentToken = response.headers["x-freud"];
+    if (currentToken && (token.length == 0 || token != currentToken)) {
+      setToken(currentToken);
+    }
     const res = response.data as BaseResponse;
     // 处理异常的情况
     if (res.status !== 200) {

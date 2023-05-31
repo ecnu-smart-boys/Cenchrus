@@ -60,7 +60,7 @@
         type="plain"
         text
         :icon="Plus"
-        @click="addConsultantDialogVisible = true"
+        @click="handleAddConsultant"
       >
         添加咨询师
       </el-button>
@@ -69,7 +69,7 @@
         type="plain"
         text
         :icon="Plus"
-        @click="addSupervisorDialogVisible = true"
+        @click="handleAddSupervisor"
       >
         添加督导
       </el-button>
@@ -104,7 +104,12 @@
       title="添加咨询师"
       width="400px"
     >
-      <form-add-schedule :is-consultant="true" />
+      <form-add-schedule
+        ref="addConsultantForm"
+        :is-consultant="true"
+        :options-data="optionsData"
+        @on-submit="handleSubmit"
+      />
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="addConsultantDialogVisible = false">
@@ -119,7 +124,12 @@
       title="添加督导"
       width="400px"
     >
-      <form-add-schedule :is-consultant="false" />
+      <form-add-schedule
+        ref="addSupervisorForm"
+        :is-consultant="false"
+        :options-data="optionsData"
+        @on-submit="handleSubmit"
+      />
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="addSupervisorDialogVisible = false">
@@ -136,10 +146,14 @@
 import { Plus } from "@element-plus/icons-vue";
 import { onMounted, reactive, ref, watch, watchEffect } from "vue";
 import FormAddSchedule from "@/components/form-add-schedule.vue";
-import { ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
+  addArrangement,
   consultantArrangement,
   monthArrangement,
+  notArrangedConsultants,
+  notArrangedSupervisors,
+  removeArrangement,
   supervisorArrangement
 } from "@/apis/arrangement/arrangement";
 import {
@@ -158,16 +172,71 @@ const tableData: ArrangementResp[] = reactive([]);
 
 const addConsultantDialogVisible = ref(false);
 const addSupervisorDialogVisible = ref(false);
+const optionsData = reactive<
+  {
+    id: string;
+    name: string;
+  }[]
+>([]);
 
-const submitAddForm = () => {
-  // TODO API
+const handleAddConsultant = async () => {
+  const data = await notArrangedConsultants({
+    name: "",
+    timestamp: currentDate.value.getTime()
+  });
+  optionsData.splice(0);
+  data.forEach((i) =>
+    optionsData.push({
+      id: i.id,
+      name: i.name
+    })
+  );
+  addConsultantDialogVisible.value = true;
+};
+const handleAddSupervisor = async () => {
+  const data = await notArrangedSupervisors({
+    name: "",
+    timestamp: currentDate.value.getTime()
+  });
+  optionsData.splice(0);
+  data.forEach((i) =>
+    optionsData.push({
+      id: i.id,
+      name: i.name
+    })
+  );
+  addSupervisorDialogVisible.value = true;
 };
 
+const addConsultantForm: any = ref(null);
+const addSupervisorForm: any = ref(null);
+const submitAddForm = async () => {
+  try {
+    await addConsultantForm.value.submitForm();
+  } catch (e) {
+    return;
+  }
+};
+
+const handleSubmit = async () => {
+  await addArrangement({
+    timestamp: currentDate.value.getTime()
+  });
+};
 const handleRemove = async (row) => {
   await ElMessageBox.confirm("确定移除排班吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning"
+  });
+  await removeArrangement({
+    timestamp: currentDate.value.getTime(),
+    userId: row.id
+  });
+  ElMessage({
+    message: "移除成功",
+    type: "success",
+    duration: 5 * 1000
   });
 };
 
@@ -184,9 +253,7 @@ const refreshData = async () => {
   data.forEach((i) => monthData.push(i));
 };
 
-watch(() => currentYear.value, refreshData);
-watch(() => currentMonth.value, refreshData);
-watchEffect(async () => {
+const refreshTableData = async () => {
   isLoading.value = true;
   tableData.splice(0);
   if (activeIndex.value == "1") {
@@ -201,6 +268,11 @@ watchEffect(async () => {
     data.forEach((i) => tableData.push(i));
   }
   isLoading.value = false;
+};
+watch(() => currentYear.value, refreshData);
+watch(() => currentMonth.value, refreshData);
+watchEffect(async () => {
+  await refreshTableData();
 });
 const calendar = ref();
 const selectDate = (val: string) => {

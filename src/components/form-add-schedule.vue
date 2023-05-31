@@ -26,13 +26,26 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { defineEmits, reactive, ref, toRaw, watchEffect } from "vue";
 import type { FormInstance } from "element-plus";
 import { Search } from "@element-plus/icons-vue";
 import { FormRules } from "element-plus";
 
 const props = defineProps<{
+  optionsData: {
+    id: string;
+    name: string;
+  }[];
   isConsultant: boolean;
+}>();
+
+const emits = defineEmits<{
+  (
+    event: "onSubmit",
+    form: {
+      name: string;
+    }
+  ): void;
 }>();
 
 const form = reactive({
@@ -56,32 +69,27 @@ const submitForm = async () => {
       throw Error();
     }
   });
+  emits("onSubmit", form);
 };
 
 const employeeList = ref([]);
+watchEffect(() => {
+  employeeList.value.splice(0);
+  props.optionsData.forEach((i) => employeeList.value.push(toRaw(i)));
+});
 const querySearch = (queryString: string, cb: any) => {
   const results = queryString
-    ? employeeList.value.filter(createFilter(queryString))
+    ? employeeList.value.filter((item) => {
+        return item.name.indexOf(queryString) >= 0;
+      })
     : employeeList.value;
+  console.log(
+    employeeList.value.filter((item) => {
+      return item.name.indexOf(queryString) >= 0;
+    })
+  );
   cb(results);
 };
-
-const createFilter = (queryString: string) => {
-  return (item) => {
-    return item.value.startsWith(queryString);
-  };
-};
-const loadAll = async () => {
-  if (props.isConsultant) {
-    return [{ value: "咨询师A" }, { value: "咨询师B" }, { value: "咨询师C" }];
-  } else {
-    return [{ value: "督导A" }, { value: "督导B" }, { value: "督导C" }];
-  }
-};
-
-onMounted(async () => {
-  employeeList.value = await loadAll();
-});
 
 defineExpose({ submitForm });
 </script>
