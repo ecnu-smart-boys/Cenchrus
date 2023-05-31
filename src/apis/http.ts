@@ -2,6 +2,7 @@ import axios, { InternalAxiosRequestConfig } from "axios";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { BaseResponse } from "@/apis/schema";
 import createStore from "@/store";
+import router from "@/router/index";
 const { token, clearToken, setToken } = createStore();
 
 const pendingMap = new Map();
@@ -56,9 +57,9 @@ const request = axios.create({
 request.interceptors.request.use(
   (config) => {
     // 删除重复的请求
-    // removePending(config);
+    removePending(config);
     // 如果repeatRequest不配置，那么该请求则不能多次请求
-    // !(config as any).repeatRequest && addPending(config);
+    !(config as any).repeatRequest && addPending(config);
 
     if (token !== "") {
       config.headers["x-freud"] = token;
@@ -88,18 +89,14 @@ request.interceptors.response.use(
         duration: 5 * 1000
       });
       // TODO
-      // 403:非法的token; 50012:其他客户端登录了;  401:Token 过期了;
-      if (res.status === 403 || res.status === 50012 || res.status === 401) {
+      if (res.status === 403 || res.status === 401) {
         ElMessageBox.confirm("你已被登出，请重新登录", "确定登出", {
           confirmButtonText: "重新登录",
           cancelButtonText: "取消",
           type: "warning"
         }).then(() => {
-          clearToken().then(() => {
-            location.reload();
-            // TODO
-            // router.push("/login");
-          });
+          clearToken();
+          router.push({ path: "/login" });
         });
       }
       return Promise.reject("error");
@@ -109,8 +106,12 @@ request.interceptors.response.use(
   },
   (error) => {
     console.log("err" + error);
+    let message = error.response?.data?.message || error.message;
+    if (error.name == "CanceledError") {
+      message = "取消请求";
+    }
     ElMessage({
-      message: error.response?.data?.message || error.message,
+      message,
       type: "error",
       duration: 5 * 1000
     });

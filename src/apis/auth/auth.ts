@@ -8,3 +8,10 @@ export function login(loginReq: LoginReq): Promise<LoginResp> {
     data: loginReq
   });
 }
+
+export function logout(): Promise<any> {
+  return request({
+    method: "post",
+    url: "/user/logout"
+  });
+}

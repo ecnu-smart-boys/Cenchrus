@@ -4,12 +4,12 @@
       <el-header
         ><el-menu
           :default-active="activeIndex"
-          class="el-menu-demo"
           mode="horizontal"
+          @select="handleUpperSelect"
         >
           <el-menu-item index="0">心理学院热线咨询</el-menu-item>
           <div class="flex-grow" />
-          <el-menu-item index="1">欢迎你！咨询师！</el-menu-item>
+          <el-menu-item index="1">登出</el-menu-item>
         </el-menu></el-header
       >
       <el-container>
@@ -50,9 +50,10 @@
 <script setup lang="ts">
 import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
-import router from "@/router";
+import router, { hasRoles } from "@/router";
 import createStore from "@/store/index";
-const { role } = createStore();
+import { logout } from "@/apis/auth/auth";
+const { role, clearToken, clearUserInfo } = createStore();
 const handleSelect = (key: string) => {
   switch (key) {
     case "1":
@@ -75,6 +76,24 @@ const handleSelect = (key: string) => {
       break;
   }
 };
+const handleUpperSelect = (key: string) => {
+  if (key == "1") {
+    clearUserInfo();
+    clearToken();
+    // logout();
+    if (router.hasRoute("supervisor")) {
+      router.removeRoute("supervisor");
+    }
+    if (router.hasRoute("admin")) {
+      router.removeRoute("admin");
+    }
+    if (router.hasRoute("consultant")) {
+      router.removeRoute("consultant");
+    }
+    hasRoles.hasRoles = true;
+    router.push({ path: "/login" });
+  }
+};
 
 const activeIndex = ref("1");
 </script>
@@ -82,10 +101,5 @@ const activeIndex = ref("1");
 <style scoped lang="scss">
 .flex-grow {
   flex-grow: 1;
-}
-</style>
-<style>
-.el-aside {
-  overflow-y: hidden;
 }
 </style>

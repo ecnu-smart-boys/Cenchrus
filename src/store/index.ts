@@ -17,16 +17,17 @@ const useStore = defineStore("main", {
       this.token = token;
       localStorage.setItem("token", token);
     },
-    clearToken(): Promise<void> {
-      return new Promise((resolve) => {
-        this.token = "";
-        localStorage.removeItem("token");
-        resolve();
-      });
+    clearToken() {
+      this.token = "";
+      localStorage.removeItem("token");
     },
     setUserInfo(userInfo: LoginResp) {
       this.userInfo = userInfo;
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
+    },
+    clearUserInfo() {
+      this.userInfo = {};
+      localStorage.removeItem("userInfo");
     }
   }
 });

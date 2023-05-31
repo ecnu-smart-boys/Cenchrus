@@ -1,18 +1,20 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 
 import useStore from "@/store";
 
 const routes = [
+  { path: "/login", component: () => import("@/views/login/index.vue") },
   {
-    path: "/:catchAll(.*)",
+    path: "/:catchAll(.*)*",
     component: () => import("@/views/404/index.vue")
-  },
-  { path: "/login", component: () => import("@/views/login/index.vue") }
+  }
 ];
 const supervisorRoutes = [
   {
     path: "/",
+    name: "supervisor",
     component: () => import("@/views/index/index.vue"),
     redirect: "/supervisor",
     children: [
@@ -34,6 +36,7 @@ const supervisorRoutes = [
 const consultantRoutes = [
   {
     path: "/",
+    name: "consultant",
     component: () => import("@/views/index/index.vue"),
     redirect: "/consultant",
     children: [
@@ -55,6 +58,7 @@ const consultantRoutes = [
 const adminRoutes = [
   {
     path: "/",
+    name: "admin",
     component: () => import("@/views/index/index.vue"),
     redirect: "/administrator",
     children: [
@@ -92,7 +96,7 @@ const router = createRouter({
 });
 
 const whiteList = ["/login"];
-let hasRoles = true;
+export const hasRoles = { hasRoles: true };
 router.beforeEach((to, from, next) => {
   const { token, role } = useStore();
   NProgress.start();
@@ -112,7 +116,7 @@ router.beforeEach((to, from, next) => {
         NProgress.done();
       }
     } else {
-      if (hasRoles) {
+      if (hasRoles.hasRoles) {
         switch (role) {
           case "admin":
             adminRoutes.forEach((i) => {
@@ -130,7 +134,7 @@ router.beforeEach((to, from, next) => {
             });
             break;
         }
-        hasRoles = false;
+        hasRoles.hasRoles = false;
         next({ ...to, replace: true });
       } else {
         next();
@@ -147,7 +151,7 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach(() => {
-  NProgress.done(); // finish progress bar
+  NProgress.done();
 });
 
 export default router;
