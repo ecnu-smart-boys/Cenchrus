@@ -52,8 +52,10 @@ import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import router, { hasRoles } from "@/router";
 import createStore from "@/store/index";
-import { logout } from "@/apis/auth/auth";
 const { role, clearToken, clearUserInfo } = createStore();
+import { logout } from "@/apis/auth/auth";
+import { imLogout } from "@/apis/im/im";
+
 const handleSelect = (key: string) => {
   switch (key) {
     case "1":
@@ -76,11 +78,12 @@ const handleSelect = (key: string) => {
       break;
   }
 };
-const handleUpperSelect = (key: string) => {
+const handleUpperSelect = async (key: string) => {
   if (key == "1") {
     clearUserInfo();
     clearToken();
-    // logout();
+    await logout();
+    await imLogout();
     if (router.hasRoute("supervisor")) {
       router.removeRoute("supervisor");
     }
@@ -91,7 +94,7 @@ const handleUpperSelect = (key: string) => {
       router.removeRoute("consultant");
     }
     hasRoles.hasRoles = true;
-    router.push({ path: "/login" });
+    await router.push({ path: "/login" });
   }
 };
 
