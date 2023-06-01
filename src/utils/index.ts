@@ -1,5 +1,9 @@
 import MD5 from "crypto-js/md5";
 
+/**
+ * convert time to 00:00:00
+ * @param time
+ */
 export function parseTime(time: number): string {
   const h = parseInt(String((time / 60 / 60) % 24));
   const hs = h < 10 ? "0" + h : h;
@@ -8,6 +12,18 @@ export function parseTime(time: number): string {
   const s = parseInt(String(time % 60));
   const ss = s < 10 ? "0" + s : s;
   return `${hs}:${ms}:${ss}`;
+}
+
+/**
+ * convert time to 00'00''
+ * @param time
+ */
+export function parseSecond(time: number): string {
+  const m = parseInt(String((time / 60) % 60));
+  const ms = m < 10 ? "0" + m : m;
+  const s = parseInt(String(time % 60));
+  const ss = s < 10 ? "0" + s : s;
+  return `${ms}'${ss}''`;
 }
 
 export function parseSchedule(schedule: number): string {
