@@ -1,16 +1,12 @@
 <template>
   <ul id="chat_list_wrapper" ref="UL">
-    <li
-      v-for="item in getCurrentIMInfoMessages"
-      :key="item.time"
-      class="clearfix"
-    >
-      <div :class="item.isSelfSend ? 'textRight' : 'textLeft'">
-        <div v-if="!item.isSelfSend" class="headImage">
+    <li v-for="item in currentMessage" :key="item.ID" class="clearfix">
+      <div :class="item.flow == MSG_FLOW.OUT ? 'textRight' : 'textLeft'">
+        <div v-if="item.flow == MSG_FLOW.IN" class="headImage">
           <img
             width="40"
             height="40"
-            :src="item.fromAccountImage"
+            src="/src/assets/defaultAvatar.jpg"
             alt=""
             style="border-radius: 50%"
           />
@@ -18,30 +14,32 @@
         <div
           class="chat-wrapper"
           :style="
-            item.isSelfSend ? 'margin-right: 10px;' : 'margin-left: 10px;'
+            item.flow == MSG_FLOW.OUT
+              ? 'margin-right: 10px;'
+              : 'margin-left: 10px;'
           "
         >
           <TextContent
-            v-if="item.msgOptions.type === MSG_ELEMENT_TYPE.TEXT"
-            :text="item.msgOptions.text"
+            v-if="item.type === MSG_ELEMENT_TYPE.TEXT"
+            :text="item.payload.text"
           ></TextContent>
           <ImageContent
-            v-if="item.msgOptions.type === MSG_ELEMENT_TYPE.IMAGE"
+            v-if="item.type === MSG_ELEMENT_TYPE.IMAGE"
             v-viewer="{ movable: false }"
-            :images-options="item.msgOptions"
+            :payload="item.payload"
           >
           </ImageContent>
           <AudioContent
-            v-if="item.msgOptions.type === MSG_ELEMENT_TYPE.AUDIO"
-            :audios-options="item.msgOptions"
+            v-if="item.type === MSG_ELEMENT_TYPE.AUDIO"
+            :payload="item.payload"
           >
           </AudioContent>
         </div>
-        <div v-if="item.isSelfSend" class="headImage">
+        <div v-if="item.flow == MSG_FLOW.OUT" class="headImage">
           <img
             width="40"
             height="40"
-            :src="item.fromAccountImage"
+            src="/src/assets/defaultAvatar.jpg"
             alt=""
             style="border-radius: 50%"
           />
@@ -56,175 +54,21 @@ import TextContent from "@/im/components/chatArea/TextContent.vue";
 import ImageContent from "@/im/components/chatArea/ImageContent.vue";
 import AudioContent from "@/im/components/chatArea/AudioContent.vue";
 
+const props = defineProps<{
+  currentMessage: any;
+}>();
+
 const MSG_ELEMENT_TYPE = {
-  TEXT: 1 << 1,
-  IMAGE: 1 << 2,
+  TEXT: "TIMTextElem",
+  IMAGE: "TIMImageElem",
   CUSTOM: 1 << 3,
-  AUDIO: 1 << 4
+  AUDIO: "TIMSoundElem"
 };
 
-const getCurrentIMInfoMessages = [
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.IMAGE,
-      image: {
-        url: "https://fastly.picsum.photos/id/936/800/600.jpg?hmac=WbNMCbsY-Q5pGIMQvZvVUWUK7ThFST3ZCK_YQ87QxTE"
-      }
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.IMAGE,
-      image: {
-        url: "https://fastly.picsum.photos/id/306/700/700.jpg?hmac=CxQRWSoKNAq47vxLemFrotdYrWXl9RVF5OePqxY_mgE"
-      }
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: false,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.AUDIO,
-      audio: {
-        url: "https://fastly.picsum.photos/id/306/700/700.jpg?hmac=CxQRWSoKNAq47vxLemFrotdYrWXl9RVF5OePqxY_mgE",
-        duration: 20
-      }
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "<p>123</p>"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "222",
-    isSelfSend: false,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha\nhahahaha\nahahaha"
-    }
-  },
-  {
-    time: "222",
-    isSelfSend: false,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "222",
-    isSelfSend: false,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha\nhahahaha\nahahaha"
-    }
-  },
-  {
-    time: "222",
-    isSelfSend: false,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "111",
-    isSelfSend: true,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  },
-  {
-    time: "222",
-    isSelfSend: false,
-    fromAccountImage: "/src/assets/defaultAvatar.jpg",
-    msgOptions: {
-      type: MSG_ELEMENT_TYPE.TEXT,
-      text: "hahahaha"
-    }
-  }
-];
+const MSG_FLOW = {
+  IN: "in",
+  OUT: "out"
+};
 </script>
 
 <style scoped lang="scss">

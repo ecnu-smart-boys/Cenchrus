@@ -4,7 +4,7 @@ import "nprogress/nprogress.css";
 
 import useStore from "@/store";
 
-const routes = [
+let routes = [
   { path: "/login", component: () => import("@/views/login/index.vue") },
   {
     path: "/:catchAll(.*)*",
@@ -90,6 +90,9 @@ const adminRoutes = [
   }
 ];
 
+if (process.env.VUE_APP_ENV === "development") {
+  routes = [...routes, ...consultantRoutes];
+}
 const router = createRouter({
   history: createWebHashHistory(),
   routes
@@ -98,6 +101,10 @@ const router = createRouter({
 const whiteList = ["/login"];
 export const hasRoles = { hasRoles: true };
 router.beforeEach((to, from, next) => {
+  if (process.env.VUE_APP_ENV === "development") {
+    next();
+    return;
+  }
   const { token, role } = useStore();
   NProgress.start();
   if (token.length !== 0) {

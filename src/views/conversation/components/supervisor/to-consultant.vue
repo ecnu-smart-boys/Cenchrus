@@ -6,15 +6,15 @@
     <div class="chat-wrapper">
       <supervisor-to-consultant />
       <div class="chat-list-wrapper">
-        <ChatArea />
+        <ChatArea :current-message="consultantSupervisorData" />
       </div>
       <div class="chat-input-wrapper">
         <ChatInput />
       </div>
     </div>
-    <div v-if="isHelping" class="chat-wrapper">
+    <div class="chat-wrapper">
       <div class="chat-list-wrapper">
-        <ChatArea />
+        <ChatArea :current-message="consultantSupervisorData" />
       </div>
     </div>
   </div>
@@ -24,13 +24,20 @@
 import ChatArea from "@/im/components/chatArea/index.vue";
 import ChatInput from "@/im/components/ChatInput.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import { ref } from "vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
-let isHelping = ref(false);
+import { ref, watchEffect } from "vue";
+import { imGetMessageList } from "@/apis/im/im";
+import createStore from "@/store/index";
+const store = createStore();
 
-const handleHelp = () => {
-  isHelping.value = !isHelping.value;
-};
+const consultantSupervisorData = ref({});
+watchEffect(async () => {
+  if (store.isTimReady) {
+    const data = await imGetMessageList("2_1");
+    consultantSupervisorData.value = data.data.messageList;
+    console.log(consultantSupervisorData.value);
+  }
+});
 </script>
 
 <style scoped lang="scss">

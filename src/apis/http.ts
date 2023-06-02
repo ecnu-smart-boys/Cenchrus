@@ -3,7 +3,6 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { BaseResponse } from "@/apis/schema";
 import createStore from "@/store";
 import router from "@/router/index";
-const { token, clearToken, setToken } = createStore();
 
 const pendingMap = new Map();
 
@@ -56,13 +55,14 @@ const request = axios.create({
 
 request.interceptors.request.use(
   (config) => {
+    const store = createStore();
     // 删除重复的请求
     removePending(config);
     // 如果repeatRequest不配置，那么该请求则不能多次请求
     !(config as any).repeatRequest && addPending(config);
 
-    if (token !== "") {
-      config.headers["x-freud"] = token;
+    if (store.token !== "") {
+      config.headers["x-freud"] = store.token;
     }
     return config;
   },
@@ -76,9 +76,13 @@ request.interceptors.response.use(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   (response) => {
+    const store = createStore();
     const currentToken = response.headers["x-freud"];
-    if (currentToken && (token.length == 0 || token != currentToken)) {
-      setToken(currentToken);
+    if (
+      currentToken &&
+      (store.token.length == 0 || store.token != currentToken)
+    ) {
+      store.setToken(currentToken);
     }
     const res = response.data as BaseResponse;
     // 处理异常的情况
@@ -95,7 +99,7 @@ request.interceptors.response.use(
           cancelButtonText: "取消",
           type: "warning"
         }).then(() => {
-          clearToken();
+          store.clearToken();
           router.push({ path: "/login" });
         });
       }

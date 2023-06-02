@@ -19,10 +19,9 @@
 </template>
 <script lang="ts" setup>
 import { SendFaceJSON } from "./SendJSONData.ts";
-import { reactive } from "vue";
 import { CoffeeCup } from "@element-plus/icons-vue";
 
-const FaceJSON = reactive(SendFaceJSON);
+const FaceJSON = [...SendFaceJSON];
 const emits = defineEmits<{
   (event: "onFace", item: string): void;
 }>();

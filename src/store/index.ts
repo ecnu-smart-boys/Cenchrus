@@ -4,7 +4,9 @@ const useStore = defineStore("main", {
   state() {
     return {
       token: localStorage.getItem("token") || "",
-      userInfo: JSON.parse(localStorage.getItem("userInfo") || "{}")
+      userInfo: JSON.parse(localStorage.getItem("userInfo") || "{}"),
+      isLogin: false,
+      isTimReady: false
     };
   },
   getters: {
@@ -13,6 +15,12 @@ const useStore = defineStore("main", {
     }
   },
   actions: {
+    setIsLogin() {
+      this.isLogin = true;
+    },
+    setIsTimReady() {
+      this.isTimReady = true;
+    },
     setToken(token: string) {
       this.token = token;
       localStorage.setItem("token", token);

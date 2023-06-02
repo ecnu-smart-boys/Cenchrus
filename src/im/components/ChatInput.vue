@@ -10,7 +10,7 @@
         <textarea v-model="currentMessage"></textarea>
       </div>
       <div class="btn-wrapper">
-        <el-button class="btn" type="primary" @click="submitNewMsg"
+        <el-button class="btn" type="primary" @click="submitTextMsg"
           >发送</el-button
         >
       </div>
@@ -22,10 +22,24 @@ import SendAudio from "@/im/components/SendAudio.vue";
 import SendFace from "./SendFace.vue";
 import SendImage from "@/im/components/SendImage.vue";
 import { ref } from "vue";
+import { imSendMessage } from "@/apis/im/im";
+import { createTextMessage } from "@/im/utils/createMessage";
+import { ElMessage } from "element-plus";
 
 let currentMessage = ref("");
 
-const submitNewMsg = () => {};
+const submitTextMsg = async () => {
+  try {
+    await imSendMessage(createTextMessage("2_1", currentMessage.value));
+    currentMessage.value = "";
+  } catch (error) {
+    ElMessage({
+      message: error,
+      type: "error",
+      duration: 5 * 1000
+    });
+  }
+};
 const handleFace = (item) => {
   currentMessage.value = currentMessage.value + item;
 };
