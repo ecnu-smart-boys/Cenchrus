@@ -32,6 +32,13 @@ tim.on(TIM.EVENT.MESSAGE_RECEIVED, function (event: any) {
   // 收到推送的单聊、群聊、群提示、群系统通知的新消息，可通过遍历 event.data 获取消息列表数据并渲染到页面
   // event.name - TIM.EVENT.MESSAGE_RECEIVED
   // event.data - 存储 Message 对象的数组 - [Message]
+  // TODO 目前仅仅考虑leftMessageList
+  const store = createStore();
+
+  store.setLeftMessage({
+    leftMessageList: [...store.leftMessage.leftMessageList, ...event.data],
+    leftHasNewMessage: true
+  });
 });
 
 tim.on(TIM.EVENT.MESSAGE_MODIFIED, function (event: any) {
@@ -44,12 +51,8 @@ tim.on(TIM.EVENT.MESSAGE_REVOKED, function (event: any) {
   // 收到消息被撤回的通知。使用前需要将SDK版本升级至v2.4.0或更高版本
   // event.name - TIM.EVENT.MESSAGE_REVOKED
   // event.data - 存储 Message 对象的数组 - [Message] - 每个 Message 对象的 isRevoked 属性值为 true
-});
-
-tim.on(TIM.EVENT.MESSAGE_READ_BY_PEER, function (event: any) {
-  // SDK 收到对端已读消息的通知，即已读回执。使用前需要将SDK版本升级至v2.7.0或更高版本。仅支持单聊会话
-  // event.name - TIM.EVENT.MESSAGE_READ_BY_PEER
-  // event.data - event.data - 存储 Message 对象的数组 - [Message] - 每个 Message 对象的 isPeerRead 属性值为 true
+  console.log(event.name);
+  console.log(event.data);
 });
 
 tim.on(TIM.EVENT.CONVERSATION_LIST_UPDATED, function (event: any) {

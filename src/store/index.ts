@@ -6,7 +6,16 @@ const useStore = defineStore("main", {
       token: localStorage.getItem("token") || "",
       userInfo: JSON.parse(localStorage.getItem("userInfo") || "{}"),
       isLogin: false,
-      isTimReady: false
+      // TIM是否进入READY-STATE（只有READY-STATE才可以进行sendMessage等鉴权操作）
+      isTimReady: false,
+      // 左侧消息
+      leftMessage: {
+        leftMessageList: [],
+        leftHasNewMessage: false
+      },
+      rightMessageList: [],
+      // 右侧是否有新消息
+      rightHasNewMessage: false
     };
   },
   getters: {
@@ -15,6 +24,17 @@ const useStore = defineStore("main", {
     }
   },
   actions: {
+    setLeftMessage(o: { leftMessageList: any[]; leftHasNewMessage: boolean }) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.leftMessage = o;
+    },
+    setLeftHasNewMessage(b: boolean) {
+      this.leftMessage.leftHasNewMessage = b;
+    },
+    leftMessageListCallback(fn: (list: any[]) => void) {
+      fn.call(this, this.leftMessage.leftMessageList);
+    },
     setIsLogin() {
       this.isLogin = true;
     },

@@ -1,7 +1,11 @@
 <template>
   <ul id="chat_list_wrapper" ref="UL">
     <li v-for="item in currentMessage" :key="item.ID" class="clearfix">
-      <div :class="item.flow == MSG_FLOW.OUT ? 'textRight' : 'textLeft'">
+      <div class="timestamp">{{ parseTimestamp(item.clientTime) }}</div>
+      <div
+        v-if="!item.isRevoked"
+        :class="item.flow == MSG_FLOW.OUT ? 'textRight' : 'textLeft'"
+      >
         <div v-if="item.flow == MSG_FLOW.IN" class="headImage">
           <img
             width="40"
@@ -18,6 +22,7 @@
               ? 'margin-right: 10px;'
               : 'margin-left: 10px;'
           "
+          @contextmenu.prevent="openMenu($event, item)"
         >
           <TextContent
             v-if="item.type === MSG_ELEMENT_TYPE.TEXT"
@@ -35,6 +40,7 @@
           >
           </AudioContent>
         </div>
+
         <div v-if="item.flow == MSG_FLOW.OUT" class="headImage">
           <img
             width="40"
@@ -45,29 +51,60 @@
           />
         </div>
       </div>
+      <div v-else class="timestamp">
+        {{ item.flow == MSG_FLOW.OUT ? "您" : "对方" }}撤回了一条消息
+      </div>
     </li>
   </ul>
+  <div
+    v-show="rightMenuVisible"
+    :style="{
+      left: position.left + 'px',
+      top: position.top + 'px',
+      display: rightMenuVisible ? 'block' : 'none'
+    }"
+    class="contextmenu"
+  >
+    <div class="item" @click="handleRevoke">撤回</div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import TextContent from "@/im/components/chatArea/TextContent.vue";
 import ImageContent from "@/im/components/chatArea/ImageContent.vue";
 import AudioContent from "@/im/components/chatArea/AudioContent.vue";
-
+import { parseTimestamp } from "@/utils";
+import useRightClick from "@/hooks/userRightClick";
+import { MessageList } from "@/apis/im/im-interface";
+import { imRevokeMessage } from "@/apis/im/im";
+import { ElMessage } from "element-plus";
+const { rightMenuVisible, position, rightClickItem, openMenu } =
+  useRightClick();
 const props = defineProps<{
-  currentMessage: any;
+  currentMessage: MessageList[];
 }>();
 
 const MSG_ELEMENT_TYPE = {
   TEXT: "TIMTextElem",
   IMAGE: "TIMImageElem",
-  CUSTOM: 1 << 3,
   AUDIO: "TIMSoundElem"
 };
 
 const MSG_FLOW = {
   IN: "in",
   OUT: "out"
+};
+
+const handleRevoke = async () => {
+  try {
+    await imRevokeMessage(rightClickItem.value);
+  } catch (e) {
+    ElMessage({
+      message: "撤回失败",
+      type: "error",
+      duration: 5 * 1000
+    });
+  }
 };
 </script>
 
@@ -134,6 +171,37 @@ li {
 }
 .clearfix {
   zoom: 1;
+}
+.timestamp {
+  text-align: center;
+  font-size: 12px;
+  color: #9a9a9a;
+  margin: 3px 0;
+}
+
+.contextmenu {
+  width: 100px;
+  background: #fff;
+  z-index: 3000;
+  position: fixed;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #333;
+  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
+
+  .item {
+    box-sizing: border-box;
+    padding-left: 15px;
+    height: 35px;
+    width: 100%;
+    line-height: 35px;
+    color: rgb(29, 33, 41);
+    cursor: pointer;
+  }
+  .item:hover {
+    background: rgb(229, 230, 235);
+  }
 }
 </style>
 <style>

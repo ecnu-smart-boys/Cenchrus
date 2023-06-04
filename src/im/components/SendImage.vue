@@ -27,9 +27,15 @@ import { createImageMessage } from "@/im/utils/createMessage";
 import { ElMessage } from "element-plus";
 const inputFileRef: any = ref(null);
 
+const emits = defineEmits<{
+  (event: "onSend", data: any): void;
+}>();
 const handleInput = async () => {
   try {
-    await imSendMessage(createImageMessage("2_1", inputFileRef.value));
+    const data = await imSendMessage(
+      createImageMessage("2_1", inputFileRef.value)
+    );
+    emits("onSend", data);
   } catch (error) {
     ElMessage({
       message: error,

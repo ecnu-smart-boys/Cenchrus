@@ -36,6 +36,9 @@ import { ElMessage } from "element-plus";
 let isRecording = ref(false);
 let recorder;
 let startTs;
+const emits = defineEmits<{
+  (event: "onSend", data: any): void;
+}>();
 const sendUploadAudio = async () => {
   if (isRecording.value) {
     isRecording.value = false;
@@ -50,7 +53,8 @@ const sendUploadAudio = async () => {
     audioFile.duration = duration;
 
     try {
-      await imSendMessage(createAudioMessage("2_1", audioFile));
+      const data = await imSendMessage(createAudioMessage("2_1", audioFile));
+      emits("onSend", data);
     } catch (error) {
       ElMessage({
         message: error,

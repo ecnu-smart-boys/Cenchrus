@@ -2,8 +2,8 @@
   <div class="ChatInput">
     <div class="header">
       <SendFace @on-face="handleFace" />
-      <SendImage />
-      <SendAudio />
+      <SendImage @on-send="handleSend" />
+      <SendAudio @on-send="handleSend" />
     </div>
     <div class="body">
       <div class="input-wrapper">
@@ -27,10 +27,15 @@ import { createTextMessage } from "@/im/utils/createMessage";
 import { ElMessage } from "element-plus";
 
 let currentMessage = ref("");
-
+const emits = defineEmits<{
+  (event: "onSend", data: any): void;
+}>();
 const submitTextMsg = async () => {
   try {
-    await imSendMessage(createTextMessage("2_1", currentMessage.value));
+    const data = await imSendMessage(
+      createTextMessage("2_1", currentMessage.value)
+    );
+    emits("onSend", data);
     currentMessage.value = "";
   } catch (error) {
     ElMessage({
@@ -42,6 +47,10 @@ const submitTextMsg = async () => {
 };
 const handleFace = (item) => {
   currentMessage.value = currentMessage.value + item;
+};
+
+const handleSend = (data) => {
+  emits("onSend", data);
 };
 </script>
 <style lang="scss" scoped>

@@ -1,5 +1,5 @@
 import tim from "@/im/utils/index";
-import { imLoginReq } from "@/apis/im/im-interface";
+import { imLoginReq, MessageList } from "@/apis/im/im-interface";
 import { Message } from "tim-js-sdk";
 export function imLogin(options: imLoginReq): Promise<any> {
   return tim.login({ ...options });
@@ -21,10 +21,20 @@ export function imResend(message: Message): Promise<any> {
   return tim.resendMessage(message);
 }
 
+export function imFindMessage(id: string): Message | null {
+  return tim.findMessage(id);
+}
+
 export function imGetMessageList(
   toUserId: string,
   nextReqMessageID?: string
-): Promise<any> {
+): Promise<{
+  data: {
+    messageList: MessageList[];
+    nextReqMessageID: string;
+    isCompleted: boolean;
+  };
+}> {
   if (nextReqMessageID) {
     return tim.getMessageList({
       conversationID: `C2C${toUserId}`,

@@ -26,6 +26,20 @@ export function parseSecond(time: number): string {
   return `${ms}'${ss}''`;
 }
 
+export function parseTimestamp(timestamp: number): string {
+  const date = new Date(parseInt(String(timestamp)) * 1000);
+  const Moth =
+    date.getMonth() + 1 < 10
+      ? "0" + (date.getMonth() + 1)
+      : date.getMonth() + 1;
+  const Day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+  const Hour = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+  const Minute =
+    date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+  const Second =
+    date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+  return Moth + "月" + Day + "日 " + Hour + ":" + Minute + ":" + Second;
+}
 export function parseSchedule(schedule: number): string {
   const weeks = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
   const result = [];
