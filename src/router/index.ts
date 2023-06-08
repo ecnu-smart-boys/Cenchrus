@@ -11,6 +11,7 @@ let routes = [
     component: () => import("@/views/404/index.vue")
   }
 ];
+
 const supervisorRoutes = [
   {
     path: "/",
@@ -33,6 +34,10 @@ const supervisorRoutes = [
       {
         path: "conversation",
         component: () => import("@/views/conversation/index.vue")
+      },
+      {
+        path: "conversation-detail",
+        component: () => import("@/views/conversationDetail/index.vue")
       }
     ]
   }
@@ -55,6 +60,10 @@ const consultantRoutes = [
       {
         path: "conversation",
         component: () => import("@/views/conversation/index.vue")
+      },
+      {
+        path: "conversation-detail",
+        component: () => import("@/views/conversationDetail/index.vue")
       }
     ]
   }
@@ -89,6 +98,10 @@ const adminRoutes = [
       {
         path: "schedule",
         component: () => import("@/views/schedule/index.vue")
+      },
+      {
+        path: "conversation-detail",
+        component: () => import("@/views/conversationDetail/index.vue")
       }
     ]
   }

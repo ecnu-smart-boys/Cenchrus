@@ -1,10 +1,45 @@
 <template>
   <div style="display: flex">
     <div>
-      <conversation-info @on-help="handleHelp" />
+      <conversation-info>
+        <template #middle>
+          <div style="margin: 10px 0; font-size: 20px; font-weight: bold">
+            正在咨询中
+          </div>
+          <div style="margin: 10px 0; font-size: 20px">已咨询时间</div>
+          <div style="margin: 10px 0; font-size: 40px">00:13:13</div>
+        </template>
+        <template #bottom>
+          <el-button
+            size="large"
+            :icon="User"
+            style="margin: 0 20px; font-size: 20px"
+            color="#337ecc"
+            @click="askHelp"
+          >
+            请求督导
+          </el-button>
+          <el-divider />
+          <el-button
+            size="large"
+            :icon="Check"
+            style="margin: 0 20px; font-size: 20px"
+            color="#337ecc"
+            @click="stopConversion"
+          >
+            结束咨询
+          </el-button>
+        </template>
+      </conversation-info>
     </div>
     <div class="chat-wrapper">
-      <supervisor-to-consultant />
+      <supervisor-to-consultant :is-show-btn="true">
+        <template #left>
+          <div style="font-size: 25px">督导A</div>
+          <div>正在求助中</div>
+          <div style="font-size: 30px">00:13:13</div>
+        </template>
+      </supervisor-to-consultant>
       <div ref="leftChatAreaWrapper" class="chat-list-wrapper">
         <ChatArea
           ref="leftChatArea"
@@ -40,6 +75,7 @@ import { imGetMessageList } from "@/apis/im/im";
 import createStore from "@/store/index";
 import useScroll from "@/hooks/useScroll";
 import { useRoute } from "vue-router";
+import { Check, User } from "@element-plus/icons-vue";
 const route = useRoute();
 const store = createStore();
 
@@ -142,7 +178,9 @@ const handleDown = () => {
   leftChatAreaWrapper.value.scrollTop = scrollHeight.value - clientHeight.value;
 };
 
-const handleHelp = () => {};
+const askHelp = () => {};
+
+const stopConversion = () => {};
 </script>
 
 <style scoped lang="scss">

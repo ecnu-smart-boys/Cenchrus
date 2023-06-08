@@ -1,9 +1,12 @@
 import request from "@/apis/http";
 import {
+  CallHelpReq,
+  CommentReq,
   ConsultRecordListReq,
   ConsultRecordsResp,
   ConversationInfo,
   DayConsultInfo,
+  EndReq,
   HelpRecordsResp,
   SettingReq
 } from "@/apis/conversation/conversation-interface";
@@ -84,5 +87,38 @@ export function setting(settingReq: SettingReq): Promise<any> {
     method: "post",
     url: "/conversation/setting",
     data: settingReq
+  });
+}
+
+///////////////////////////////////////////////////////////////////////
+
+export function endConsultation(endReq: EndReq): Promise<any> {
+  return request({
+    method: "post",
+    url: "/conversation/endConsultation",
+    data: endReq
+  });
+}
+
+export function callHelp(callHelpReq: CallHelpReq): Promise<any> {
+  return request({
+    method: "post",
+    url: "/conversation/callHelp",
+    data: callHelpReq
+  });
+}
+
+export function endHelp(endReq: EndReq): Promise<any> {
+  return request({
+    method: "post",
+    url: "/conversation/endHelp",
+    data: endReq
+  });
+}
+export function comment(commentReq: CommentReq): Promise<any> {
+  return request({
+    method: "post",
+    url: "/conversation/comment",
+    data: commentReq
   });
 }

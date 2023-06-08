@@ -48,3 +48,20 @@ export interface ConsultRecordListReq {
   name: string;
   timestamp: number;
 }
+
+export interface EndReq {
+  conversationId: string;
+  myId: string;
+}
+
+export interface CallHelpReq {
+  toId: string;
+  myId: string;
+  conversationId: string;
+}
+
+export interface CommentReq {
+  conversationId: string;
+  text: string;
+  score: number;
+}

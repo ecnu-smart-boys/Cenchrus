@@ -10,25 +10,28 @@
           justify-content: center;
         "
       >
-        <div style="font-size: 25px">督导A</div>
-        <div>正在求助中</div>
-        <div style="font-size: 30px">00:13:13</div>
+        <slot name="left"></slot>
       </div>
     </div>
-    <el-divider direction="vertical" style="height: 70%" />
-    <el-button
-      size="large"
-      :icon="Check"
-      style="margin: 0 20px; font-size: 20px"
-      color="#1e5a96"
-    >
-      结束求助
-    </el-button>
+    <template v-if="isShowBtn">
+      <el-divider direction="vertical" style="height: 70%" />
+      <el-button
+        size="large"
+        :icon="Check"
+        style="margin: 0 20px; font-size: 20px"
+        color="#1e5a96"
+      >
+        结束求助
+      </el-button>
+    </template>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Check } from "@element-plus/icons-vue";
+const props = defineProps<{
+  isShowBtn: boolean;
+}>();
 </script>
 
 <style scoped lang="scss">
