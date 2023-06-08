@@ -11,7 +11,9 @@
             <div class="dot"></div>
             <div style="color: #409dfd">在线</div>
           </div>
-          <el-tag>空闲</el-tag>
+          <el-tag :type="tagType">{{
+            currentCount > todayConsultantSession ? "空闲" : "忙碌"
+          }}</el-tag>
         </div>
         <div style="margin: 20px 0">
           <div style="font-size: 1.2em">我的综合评价</div>
@@ -22,20 +24,77 @@
             style="transform: scale(1.8) translateX(25px)"
           />
         </div>
-        <el-button type="primary">咨询设置</el-button>
+        <el-button type="primary" @click="handleClick">咨询设置</el-button>
       </div>
       <div class="right-wrapper">
         <div style="font-size: 1.5em; margin: 10px">累计完成咨询</div>
-        <div style="font-size: 3em">100</div>
+        <div style="font-size: 3em">
+          {{ totalConsultations ? totalConsultations : 0 }}
+        </div>
       </div>
     </div>
   </el-card>
+  <el-dialog
+    v-model="settingDialogVisible"
+    title="修改最大咨询数"
+    width="400px"
+  >
+    <form-setting
+      ref="settingForm"
+      :is-consultant="false"
+      :current-count="currentCount"
+      @on-submit="handleSubmit"
+    />
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="settingDialogVisible = false"> 取消 </el-button>
+        <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import FormSetting from "@/components/form-setting.vue";
+import { ElMessage } from "element-plus";
+import { setting } from "@/apis/conversation/conversation";
+const props = defineProps<{
+  totalConsultations: number | undefined;
+  currentCount: number;
+  todayConsultantSession: number;
+}>();
+const value = ref(5);
+const settingForm: any = ref(null);
+let settingDialogVisible = ref(false);
+const handleClick = () => {
+  settingDialogVisible.value = true;
+};
 
-const value = ref(new Date());
+let tagType = computed(() => {
+  if (props.currentCount > props.todayConsultantSession) {
+    return "";
+  }
+  return "danger";
+});
+const handleSubmit = async (data) => {
+  await setting({
+    maxConversations: parseInt(data.maxCount)
+  });
+  ElMessage({
+    message: "修改成功",
+    type: "success",
+    duration: 5 * 1000
+  });
+  settingDialogVisible.value = false;
+};
+const submitAddForm = async () => {
+  try {
+    await settingForm.value.submitForm();
+  } catch (e) {
+    return;
+  }
+};
 </script>
 
 <style scoped lang="scss">

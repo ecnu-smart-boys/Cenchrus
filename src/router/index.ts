@@ -42,7 +42,7 @@ const consultantRoutes = [
     children: [
       {
         path: "consultant",
-        component: () => import("@/views/home/supervisor.vue")
+        component: () => import("@/views/home/consultant.vue")
       },
       {
         path: "consult-record",
