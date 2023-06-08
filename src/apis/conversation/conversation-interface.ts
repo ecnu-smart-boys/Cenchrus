@@ -41,3 +41,10 @@ export interface HelpRecordsResp {
 export interface SettingReq {
   maxConversations: number;
 }
+
+export interface ConsultRecordListReq {
+  current: number;
+  size: number;
+  name: string;
+  timestamp: number;
+}

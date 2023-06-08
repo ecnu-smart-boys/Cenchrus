@@ -38,11 +38,22 @@
       <el-table-column prop="duration" label="咨询时长" width="400" />
       <el-table-column prop="date" label="咨询日期" width="400" />
       <el-table-column fixed="right" label="操作" width="180">
-        <template #default>
-          <el-button link type="primary" size="small" style="margin: 10px 0"
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            style="margin: 10px 0"
+            @click="handleDetail(scope.row)"
             >查看详情</el-button
           >
-          <el-button link type="primary" size="small">导出记录</el-button>
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="handleExport(scope.row)"
+            >导出记录</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -60,7 +71,9 @@
 
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
-import { ref } from "vue";
+import { onMounted, reactive, ref, watch, watchEffect } from "vue";
+import { getSupervisorHelpRecords } from "@/apis/conversation/conversation";
+import { parseTime, parseTimestamp } from "@/utils";
 
 let searchName = ref("");
 
@@ -71,25 +84,53 @@ const handleCurrentChange = async (val) => {
   currentPage.value = val;
 };
 
-const tableData = [
-  {
-    consultantName: "Tom",
-    duration: "00:12:39",
-    date: "2016-05-03 12:00:39"
-  },
-  {
-    consultantName: "Tom",
-    duration: "00:12:39",
-    date: "2016-05-03 12:00:39"
-  },
-  {
-    consultantName: "Tom",
-    duration: "00:12:39",
-    date: "2016-05-03 12:00:39"
-  }
-];
+const tableData = reactive<any[]>([]);
 
 let selectDate = ref("");
+let timeStamp = ref(0);
+
+watchEffect(async () => {
+  if (selectDate.value == null) {
+    timeStamp.value = 0;
+  } else if (selectDate.value instanceof Date) {
+    timeStamp.value = selectDate.value.getTime();
+  }
+  currentPage.value = 1;
+  await refreshData();
+});
+
+watch(
+  () => searchName.value,
+  async () => {
+    currentPage.value = 1;
+    await refreshData();
+  }
+);
+
+const handleDetail = (row) => {};
+
+const handleExport = (row) => {};
+
+const refreshData = async () => {
+  const data = await getSupervisorHelpRecords({
+    current: currentPage.value,
+    size: pageSize.value,
+    name: searchName.value,
+    timestamp: timeStamp.value
+  });
+  tableData.splice(0);
+  totalPage.value = data.total;
+  data.records.forEach((i) => {
+    tableData.push({
+      consultantName: i.consultantName,
+      duration: parseTime((i.endTime - i.startTime) / 1000),
+      date: parseTimestamp(i.startTime)
+    });
+  });
+};
+onMounted(async () => {
+  await refreshData();
+});
 </script>
 
 <style scoped lang="scss"></style>

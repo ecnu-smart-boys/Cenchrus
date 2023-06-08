@@ -1,5 +1,6 @@
 import request from "@/apis/http";
 import {
+  ConsultRecordListReq,
   ConsultRecordsResp,
   ConversationInfo,
   DayConsultInfo,
@@ -27,10 +28,13 @@ export function getRecentWeek(): Promise<DayConsultInfo[]> {
   });
 }
 
-export function getConsultantConsultations(): Promise<ConsultRecordsResp> {
+export function getConsultantConsultations(
+  consultRecordListReq: ConsultRecordListReq
+): Promise<ConsultRecordsResp> {
   return request({
     method: "get",
-    url: "/conversation/consultant/consultations"
+    url: "/conversation/consultant/consultations",
+    params: consultRecordListReq
   });
 }
 
@@ -48,10 +52,13 @@ export function getTodayOwnConsultations(): Promise<ConversationInfo[]> {
   });
 }
 
-export function getSupervisorHelpRecords(): Promise<HelpRecordsResp> {
+export function getSupervisorHelpRecords(
+  consultRecordListReq: ConsultRecordListReq
+): Promise<HelpRecordsResp> {
   return request({
     method: "get",
-    url: "/conversation/supervisor/helpRecords"
+    url: "/conversation/supervisor/helpRecords",
+    params: consultRecordListReq
   });
 }
 
