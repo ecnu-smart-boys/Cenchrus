@@ -2,16 +2,21 @@
   <el-card class="box-card">
     <el-row style="height: 200px; align-items: center">
       <el-col :span="12">
-        <el-statistic title="今日咨询数" :value="5" />
+        <el-statistic title="今日咨询数" :value="todayConsultantNumber" />
       </el-col>
       <el-col :span="12">
-        <el-statistic title="今日咨询时长" value="10:10:10" />
+        <el-statistic title="今日咨询时长" :value="todayConsultantTime" />
       </el-col>
     </el-row>
   </el-card>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps<{
+  todayConsultantNumber: number;
+  todayConsultantTime: string;
+}>();
+</script>
 
 <style scoped lang="scss">
 .box-card {

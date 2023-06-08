@@ -95,7 +95,7 @@ const adminRoutes = [
 ];
 
 if (process.env.VUE_APP_ENV === "development") {
-  routes = [...routes, ...supervisorRoutes];
+  routes = [...routes, ...adminRoutes];
 }
 const router = createRouter({
   history: createWebHashHistory(),

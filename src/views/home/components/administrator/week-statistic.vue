@@ -8,6 +8,10 @@
 import { onMounted } from "vue";
 import * as echarts from "echarts";
 
+const props = defineProps<{
+  weekConsultantChart: number[];
+}>();
+
 onMounted(() => {
   const weekChart = echarts.init(document.getElementById("weekChart"));
   weekChart.setOption({
@@ -21,7 +25,7 @@ onMounted(() => {
       {
         name: "咨询数量",
         type: "line",
-        data: [5, 20, 36, 10, 10, 20, 0],
+        data: props.weekConsultantChart,
         smooth: true
       }
     ]

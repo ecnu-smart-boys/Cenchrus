@@ -7,10 +7,13 @@ import {
   HelpRecordsResp,
   SettingReq
 } from "@/apis/conversation/conversation-interface";
-export function getAllConsultations(): Promise<ConsultRecordsResp> {
+export function getAllConsultations(
+  consultRecordListReq: ConsultRecordListReq
+): Promise<ConsultRecordsResp> {
   return request({
     method: "get",
-    url: "/conversation/admin/consultations"
+    url: "/conversation/admin/consultations",
+    params: consultRecordListReq
   });
 }
 

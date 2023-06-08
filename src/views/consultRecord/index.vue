@@ -79,7 +79,10 @@
 import { Search } from "@element-plus/icons-vue";
 import { onMounted, reactive, ref, watch, watchEffect } from "vue";
 import createStore from "@/store/index";
-import { getConsultantConsultations } from "@/apis/conversation/conversation";
+import {
+  getAllConsultations,
+  getConsultantConsultations
+} from "@/apis/conversation/conversation";
 import { parseTime, parseTimestamp } from "@/utils";
 const store = createStore();
 
@@ -120,7 +123,24 @@ const handleExport = (row) => {};
 
 const refreshData = async () => {
   if (store.role == "admin") {
-    // TODO
+    const data = await getAllConsultations({
+      current: currentPage.value,
+      size: pageSize.value,
+      name: searchName.value,
+      timestamp: 0
+    });
+    tableData.splice(0);
+    totalPage.value = data.total;
+    data.records.forEach((i) => {
+      tableData.push({
+        visitorName: i.visitorName,
+        duration: parseTime((i.endTime - i.startTime) / 1000),
+        date: parseTimestamp(i.startTime),
+        score: i.score,
+        helper: i.helper,
+        comment: i.comment
+      });
+    });
   } else if (store.role == "supervisor") {
     // TODO
   }

@@ -2,7 +2,7 @@
   <el-card class="box-card">
     <template #header>
       <div class="card-header">
-        <span>当月咨询数量排行</span>
+        <slot></slot>
       </div>
     </template>
     <el-table :data="tableData" style="width: 100%" :show-header="false">

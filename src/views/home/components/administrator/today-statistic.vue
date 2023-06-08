@@ -8,6 +8,10 @@
 import { onMounted } from "vue";
 import * as echarts from "echarts";
 
+const props = defineProps<{
+  todayConsultantChart: number[];
+}>();
+
 onMounted(() => {
   const todayChart = echarts.init(document.getElementById("todayChart"));
   todayChart.setOption({
@@ -46,10 +50,7 @@ onMounted(() => {
       {
         name: "咨询数量",
         type: "line",
-        data: [
-          5, 20, 36, 10, 10, 20, 0, 0, 0, 0, 0, 5, 0, 2, 3, 5, 4, 7, 10, 20, 1,
-          1, 23, 0
-        ],
+        data: props.todayConsultantChart,
         smooth: true
       }
     ]
