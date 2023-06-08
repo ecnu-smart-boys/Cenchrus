@@ -22,7 +22,7 @@
               ? 'margin-right: 10px;'
               : 'margin-left: 10px;'
           "
-          @contextmenu.prevent="openMenu($event, item)"
+          @contextmenu.prevent="handleContextMenu($event, item)"
         >
           <TextContent
             v-if="item.type === MSG_ELEMENT_TYPE.TEXT"
@@ -78,23 +78,12 @@ import useRightClick from "@/hooks/userRightClick";
 import { MessageList } from "@/apis/im/im-interface";
 import { imRevokeMessage } from "@/apis/im/im";
 import { ElMessage } from "element-plus";
+import { MSG_ELEMENT_TYPE, MSG_FLOW } from "@/im/components/SendJSONData";
 const { rightMenuVisible, position, rightClickItem, openMenu } =
   useRightClick();
 const props = defineProps<{
   currentMessage: MessageList[];
 }>();
-
-const MSG_ELEMENT_TYPE = {
-  TEXT: "TIMTextElem",
-  IMAGE: "TIMImageElem",
-  AUDIO: "TIMSoundElem"
-};
-
-const MSG_FLOW = {
-  IN: "in",
-  OUT: "out"
-};
-
 const handleRevoke = async () => {
   try {
     await imRevokeMessage(rightClickItem.value);
@@ -104,6 +93,12 @@ const handleRevoke = async () => {
       type: "error",
       duration: 5 * 1000
     });
+  }
+};
+
+const handleContextMenu = (e: any, item: any) => {
+  if (item.flow == MSG_FLOW.OUT) {
+    openMenu(e, item);
   }
 };
 </script>

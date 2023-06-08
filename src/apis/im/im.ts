@@ -17,14 +17,6 @@ export function imRevokeMessage(message: Message): Promise<any> {
   return tim.revokeMessage(message);
 }
 
-export function imResend(message: Message): Promise<any> {
-  return tim.resendMessage(message);
-}
-
-export function imFindMessage(id: string): Message | null {
-  return tim.findMessage(id);
-}
-
 export function imGetMessageList(
   toUserId: string,
   nextReqMessageID?: string

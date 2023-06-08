@@ -1,8 +1,8 @@
 <template>
   <div style="display: flex">
-    <!--    <div>-->
-    <!--      <conversation-info @on-help="handleHelp" />-->
-    <!--    </div>-->
+    <div>
+      <conversation-info @on-help="handleHelp" />
+    </div>
     <div class="chat-wrapper">
       <supervisor-to-consultant />
       <div ref="leftChatAreaWrapper" class="chat-list-wrapper">
@@ -39,7 +39,11 @@ import { nextTick, ref, watchEffect } from "vue";
 import { imGetMessageList } from "@/apis/im/im";
 import createStore from "@/store/index";
 import useScroll from "@/hooks/useScroll";
+import { useRoute } from "vue-router";
+const route = useRoute();
 const store = createStore();
+
+const userId = route.query.userId as string;
 
 const leftChatArea: any = ref(null);
 const leftChatAreaWrapper: any = ref(null);
@@ -58,7 +62,7 @@ let nextReqMessageID = "";
 watchEffect(async () => {
   if (isReachTop.value && nextReqMessageID !== "") {
     // 触发懒加载
-    const data = await imGetMessageList("2_1", nextReqMessageID);
+    const data = await imGetMessageList(userId, nextReqMessageID);
     nextReqMessageID = data.data.nextReqMessageID;
     store.leftMessageListCallback((list: any[]) => {
       list.unshift(...data.data.messageList);
@@ -107,7 +111,7 @@ watchEffect(() => {
 
 watchEffect(async () => {
   if (store.isTimReady) {
-    const data = await imGetMessageList("2_1");
+    const data = await imGetMessageList(userId);
     nextReqMessageID = data.data.nextReqMessageID;
     store.leftMessageListCallback((list: any[]) => {
       list.splice(0);
@@ -137,6 +141,8 @@ const handleDown = () => {
   store.setLeftHasNewMessage(false);
   leftChatAreaWrapper.value.scrollTop = scrollHeight.value - clientHeight.value;
 };
+
+const handleHelp = () => {};
 </script>
 
 <style scoped lang="scss">

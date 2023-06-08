@@ -13,7 +13,7 @@
         </el-menu></el-header
       >
       <el-container>
-        <el-aside width="250px">
+        <el-aside width="200px">
           <el-menu default-active="1" @select="handleSelect">
             <el-menu-item index="1">
               <el-icon><location /></el-icon>
@@ -40,8 +40,11 @@
               <span>用户管理</span>
             </el-menu-item>
           </el-menu>
+          <conversation-list />
         </el-aside>
-        <el-main body-style="padding: 0;"><router-view /></el-main>
+        <el-main body-style="padding: 0;">
+          <router-view :key="`${route.path}${route.query?.userId}`" />
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -55,6 +58,9 @@ import createStore from "@/store/index";
 const { role, clearToken, clearUserInfo } = createStore();
 import { logout } from "@/apis/auth/auth";
 import { imLogout } from "@/apis/im/im";
+import ConversationList from "@/views/conversation/components/conversation-list.vue";
+import { useRoute } from "vue-router";
+const route = useRoute();
 
 const handleSelect = (key: string) => {
   switch (key) {
