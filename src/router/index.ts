@@ -27,6 +27,10 @@ const supervisorRoutes = [
         component: () => import("@/views/consultRecord/index.vue")
       },
       {
+        path: "help-record",
+        component: () => import("@/views/helpRecord/index.vue")
+      },
+      {
         path: "conversation",
         component: () => import("@/views/conversation/index.vue")
       }
@@ -91,7 +95,7 @@ const adminRoutes = [
 ];
 
 if (process.env.VUE_APP_ENV === "development") {
-  routes = [...routes, ...consultantRoutes];
+  routes = [...routes, ...supervisorRoutes];
 }
 const router = createRouter({
   history: createWebHashHistory(),

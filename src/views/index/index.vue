@@ -23,6 +23,10 @@
               <el-icon><icon-menu /></el-icon>
               <span>咨询记录</span>
             </el-menu-item>
+            <el-menu-item index="7">
+              <el-icon><icon-menu /></el-icon>
+              <span>求助记录</span>
+            </el-menu-item>
             <el-menu-item v-if="role == 'admin'" index="3">
               <el-icon><icon-menu /></el-icon>
               <span>排班表</span>
@@ -81,6 +85,9 @@ const handleSelect = (key: string) => {
       break;
     case "6":
       router.push("visitor-manager");
+      break;
+    case "7":
+      router.push("help-record");
       break;
   }
 };

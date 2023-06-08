@@ -52,14 +52,18 @@
         </div>
       </div>
       <div class="right-wrapper">
-        <div style="font-size: 1.5em; margin: 10px">累计完成咨询</div>
-        <div style="font-size: 2em">100</div>
+        <div style="font-size: 1.5em; margin: 10px">正在进行的咨询会话</div>
+        <div style="font-size: 2em">{{ currentConsultationSession }}</div>
       </div>
     </div>
   </el-card>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps<{
+  currentConsultationSession: number;
+}>();
+</script>
 
 <style scoped lang="scss">
 .box-card {
