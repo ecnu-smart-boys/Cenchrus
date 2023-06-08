@@ -4,6 +4,17 @@ export interface ConversationInfo {
   endTime: number;
 }
 
+export interface ConsultRecordInfo {
+  id: string;
+  visitorName: string;
+  consultantName: string;
+  startTime: number;
+  endTime: number;
+  score: number;
+  comment: string;
+  helper: string;
+}
+
 export interface DayConsultInfo {
   consultationCount: number;
   timestamp: number;
@@ -18,7 +29,7 @@ export interface HelpRecordInfo {
 }
 
 export interface ConsultRecordsResp {
-  records: ConversationInfo[];
+  records: ConsultRecordInfo[];
   total: number;
 }
 

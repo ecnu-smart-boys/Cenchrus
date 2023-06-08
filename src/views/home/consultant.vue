@@ -13,10 +13,10 @@
           :today-consultant-session="todayConsultantSession"
         />
       </div>
-      <schedule-calendar />
+      <schedule-calendar :arrangement-info="arrangementInfo" />
     </div>
     <div style="display: flex">
-      <consultant-recently />
+      <consultant-recently :consult-records="consultRecords" />
     </div>
   </div>
 </template>
@@ -36,12 +36,15 @@ import {
   getTodayOwnConsultations
 } from "@/apis/conversation/conversation";
 import { parseTime } from "@/utils";
+import { personalArrangement } from "@/apis/arrangement/arrangement";
 
 const conversationInfo = ref<ConversationInfo[]>([]);
 const consultRecords = ref<ConsultRecordsResp>();
+const arrangementInfo = ref<number[]>([]);
 onMounted(async () => {
   conversationInfo.value = await getTodayOwnConsultations();
   consultRecords.value = await getRecentConsultations();
+  arrangementInfo.value = await personalArrangement();
 });
 
 let todayConsultantNumber = computed(() => {

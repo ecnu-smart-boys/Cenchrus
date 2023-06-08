@@ -77,3 +77,9 @@ export function notArrangedSupervisors(
     params: notArrangedSupervisorsReq
   });
 }
+export function personalArrangement(): Promise<number[]> {
+  return request({
+    method: "get",
+    url: "/arrangement/personalArrangement"
+  });
+}
