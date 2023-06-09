@@ -1,6 +1,6 @@
 <template>
-  <to-visitor v-if="role === 'consultant'" />
-  <to-consultant v-if="role === 'supervisor'" />
+  <to-visitor />
+  <!--  <to-consultant />-->
 </template>
 
 <script setup lang="ts">

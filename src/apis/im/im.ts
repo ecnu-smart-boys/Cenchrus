@@ -1,4 +1,4 @@
-import tim from "@/im/utils/index";
+import tim from "@/imComponent/utils/index";
 import { imLoginReq, MessageList } from "@/apis/im/im-interface";
 import { Message } from "tim-js-sdk";
 export function imLogin(options: imLoginReq): Promise<any> {

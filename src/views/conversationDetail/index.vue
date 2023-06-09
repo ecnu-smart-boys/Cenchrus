@@ -69,9 +69,10 @@
 <script setup lang="ts">
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import ChatArea from "@/im/components/chatArea/index.vue";
+import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import { reactive } from "vue";
 import { Back, Collection } from "@element-plus/icons-vue";
+import router from "@/router";
 
 const leftData = reactive([]);
 const rightData = reactive([]);
@@ -80,7 +81,7 @@ const handleExport = () => {
   // TODO
 };
 const handleBack = () => {
-  // TODO
+  router.go(-1);
 };
 </script>
 

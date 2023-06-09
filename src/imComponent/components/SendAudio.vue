@@ -31,8 +31,13 @@ import { Microphone } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import Recorder from "js-audio-recorder";
 import { imSendMessage } from "@/apis/im/im";
-import { createAudioMessage } from "@/im/utils/createMessage";
+import { createAudioMessage } from "@/imComponent/utils/createMessage";
 import { ElMessage } from "element-plus";
+
+const props = defineProps<{
+  toId: string;
+}>();
+
 let isRecording = ref(false);
 let recorder;
 let startTs;
@@ -53,7 +58,9 @@ const sendUploadAudio = async () => {
     audioFile.duration = duration;
 
     try {
-      const data = await imSendMessage(createAudioMessage("2_1", audioFile));
+      const data = await imSendMessage(
+        createAudioMessage(props.toId, audioFile)
+      );
       emits("onSend", data);
     } catch (error) {
       ElMessage({

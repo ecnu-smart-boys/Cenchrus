@@ -81,3 +81,9 @@ export function toBoolArraySchedule(schedule: number): boolean[] {
 export function md5(str: string): string {
   return MD5(str).toString().toUpperCase();
 }
+
+export function mosaic(str: string): string {
+  const strings = str.split("");
+  strings.splice(6, 4, "****");
+  return strings.join("");
+}

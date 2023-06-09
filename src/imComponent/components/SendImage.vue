@@ -23,8 +23,13 @@
 import { Picture } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import { imSendMessage } from "@/apis/im/im";
-import { createImageMessage } from "@/im/utils/createMessage";
+import { createImageMessage } from "@/imComponent/utils/createMessage";
 import { ElMessage } from "element-plus";
+
+const props = defineProps<{
+  toId: string;
+}>();
+
 const inputFileRef: any = ref(null);
 
 const emits = defineEmits<{
@@ -33,7 +38,7 @@ const emits = defineEmits<{
 const handleInput = async () => {
   try {
     const data = await imSendMessage(
-      createImageMessage("2_1", inputFileRef.value)
+      createImageMessage(props.toId, inputFileRef.value)
     );
     emits("onSend", data);
   } catch (error) {

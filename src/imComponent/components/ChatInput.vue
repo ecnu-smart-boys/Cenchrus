@@ -2,8 +2,8 @@
   <div class="ChatInput">
     <div class="header">
       <SendFace @on-face="handleFace" />
-      <SendImage @on-send="handleSend" />
-      <SendAudio @on-send="handleSend" />
+      <SendImage :to-id="toId" @on-send="handleSend" />
+      <SendAudio :to-id="toId" @on-send="handleSend" />
     </div>
     <div class="body">
       <div class="input-wrapper">
@@ -18,13 +18,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import SendAudio from "@/im/components/SendAudio.vue";
+import SendAudio from "@/imComponent/components/SendAudio.vue";
 import SendFace from "./SendFace.vue";
-import SendImage from "@/im/components/SendImage.vue";
+import SendImage from "@/imComponent/components/SendImage.vue";
 import { ref } from "vue";
 import { imSendMessage } from "@/apis/im/im";
-import { createTextMessage } from "@/im/utils/createMessage";
+import { createTextMessage } from "@/imComponent/utils/createMessage";
 import { ElMessage } from "element-plus";
+
+const props = defineProps<{
+  toId: string;
+}>();
 
 let currentMessage = ref("");
 const emits = defineEmits<{
@@ -33,7 +37,7 @@ const emits = defineEmits<{
 const submitTextMsg = async () => {
   try {
     const data = await imSendMessage(
-      createTextMessage("2_1", currentMessage.value)
+      createTextMessage(props.toId, currentMessage.value)
     );
     emits("onSend", data);
     currentMessage.value = "";

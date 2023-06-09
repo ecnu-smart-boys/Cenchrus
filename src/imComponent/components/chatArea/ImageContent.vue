@@ -1,9 +1,15 @@
 <template>
   <img
-    width="300"
+    :width="
+      props.payload.imageInfoArray[0].width > 300
+        ? 300
+        : props.payload.imageInfoArray[0].width
+    "
     :height="
-      (300 * props.payload.imageInfoArray[0].width) /
-      props.payload.imageInfoArray[0].height
+      props.payload.imageInfoArray[0].width > 300
+        ? (300 * props.payload.imageInfoArray[0].height) /
+          props.payload.imageInfoArray[0].width
+        : props.payload.imageInfoArray[0].height
     "
     :src="props.payload.imageInfoArray[0].url"
     alt=""

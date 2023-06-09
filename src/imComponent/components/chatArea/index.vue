@@ -70,15 +70,18 @@
 </template>
 
 <script setup lang="ts">
-import TextContent from "@/im/components/chatArea/TextContent.vue";
-import ImageContent from "@/im/components/chatArea/ImageContent.vue";
-import AudioContent from "@/im/components/chatArea/AudioContent.vue";
+import TextContent from "@/imComponent/components/chatArea/TextContent.vue";
+import ImageContent from "@/imComponent/components/chatArea/ImageContent.vue";
+import AudioContent from "@/imComponent/components/chatArea/AudioContent.vue";
 import { parseTimestamp } from "@/utils";
 import useRightClick from "@/hooks/userRightClick";
 import { MessageList } from "@/apis/im/im-interface";
 import { imRevokeMessage } from "@/apis/im/im";
 import { ElMessage } from "element-plus";
-import { MSG_ELEMENT_TYPE, MSG_FLOW } from "@/im/components/SendJSONData";
+import {
+  MSG_ELEMENT_TYPE,
+  MSG_FLOW
+} from "@/imComponent/components/SendJSONData";
 const { rightMenuVisible, position, rightClickItem, openMenu } =
   useRightClick();
 const props = defineProps<{

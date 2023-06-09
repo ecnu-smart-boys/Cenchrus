@@ -102,6 +102,10 @@ const adminRoutes = [
       {
         path: "conversation-detail",
         component: () => import("@/views/conversationDetail/index.vue")
+      },
+      {
+        path: "conversation",
+        component: () => import("@/views/conversation/index.vue") // temporary // TODO
       }
     ]
   }

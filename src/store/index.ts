@@ -13,9 +13,10 @@ const useStore = defineStore("main", {
         leftMessageList: [],
         leftHasNewMessage: false
       },
-      rightMessageList: [],
-      // 右侧是否有新消息
-      rightHasNewMessage: false
+      rightMessage: {
+        rightMessageList: [],
+        rightHasNewMessage: false
+      }
     };
   },
   getters: {
@@ -34,6 +35,20 @@ const useStore = defineStore("main", {
     },
     leftMessageListCallback(fn: (list: any[]) => void) {
       fn.call(this, this.leftMessage.leftMessageList);
+    },
+    setRightMessage(o: {
+      rightMessageList: any[];
+      rightHasNewMessage: boolean;
+    }) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.rightMessage = o;
+    },
+    setRightHasNewMessage(b: boolean) {
+      this.rightMessage.rightHasNewMessage = b;
+    },
+    rightMessageListCallback(fn: (list: any[]) => void) {
+      fn.call(this, this.rightMessage.rightMessageList);
     },
     setIsLogin() {
       this.isLogin = true;

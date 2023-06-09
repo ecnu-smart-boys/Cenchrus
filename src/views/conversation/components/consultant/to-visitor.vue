@@ -1,39 +1,65 @@
 <template>
   <div style="display: flex">
     <div>
-      <conversation-info @on-help="handleHelp" />
+      <conversation-info>
+        <template #middle>
+          <div style="margin: 10px 0; font-size: 20px; font-weight: bold">
+            正在咨询中
+          </div>
+          <div style="margin: 10px 0; font-size: 20px">已咨询时间</div>
+          <div style="margin: 10px 0; font-size: 40px">00:13:13</div>
+        </template>
+        <template #bottom>
+          <el-button
+            size="large"
+            :icon="User"
+            style="margin: 0 20px; font-size: 20px"
+            color="#337ecc"
+            @click="handleHelp"
+          >
+            请求督导
+          </el-button>
+          <el-divider />
+          <el-button
+            size="large"
+            :icon="Check"
+            style="margin: 0 20px; font-size: 20px"
+            color="#337ecc"
+            @click="handleStop"
+          >
+            结束咨询
+          </el-button>
+        </template>
+      </conversation-info>
     </div>
-    <div class="chat-wrapper">
-      <div class="chat-list-wrapper">
-        <ChatArea />
-      </div>
-      <div class="chat-input-wrapper">
-        <ChatInput />
-      </div>
-    </div>
-    <div v-if="isHelping" class="chat-wrapper">
-      <consultant-to-supervisor />
-      <div class="chat-list-wrapper">
-        <ChatArea />
-      </div>
-      <div class="chat-input-wrapper">
-        <ChatInput />
-      </div>
-    </div>
+    <im-component :is-left="true" to-id="2_1"> </im-component>
+    <im-component :is-left="false" to-id="3_1">
+      <template #left>
+        <supervisor-to-consultant :is-show-btn="true">
+          <template #left>
+            <div style="font-size: 25px">督导A</div>
+            <div>正在求助中</div>
+            <div style="font-size: 30px">00:13:13</div>
+          </template>
+        </supervisor-to-consultant>
+      </template>
+    </im-component>
   </div>
 </template>
 
 <script lang="ts" setup>
-import ChatArea from "@/im/components/chatArea/index.vue";
-import ChatInput from "@/im/components/ChatInput.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import { ref } from "vue";
-import ConsultantToSupervisor from "@/views/conversation/components/consultant/consultant-to-supervisor.vue";
+import ImComponent from "@/imComponent/im-component.vue";
+import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
+import { Check, User } from "@element-plus/icons-vue";
 let isHelping = ref(false);
 
 const handleHelp = () => {
   isHelping.value = !isHelping.value;
 };
+
+const handleStop = () => {};
 </script>
 
 <style scoped lang="scss">
