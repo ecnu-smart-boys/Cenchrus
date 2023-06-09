@@ -11,41 +11,37 @@
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <img
-              src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
+              :src="scope.row.avatar"
               class="avatar"
+              onerror="this.src='/src/assets/defaultAvatar.jpg'"
             />
             <div style="margin-left: 10px">{{ scope.row.name }}</div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="count" label="咨询次数" width="100" />
+      <el-table-column prop="total" label="咨询次数" width="100" />
     </el-table>
   </el-card>
 </template>
 
 <script setup lang="ts">
-const tableData = [
-  {
-    rank: 1,
-    name: "Tom",
-    count: 120
-  },
-  {
-    rank: 2,
-    name: "Tom",
-    count: 120
-  },
-  {
-    rank: 3,
-    name: "Tom",
-    count: 120
-  },
-  {
-    rank: 4,
-    name: "Tom",
-    count: 120
-  }
-];
+import { RankUserInfo } from "@/apis/conversation/conversation-interface";
+import { reactive, watchEffect } from "vue";
+
+const props = defineProps<{
+  rankInfo: RankUserInfo[];
+}>();
+const tableData = reactive([]);
+
+watchEffect(() => {
+  tableData.splice(0);
+  props.rankInfo.forEach((item, index) => {
+    tableData.push({
+      ...item,
+      rank: index + 1
+    });
+  });
+});
 </script>
 
 <style scoped lang="scss">

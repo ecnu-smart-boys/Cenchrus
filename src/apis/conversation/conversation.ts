@@ -8,6 +8,9 @@ import {
   DayConsultInfo,
   EndReq,
   HelpRecordsResp,
+  OnlineInfoResp,
+  OnlineStaffListReq,
+  RankResp,
   SettingReq
 } from "@/apis/conversation/conversation-interface";
 export function getAllConsultations(
@@ -87,6 +90,50 @@ export function setting(settingReq: SettingReq): Promise<any> {
     method: "post",
     url: "/conversation/setting",
     data: settingReq
+  });
+}
+
+export function getRank(): Promise<RankResp> {
+  return request({
+    method: "get",
+    url: "/conversation/rank"
+  });
+}
+
+export function getMaxConversations(): Promise<number> {
+  return request({
+    method: "get",
+    url: "/conversation/maxConversations"
+  });
+}
+
+export function getOnlineConsultantInfo(
+  onlineStaffListReq: OnlineStaffListReq
+): Promise<OnlineInfoResp> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineConsultantInfo",
+    params: onlineStaffListReq
+  });
+}
+
+export function getOnlineSupervisorInfo(
+  onlineSupervisorInfo: OnlineStaffListReq
+): Promise<OnlineInfoResp> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineSupervisorInfo",
+    params: onlineSupervisorInfo
+  });
+}
+
+export function getOnlineBoundConsultantInfo(
+  onlineBoundConsultantInfo: OnlineStaffListReq
+): Promise<OnlineInfoResp> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineBoundConsultantInfo",
+    params: onlineBoundConsultantInfo
   });
 }
 

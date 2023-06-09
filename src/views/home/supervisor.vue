@@ -9,9 +9,7 @@
             :today-consultant-time="todayConsultantTime"
           />
         </div>
-        <consultant-online
-          :current-consultation-session="currentConsultationSession"
-        />
+        <consultant-online />
       </div>
       <schedule-calendar :arrangement-info="arrangementInfo" />
     </div>
@@ -32,6 +30,7 @@ import {
   HelpRecordsResp
 } from "@/apis/conversation/conversation-interface";
 import {
+  getMaxConversations,
   getRecentHelps,
   getTodayHelps
 } from "@/apis/conversation/conversation";
@@ -42,10 +41,13 @@ import ConsultantOnline from "@/views/home/components/consultant-online.vue";
 const conversationInfo = ref<ConversationInfo[]>([]);
 const helpRecords = ref<HelpRecordsResp>();
 const arrangementInfo = ref<number[]>([]);
+let currentMaxConsultantCount = ref(0);
+
 onMounted(async () => {
   conversationInfo.value = await getTodayHelps();
   helpRecords.value = await getRecentHelps();
   arrangementInfo.value = await personalArrangement();
+  currentMaxConsultantCount.value = await getMaxConversations();
 });
 
 let todayConsultantNumber = computed(() => {
@@ -58,10 +60,6 @@ let todayConsultantTime = computed(() => {
   }, 0);
   return parseTime(rawTime / 1000);
 });
-
-// TODO
-let currentMaxConsultantCount = 5;
-let currentConsultationSession = 10;
 </script>
 
 <style scoped lang="scss"></style>

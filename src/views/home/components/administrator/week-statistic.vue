@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import * as echarts from "echarts";
+import { getRecentWeek } from "@/utils";
 
 const props = defineProps<{
   weekConsultantChart: number[];
@@ -18,7 +19,7 @@ onMounted(() => {
     title: { text: "7日咨询数量" },
     tooltip: {},
     xAxis: {
-      data: ["12/01", "12/02", "12/03", "12/04", "12/05", "12/06", "12/07"]
+      data: getRecentWeek()
     },
     yAxis: {},
     series: [

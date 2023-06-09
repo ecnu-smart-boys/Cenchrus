@@ -15,10 +15,10 @@
       <supervisor-online style="flex: 1" />
     </div>
     <div style="display: flex">
-      <month-rank style="flex-shrink: 0">
+      <month-rank style="flex-shrink: 0" :rank-info="consultantRankInfo">
         <span>当月咨询数量排行</span>
       </month-rank>
-      <month-rank style="flex-shrink: 0">
+      <month-rank style="flex-shrink: 0" :rank-info="commentRankInfo">
         <span>当月好评数量排行</span>
       </month-rank>
       <week-statistic
@@ -39,9 +39,11 @@ import MonthRank from "@/views/home/components/administrator/month-rank.vue";
 import { computed, onMounted, ref } from "vue";
 import {
   ConversationInfo,
-  DayConsultInfo
+  DayConsultInfo,
+  RankUserInfo
 } from "@/apis/conversation/conversation-interface";
 import {
+  getRank,
   getRecentWeek,
   getTodayConsultations
 } from "@/apis/conversation/conversation";
@@ -49,12 +51,17 @@ import { parseTime } from "@/utils";
 
 const conversationInfo = ref<ConversationInfo[]>([]);
 const dayConsultInfo = ref<DayConsultInfo[]>([]);
+const consultantRankInfo = ref<RankUserInfo[]>([]);
+const commentRankInfo = ref<RankUserInfo[]>([]);
 onMounted(async () => {
   conversationInfo.value = await getTodayConsultations();
   dayConsultInfo.value = await getRecentWeek();
   dayConsultInfo.value.sort((a, b) => {
     return a.timestamp - b.timestamp;
   });
+  const rankInfo = await getRank();
+  consultantRankInfo.value = rankInfo.consultations;
+  commentRankInfo.value = rankInfo.goodComments;
 });
 
 let todayConsultantNumber = computed(() => {

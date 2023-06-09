@@ -87,3 +87,14 @@ export function mosaic(str: string): string {
   strings.splice(6, 4, "****");
   return strings.join("");
 }
+
+export function getRecentWeek(): string[] {
+  const result = [];
+  const now = new Date();
+  result.unshift(now.getMonth() + 1 + "/" + now.getDate());
+  for (let i = 0; i < 6; i++) {
+    now.setTime(now.getTime() - 24 * 60 * 60 * 1000);
+    result.unshift(now.getMonth() + 1 + "/" + now.getDate());
+  }
+  return result;
+}

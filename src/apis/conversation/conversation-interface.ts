@@ -65,3 +65,28 @@ export interface CommentReq {
   text: string;
   score: number;
 }
+
+export interface RankUserInfo {
+  avatar: string;
+  name: string;
+  total: number;
+}
+export interface RankResp {
+  consultations: RankUserInfo[];
+  goodComments: RankUserInfo[];
+}
+
+export interface OnlineStaffListReq {
+  current: number;
+  size: number;
+}
+export interface OnlineStaffInfo {
+  userId: string;
+  name: string;
+  state: number;
+}
+export interface OnlineInfoResp {
+  staffs: OnlineStaffInfo[];
+  liveConversations: number;
+  total: number;
+}
