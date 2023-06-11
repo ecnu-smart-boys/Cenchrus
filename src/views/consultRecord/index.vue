@@ -81,6 +81,7 @@ import { onMounted, reactive, ref, watch, watchEffect } from "vue";
 import createStore from "@/store/index";
 import {
   getAllConsultations,
+  getBoundConsultations,
   getConsultantConsultations
 } from "@/apis/conversation/conversation";
 import { parseTime, parseTimestamp } from "@/utils";
@@ -122,35 +123,29 @@ const handleDetail = (row) => {};
 const handleExport = (row) => {};
 
 const refreshData = async () => {
+  let data;
   if (store.role == "admin") {
-    const data = await getAllConsultations({
+    data = await getAllConsultations({
       current: currentPage.value,
       size: pageSize.value,
       name: searchName.value,
       timestamp: 0
     });
-    tableData.splice(0);
-    totalPage.value = data.total;
-    data.records.forEach((i) => {
-      tableData.push({
-        visitorName: i.visitorName,
-        duration: parseTime((i.endTime - i.startTime) / 1000),
-        date: parseTimestamp(i.startTime),
-        score: i.score,
-        helper: i.helper,
-        comment: i.comment
-      });
-    });
   } else if (store.role == "supervisor") {
-    // TODO
+    data = await getBoundConsultations({
+      current: currentPage.value,
+      size: pageSize.value,
+      name: searchName.value,
+      timestamp: 0
+    });
+  } else if (store.role == "consultant") {
+    data = await getConsultantConsultations({
+      current: currentPage.value,
+      size: pageSize.value,
+      name: searchName.value,
+      timestamp: 0
+    });
   }
-  // 目前先不分角色，因为有接口未实现
-  const data = await getConsultantConsultations({
-    current: currentPage.value,
-    size: pageSize.value,
-    name: searchName.value,
-    timestamp: 0
-  });
   tableData.splice(0);
   totalPage.value = data.total;
   data.records.forEach((i) => {

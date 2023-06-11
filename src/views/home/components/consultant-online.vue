@@ -30,7 +30,10 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-import { getOnlineSupervisorInfo } from "@/apis/conversation/conversation";
+import {
+  getOnlineBoundConsultantInfo,
+  getOnlineSupervisorInfo
+} from "@/apis/conversation/conversation";
 import createStore from "@/store/index";
 const store = createStore();
 
@@ -45,15 +48,19 @@ const handleCurrentChange = async (val) => {
 let liveConversations = ref(0);
 const staffs = reactive<any[]>([]);
 const refreshData = async () => {
+  let data;
   if (store.role === "admin") {
+    data = await getOnlineSupervisorInfo({
+      size: pageSize.value,
+      current: currentPage.value
+    });
+  } else {
     // TODO
-  } else if (store.role === "supervisor") {
-    // TODO
+    data = await getOnlineBoundConsultantInfo({
+      size: pageSize.value,
+      current: currentPage.value
+    });
   }
-  let data = await getOnlineSupervisorInfo({
-    size: pageSize.value,
-    current: currentPage.value
-  });
   liveConversations.value = data.liveConversations;
   totalPage.value = data.total;
   staffs.splice(0);

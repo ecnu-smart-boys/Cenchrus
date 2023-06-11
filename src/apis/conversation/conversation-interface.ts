@@ -1,3 +1,5 @@
+import exp from "constants";
+
 export interface ConversationInfo {
   conversationId: string;
   startTime: number;
@@ -63,7 +65,7 @@ export interface CallHelpReq {
 export interface CommentReq {
   conversationId: string;
   text: string;
-  score: number;
+  tag: string;
 }
 
 export interface RankUserInfo {
@@ -89,4 +91,30 @@ export interface OnlineInfoResp {
   staffs: OnlineStaffInfo[];
   liveConversations: number;
   total: number;
+}
+
+export interface ConsultationInfo {
+  consultantName: string;
+  consultantAvatar: string;
+  phone: string;
+  visitorName: string;
+  visitorAvatar: string;
+  startTime: number;
+  lastTime: number;
+}
+
+export interface HelpInfo {
+  avatar: string;
+  supervisorName: string;
+  startTime: number;
+  endTime: number;
+  isEnd: boolean;
+}
+export interface WebConversationInfoResp {
+  consultationInfo: ConsultationInfo;
+  helpInfo: HelpInfo;
+  visitorScore: number;
+  visitorText: string;
+  tag: string;
+  consultantText: string;
 }
