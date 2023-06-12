@@ -1,4 +1,12 @@
 import MD5 from "crypto-js/md5";
+import { MessageInfo } from "@/apis/message/message-interface";
+import { MessageList } from "@/apis/im/im-interface";
+import {
+  ImageElem,
+  MessageBackend,
+  SoundElem,
+  TextElem
+} from "@/apis/im/im-backend-interface";
 
 /**
  * convert time to 00:00:00
@@ -98,4 +106,60 @@ export function getRecentWeek(): string[] {
     result.unshift(now.getMonth() + 1 + "/" + now.getDate());
   }
   return result;
+}
+
+export function messageAdapter(
+  message: MessageInfo,
+  myId: string
+): MessageList {
+  let data: MessageBackend;
+  const defaultData: MessageList = {
+    clientTime: Math.floor(message.time / 1000),
+    conversationID: "",
+    flow: "",
+    from: "",
+    to: "",
+    payload: { text: "" },
+    isRead: true,
+    isRevoked: message.revoked,
+    time: Math.floor(message.time / 1000),
+    type: "TIMTextElem"
+  };
+  try {
+    data = JSON.parse(message.msgBody);
+  } catch (ignored) {
+    // 默认采用空白文本
+    return defaultData;
+  }
+  defaultData.type = data.MsgType;
+  defaultData.from = message.fromId;
+  defaultData.to = message.toId;
+  defaultData.flow = message.fromId == myId ? "OUT" : "IN";
+  if (data.MsgType == "TIMTextElem") {
+    const payload = data.MsgContent as TextElem;
+    defaultData.payload = {
+      text: payload.Text
+    };
+  } else if (data.MsgType == "TIMImageElem") {
+    const payload = data.MsgContent as ImageElem;
+    defaultData.payload = {
+      imageInfoArray: [
+        {
+          height: payload.ImageInfoArray[0].Height,
+          width: payload.ImageInfoArray[0].Width,
+          imageUrl: payload.ImageInfoArray[0].URL,
+          url: payload.ImageInfoArray[0].URL,
+          size: payload.ImageInfoArray[0].Size
+        }
+      ]
+    };
+  } else if (data.MsgType == "TIMSoundElem") {
+    const payload = data.MsgContent as SoundElem;
+    defaultData.payload = {
+      url: payload.Url,
+      size: payload.Size,
+      second: payload.Second
+    };
+  }
+  return defaultData;
 }

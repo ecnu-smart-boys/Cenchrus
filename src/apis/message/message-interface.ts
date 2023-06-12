@@ -16,6 +16,6 @@ export interface MessageInfo {
 export interface AllMsgListResp {
   consultation: MessageInfo[];
   consultationTotal: number;
-  help: MessageInfo[];
+  help: MessageInfo[] | null;
   helpTotal: number;
 }
