@@ -14,32 +14,32 @@
       >
       <el-container>
         <el-aside width="200px">
-          <el-menu default-active="1" @select="handleSelect">
-            <el-menu-item index="1">
+          <el-menu :default-active="activeIndexUnder" @select="handleSelect">
+            <el-menu-item index="/">
               <el-icon><location /></el-icon>
               <span>首页</span>
             </el-menu-item>
-            <el-menu-item index="2">
+            <el-menu-item index="consult-record">
               <el-icon><icon-menu /></el-icon>
               <span>咨询记录</span>
             </el-menu-item>
-            <el-menu-item index="7">
+            <el-menu-item index="help-record">
               <el-icon><icon-menu /></el-icon>
               <span>求助记录</span>
             </el-menu-item>
-            <el-menu-item v-if="role == 'admin'" index="3">
+            <el-menu-item v-if="role == 'admin'" index="schedule">
               <el-icon><icon-menu /></el-icon>
               <span>排班表</span>
             </el-menu-item>
-            <el-menu-item v-if="role == 'admin'" index="4">
+            <el-menu-item v-if="role == 'admin'" index="consultant-manager">
               <el-icon><icon-menu /></el-icon>
               <span>咨询师管理</span>
             </el-menu-item>
-            <el-menu-item v-if="role == 'admin'" index="5">
+            <el-menu-item v-if="role == 'admin'" index="supervisor-manager">
               <el-icon><icon-menu /></el-icon>
               <span>督导管理</span>
             </el-menu-item>
-            <el-menu-item v-if="role == 'admin'" index="6">
+            <el-menu-item v-if="role == 'admin'" index="visitor-manager">
               <el-icon><icon-menu /></el-icon>
               <span>用户管理</span>
             </el-menu-item>
@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { Menu as IconMenu, Location } from "@element-plus/icons-vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import router, { hasRoles } from "@/router";
 import createStore from "@/store/index";
 const { role, clearToken, clearUserInfo } = createStore();
@@ -67,29 +67,7 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 
 const handleSelect = (key: string) => {
-  switch (key) {
-    case "1":
-      router.push("/");
-      break;
-    case "2":
-      router.push("consult-record");
-      break;
-    case "3":
-      router.push("schedule");
-      break;
-    case "4":
-      router.push("consultant-manager");
-      break;
-    case "5":
-      router.push("supervisor-manager");
-      break;
-    case "6":
-      router.push("visitor-manager");
-      break;
-    case "7":
-      router.push("help-record");
-      break;
-  }
+  router.push(key);
 };
 const handleUpperSelect = async (key: string) => {
   if (key == "1") {
@@ -112,6 +90,21 @@ const handleUpperSelect = async (key: string) => {
 };
 
 const activeIndex = ref("1");
+
+const activeIndexUnder = ref("");
+onMounted(() => {
+  const reg = /#\/([\w-]*)\??.*/;
+  reg.test(location.hash);
+  if (
+    RegExp.$1 == "consultant" ||
+    RegExp.$1 == "administrator" ||
+    RegExp.$1 == "supervisor"
+  ) {
+    activeIndexUnder.value = "/";
+  } else {
+    activeIndexUnder.value = RegExp.$1;
+  }
+});
 </script>
 
 <style scoped lang="scss">

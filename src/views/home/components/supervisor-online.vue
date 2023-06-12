@@ -24,7 +24,7 @@
       >
         <div v-for="item in staffs" :key="item.userId" class="online-wrapper">
           <div>{{ item.name }}</div>
-          <el-tag>{{ item.state == 0 ? "空闲" : "忙碌" }}</el-tag>
+          <el-tag>{{ item.state == 1 ? "空闲" : "忙碌" }}</el-tag>
         </div>
       </div>
       <div class="right-wrapper">

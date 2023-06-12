@@ -80,11 +80,11 @@
     </div>
     <div class="chat-wrapper">
       <div ref="leftChatAreaWrapper" class="chat-list-wrapper">
-        <ChatArea
+        <chat-area
           ref="leftChatArea"
           :current-message="
             (allMsg?.consultation ?? []).map((i) =>
-              messageAdapter(i, query.userId)
+              messageAdapter(i, <string>allInfo?.consultationInfo.consultantId)
             )
           "
           :has-revoke="false"
@@ -124,11 +124,11 @@
         </template>
       </supervisor-to-consultant>
       <div ref="rightChatAreaWrapper" class="chat-list-wrapper">
-        <ChatArea
+        <chat-area
           ref="rightChatArea"
           :current-message="
             (allMsg?.help ?? []).map((i) =>
-              messageAdapter(i, allInfo?.helpInfo?.supervisorId ?? '')
+              messageAdapter(i, <string>allInfo?.consultationInfo.consultantId)
             )
           "
           :has-revoke="false"
@@ -142,7 +142,7 @@
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
-import { computed, nextTick, onMounted, reactive, ref, watchEffect } from "vue";
+import { computed, nextTick, onMounted, ref, watchEffect } from "vue";
 import { Back, Collection } from "@element-plus/icons-vue";
 import router from "@/router";
 import {
@@ -154,7 +154,7 @@ import {
 import { useRoute } from "vue-router";
 import createStore from "@/store";
 import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
-import { messageAdapter, mosaic, parseTime } from "@/utils";
+import { messageAdapter, mosaic, parseTime, preExport } from "@/utils";
 import {
   AllMessageReq,
   AllMsgListResp
@@ -166,6 +166,8 @@ import {
   getSupervisorOwnHelpMsg
 } from "@/apis/message/message";
 import useScroll from "@/hooks/useScroll";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 
 const route = useRoute();
 const store = createStore();
@@ -176,12 +178,14 @@ const leftChatAreaWrapper: any = ref(null);
 const rightChatAreaWrapper: any = ref(null);
 const {
   isReachTop: isLeftReachTop,
+  clientHeight: leftClientHeight,
   scrollHeight: leftScrollHeight,
   reflow: leftReflow,
   setScrollTop: setLeftScrollTop
 } = useScroll(leftChatAreaWrapper);
 const {
   isReachTop: isRightReachTop,
+  clientHeight: rightClientHeight,
   scrollHeight: rightScrollHeight,
   reflow: rightReflow,
   setScrollTop: setRightScrollTop
@@ -230,9 +234,45 @@ watchEffect(() => {
     rate.value = value.visitorScore;
   }
 });
-const handleExport = () => {
-  // TODO
+const handleExport = async () => {
+  let conversationInfo: WebConversationInfoResp;
+  let allMsgList: AllMsgListResp;
+  const allMsgReq: AllMessageReq = {
+    conversationId: query.conversationId,
+    consultationCurrent: 1,
+    consultationSize: 100000,
+    helpCurrent: 1,
+    helpSize: 100000
+  };
+  if (store.role === "supervisor") {
+    allMsgList = await getBoundConsultantsMsg(allMsgReq);
+    conversationInfo = await getBoundConsultantsInfo(query.conversationId);
+  } else if (store.role === "consultant") {
+    allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
+    conversationInfo = await getConsultantOwnConsultationInfo(
+      query.conversationId
+    );
+  } else if (store.role === "admin") {
+    allMsgList = await getAdminConsultationMsg(allMsgReq);
+    conversationInfo = await getAdminConsultationInfo(query.conversationId);
+  }
+  const data = preExport(conversationInfo, allMsgList);
+  const zip = new JSZip();
+  zip.file(
+    `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.consultationInfo.visitorName}.txt`,
+    data[0]
+  );
+  if (data.length > 1) {
+    zip.file(
+      `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.helpInfo?.supervisorName}.txt`,
+      data[1]
+    );
+  }
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    FileSaver(content, `${new Date().getTime()}.zip`);
+  });
 };
+
 const handleBack = () => {
   router.go(-1);
 };
@@ -254,10 +294,10 @@ const isHelpCompleted = computed(() => {
 const getInfo = async () => {
   let conversationInfo: WebConversationInfoResp;
   if (query.from === "help") {
-    conversationInfo = await getBoundConsultantsInfo(query.conversationId);
+    conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
   } else {
     if (store.role === "supervisor") {
-      conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+      conversationInfo = await getBoundConsultantsInfo(query.conversationId);
     } else if (store.role === "consultant") {
       conversationInfo = await getConsultantOwnConsultationInfo(
         query.conversationId
@@ -282,10 +322,10 @@ const getMsg = async (
     helpSize: pageSize
   };
   if (query.from === "help") {
-    allMsgList = await getBoundConsultantsMsg(allMsgReq);
+    allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
   } else {
     if (store.role === "supervisor") {
-      allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+      allMsgList = await getBoundConsultantsMsg(allMsgReq);
     } else if (store.role === "consultant") {
       allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
     } else if (store.role === "admin") {
@@ -307,6 +347,13 @@ onMounted(async () => {
   data.consultation?.reverse();
   data.help?.reverse();
   allMsg.value = data;
+  // 滑动到最底部
+  await nextTick(() => {
+    leftReflow();
+    setLeftScrollTop(leftScrollHeight.value - leftClientHeight.value);
+    rightReflow();
+    setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
+  });
 });
 </script>
 
@@ -336,5 +383,10 @@ onMounted(async () => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
+}
+</style>
+<style>
+.el-divider--horizontal {
+  margin: 10px 0;
 }
 </style>

@@ -14,10 +14,26 @@
       </div>
     </template>
     <div style="display: flex; justify-content: space-between">
-      <div style="display: flex; align-items: center; flex-flow: row wrap">
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          flex-flow: row wrap;
+          width: 80%;
+        "
+      >
         <div v-for="item in staffs" :key="item.userId" class="online-wrapper">
-          <div>{{ item.name }}</div>
-          <el-tag>{{ item.state == 0 ? "空闲" : "忙碌" }}</el-tag>
+          <div
+            style="
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              width: 100%;
+            "
+          >
+            {{ item.name }}
+          </div>
+          <el-tag>{{ item.state == 1 ? "空闲" : "忙碌" }}</el-tag>
         </div>
       </div>
       <div class="right-wrapper">
@@ -54,8 +70,7 @@ const refreshData = async () => {
       size: pageSize.value,
       current: currentPage.value
     });
-  } else {
-    // TODO
+  } else if (store.role === "supervisor") {
     data = await getOnlineBoundConsultantInfo({
       size: pageSize.value,
       current: currentPage.value
@@ -88,6 +103,8 @@ onMounted(async () => {
   align-content: center;
   justify-content: center;
   margin: 17px 0;
+  padding: 0 8px;
+  box-sizing: border-box;
   width: 33%;
 }
 

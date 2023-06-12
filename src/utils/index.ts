@@ -1,5 +1,5 @@
 import MD5 from "crypto-js/md5";
-import { MessageInfo } from "@/apis/message/message-interface";
+import { AllMsgListResp, MessageInfo } from "@/apis/message/message-interface";
 import { MessageList } from "@/apis/im/im-interface";
 import {
   ImageElem,
@@ -7,6 +7,11 @@ import {
   SoundElem,
   TextElem
 } from "@/apis/im/im-backend-interface";
+import {
+  HelpInfo,
+  WebConversationInfoResp
+} from "@/apis/conversation/conversation-interface";
+import { left } from "@popperjs/core";
 
 /**
  * convert time to 00:00:00
@@ -112,9 +117,9 @@ export function messageAdapter(
   message: MessageInfo,
   myId: string
 ): MessageList {
-  let data: MessageBackend;
+  let datas: MessageBackend[];
   const defaultData: MessageList = {
-    clientTime: Math.floor(message.time / 1000),
+    clientTime: message.time,
     conversationID: "",
     flow: "",
     from: "",
@@ -122,19 +127,20 @@ export function messageAdapter(
     payload: { text: "" },
     isRead: true,
     isRevoked: message.revoked,
-    time: Math.floor(message.time / 1000),
+    time: message.time,
     type: "TIMTextElem"
   };
   try {
-    data = JSON.parse(message.msgBody);
+    datas = JSON.parse(message.msgBody);
   } catch (ignored) {
     // 默认采用空白文本
     return defaultData;
   }
+  const data = datas[0];
   defaultData.type = data.MsgType;
   defaultData.from = message.fromId;
   defaultData.to = message.toId;
-  defaultData.flow = message.fromId == myId ? "OUT" : "IN";
+  defaultData.flow = message.fromId == myId ? "out" : "in";
   if (data.MsgType == "TIMTextElem") {
     const payload = data.MsgContent as TextElem;
     defaultData.payload = {
@@ -162,4 +168,54 @@ export function messageAdapter(
     };
   }
   return defaultData;
+}
+
+export function preExport(
+  info: WebConversationInfoResp,
+  messages: AllMsgListResp
+): string[] {
+  const consultantName = info.consultationInfo.consultantName;
+  const consultantId = info.consultationInfo.consultantId;
+  const visitorName = info.consultationInfo.visitorName;
+  const leftMessageLists = messages.consultation.map((i) =>
+    messageAdapter(i, "")
+  );
+  let leftString = "";
+  for (const m of leftMessageLists) {
+    leftString += parseTimestamp(m.clientTime) + "\n";
+    leftString +=
+      (m.from == consultantId ? consultantName : visitorName) + ":\n";
+    if (m.type == "TIMTextElem") {
+      leftString += m.payload.text + "\n";
+    } else if (m.type == "TIMImageElem") {
+      leftString += `![图片](${m.payload.ImageInfoArray[0].url})\n`;
+    } else if (m.type == "TIMSoundElem") {
+      leftString += `[语音](${m.payload.ImageInfoArray[0].url})\n`;
+    }
+    leftString += "\n";
+  }
+  if (info.helpInfo == null) {
+    return [leftString];
+  }
+  const supervisorName = info.helpInfo.supervisorName;
+  const supervisorId = info.helpInfo.supervisorId;
+  const rightMessageLists = messages.help?.map((i) => messageAdapter(i, ""));
+  let rightString = "";
+  if (!rightMessageLists) {
+    return [leftString];
+  }
+  for (const m of rightMessageLists) {
+    rightString += parseTimestamp(m.clientTime) + "\n";
+    rightString +=
+      (m.from == supervisorId ? supervisorName : consultantName) + ":\n";
+    if (m.type == "TIMTextElem") {
+      rightString += m.payload.text + "\n";
+    } else if (m.type == "TIMImageElem") {
+      rightString += `![图片](${m.payload.ImageInfoArray[0].url})\n`;
+    } else if (m.type == "TIMSoundElem") {
+      rightString += `[语音](${m.payload.ImageInfoArray[0].url})\n`;
+    }
+    rightString += "\n";
+  }
+  return [leftString, rightString];
 }

@@ -80,12 +80,27 @@ import { Search } from "@element-plus/icons-vue";
 import { onMounted, reactive, ref, watch, watchEffect } from "vue";
 import createStore from "@/store/index";
 import {
+  getAdminConsultationInfo,
   getAllConsultations,
+  getBoundConsultantsInfo,
   getBoundConsultations,
-  getConsultantConsultations
+  getConsultantConsultations,
+  getConsultantOwnConsultationInfo
 } from "@/apis/conversation/conversation";
-import { parseTime, parseTimestamp } from "@/utils";
+import { parseTime, parseTimestamp, preExport } from "@/utils";
 import router from "@/router";
+import {
+  getAdminConsultationMsg,
+  getBoundConsultantsMsg,
+  getConsultantOwnConsultationMsg
+} from "@/apis/message/message";
+import {
+  AllMessageReq,
+  AllMsgListResp
+} from "@/apis/message/message-interface";
+import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 const store = createStore();
 
 let searchName = ref("");
@@ -168,7 +183,42 @@ const handleDetail = (row) => {
   });
 };
 
-const handleExport = (row) => {};
+const handleExport = async (row) => {
+  let conversationInfo: WebConversationInfoResp;
+  let allMsgList: AllMsgListResp;
+  const allMsgReq: AllMessageReq = {
+    conversationId: row.id,
+    consultationCurrent: 1,
+    consultationSize: 100000,
+    helpCurrent: 1,
+    helpSize: 100000
+  };
+  if (store.role === "supervisor") {
+    allMsgList = await getBoundConsultantsMsg(allMsgReq);
+    conversationInfo = await getBoundConsultantsInfo(row.id);
+  } else if (store.role === "consultant") {
+    allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
+    conversationInfo = await getConsultantOwnConsultationInfo(row.id);
+  } else if (store.role === "admin") {
+    allMsgList = await getAdminConsultationMsg(allMsgReq);
+    conversationInfo = await getAdminConsultationInfo(row.id);
+  }
+  const data = preExport(conversationInfo, allMsgList);
+  const zip = new JSZip();
+  zip.file(
+    `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.consultationInfo.visitorName}.txt`,
+    data[0]
+  );
+  if (data.length > 1) {
+    zip.file(
+      `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.helpInfo?.supervisorName}.txt`,
+      data[1]
+    );
+  }
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    FileSaver(content, `${new Date().getTime()}.zip`);
+  });
+};
 
 onMounted(async () => {
   await refreshData();

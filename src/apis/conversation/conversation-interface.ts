@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export interface ConversationInfo {
   conversationId: string;
   startTime: number;
@@ -96,9 +94,11 @@ export interface OnlineInfoResp {
 export interface ConsultationInfo {
   consultantName: string;
   consultantAvatar: string;
+  consultantId: string;
   phone: string;
   visitorName: string;
   visitorAvatar: string;
+  visitorId: string;
   startTime: number;
   lastTime: number;
 }
