@@ -86,6 +86,7 @@ const { rightMenuVisible, position, rightClickItem, openMenu } =
   useRightClick();
 const props = defineProps<{
   currentMessage: MessageList[];
+  hasRevoke: boolean;
 }>();
 const handleRevoke = async () => {
   try {
@@ -100,6 +101,7 @@ const handleRevoke = async () => {
 };
 
 const handleContextMenu = (e: any, item: any) => {
+  if (!props.hasRevoke) return;
   if (item.flow == MSG_FLOW.OUT) {
     openMenu(e, item);
   }

@@ -14,6 +14,7 @@ import {
   SettingReq,
   WebConversationInfoResp
 } from "@/apis/conversation/conversation-interface";
+import { OnlineConversation } from "@/apis/schema";
 
 /************************* 获得已经结束的会话记录列表接口 *************************/
 
@@ -254,3 +255,33 @@ export function getAdminConsultationInfo(
 }
 
 /************************* 查看正在进行的会话详情 *************************/
+
+// 咨询师/督导获得在线会话列表
+export function getOnlineConversationsList(): Promise<OnlineConversation[]> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineConversationsList"
+  });
+}
+
+// 咨询师获得在线会话的基本信息
+export function getOnlineConsultationInfo(
+  conversationId: string
+): Promise<WebConversationInfoResp> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineConsultationInfo",
+    params: conversationId
+  });
+}
+
+// 督导获得在线会话的基本信息
+export function getOnlineHelpInfo(
+  conversationId: string
+): Promise<WebConversationInfoResp> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineHelpInfo",
+    params: conversationId
+  });
+}

@@ -83,6 +83,7 @@ export function md5(str: string): string {
 }
 
 export function mosaic(str: string): string {
+  if (!str) return "";
   const strings = str.split("");
   strings.splice(6, 4, "****");
   return strings.join("");

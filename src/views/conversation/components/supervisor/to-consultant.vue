@@ -45,7 +45,10 @@
     </im-component>
     <div class="chat-wrapper">
       <div class="chat-list-wrapper">
-        <chat-area :current-message="consultantSupervisorData" />
+        <chat-area
+          :current-message="consultantSupervisorData"
+          :has-revoke="true"
+        />
       </div>
     </div>
   </div>

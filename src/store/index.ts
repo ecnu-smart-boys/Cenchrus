@@ -13,10 +13,13 @@ const useStore = defineStore("main", {
         leftMessageList: [],
         leftHasNewMessage: false
       },
+      // 右侧消息
       rightMessage: {
         rightMessageList: [],
         rightHasNewMessage: false
-      }
+      },
+      // 全局websocket 相关
+      websocketMessage: null
     };
   },
   getters: {
@@ -25,6 +28,9 @@ const useStore = defineStore("main", {
     }
   },
   actions: {
+    setWebSocketMessage(newMessage: any) {
+      this.websocketMessage = newMessage;
+    },
     setLeftMessage(o: { leftMessageList: any[]; leftHasNewMessage: boolean }) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore

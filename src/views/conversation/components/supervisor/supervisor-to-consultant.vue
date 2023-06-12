@@ -1,17 +1,7 @@
 <template>
   <div class="wrapper">
     <div style="display: flex; justify-content: center; padding: 20px">
-      <img src="/src/assets/defaultAvatar.jpg" class="avatar" alt="" />
-      <div
-        style="
-          margin-left: 20px;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        "
-      >
-        <slot name="left"></slot>
-      </div>
+      <slot name="left"></slot>
     </div>
     <template v-if="isShowBtn">
       <el-divider direction="vertical" style="height: 70%" />

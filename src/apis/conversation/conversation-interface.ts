@@ -106,13 +106,14 @@ export interface ConsultationInfo {
 export interface HelpInfo {
   avatar: string;
   supervisorName: string;
+  supervisorId: string;
   startTime: number;
   endTime: number;
   isEnd: boolean;
 }
 export interface WebConversationInfoResp {
   consultationInfo: ConsultationInfo;
-  helpInfo: HelpInfo;
+  helpInfo: HelpInfo | null;
   visitorScore: number;
   visitorText: string;
   tag: string;
