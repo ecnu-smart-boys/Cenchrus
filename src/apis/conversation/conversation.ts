@@ -217,7 +217,9 @@ export function getSupervisorOwnHelpInfo(
   return request({
     method: "get",
     url: "/conversation/details/supervisorOwnHelpInfo",
-    params: helpId
+    params: {
+      helpId
+    }
   });
 }
 
@@ -228,7 +230,9 @@ export function getBoundConsultantsInfo(
   return request({
     method: "get",
     url: "/conversation/details/boundConsultantsInfo",
-    params: conversationId
+    params: {
+      conversationId
+    }
   });
 }
 
@@ -239,7 +243,9 @@ export function getConsultantOwnConsultationInfo(
   return request({
     method: "get",
     url: "/conversation/details/consultantOwnConsultationInfo",
-    params: conversationId
+    params: {
+      conversationId
+    }
   });
 }
 
@@ -250,7 +256,9 @@ export function getAdminConsultationInfo(
   return request({
     method: "get",
     url: "/conversation/details/adminConsultationInfo",
-    params: conversationId
+    params: {
+      conversationId
+    }
   });
 }
 
@@ -260,7 +268,7 @@ export function getAdminConsultationInfo(
 export function getOnlineConversationsList(): Promise<OnlineConversation[]> {
   return request({
     method: "get",
-    url: "/conversation/onlineConversationsList"
+    url: "/conversation/conversationsList"
   });
 }
 
@@ -271,7 +279,9 @@ export function getOnlineConsultationInfo(
   return request({
     method: "get",
     url: "/conversation/onlineConsultationInfo",
-    params: conversationId
+    params: {
+      conversationId
+    }
   });
 }
 
@@ -282,6 +292,8 @@ export function getOnlineHelpInfo(
   return request({
     method: "get",
     url: "/conversation/onlineHelpInfo",
-    params: conversationId
+    params: {
+      conversationId
+    }
   });
 }

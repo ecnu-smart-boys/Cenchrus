@@ -42,12 +42,12 @@
     <form-setting
       ref="settingForm"
       :is-consultant="false"
-      :current-count="currentCount"
+      :current-count="currentCountData"
       @on-submit="handleSubmit"
     />
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="settingDialogVisible = false"> 取消 </el-button>
+        <el-button @click="handleCancel"> 取消 </el-button>
         <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
       </span>
     </template>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watchEffect } from "vue";
 import FormSetting from "@/components/form-setting.vue";
 import { ElMessage } from "element-plus";
 import { setting } from "@/apis/conversation/conversation";
@@ -67,9 +67,23 @@ const props = defineProps<{
 const value = ref(5);
 const settingForm: any = ref(null);
 let settingDialogVisible = ref(false);
+
+const currentCountData = ref(0);
+
+watchEffect(() => {
+  currentCountData.value = props.currentCount;
+});
 const handleClick = () => {
+  currentCountData.value = props.currentCount;
   settingDialogVisible.value = true;
+  nextTick(() => {
+    settingForm.value.resetMaxCount(props.currentCount);
+  });
 };
+
+const emits = defineEmits<{
+  (event: "onChange"): void;
+}>();
 
 let tagType = computed(() => {
   if (props.currentCount > props.todayConsultantSession) {
@@ -77,6 +91,11 @@ let tagType = computed(() => {
   }
   return "danger";
 });
+
+const handleCancel = () => {
+  settingDialogVisible.value = false;
+  emits("onChange");
+};
 const handleSubmit = async (data) => {
   await setting({
     maxConversations: parseInt(data.maxCount)
@@ -86,7 +105,7 @@ const handleSubmit = async (data) => {
     type: "success",
     duration: 5 * 1000
   });
-  settingDialogVisible.value = false;
+  handleCancel();
 };
 const submitAddForm = async () => {
   try {

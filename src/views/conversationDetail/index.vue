@@ -172,9 +172,6 @@ const store = createStore();
 
 const query: any = route.query;
 
-const leftData = reactive([]);
-const rightData = reactive([]);
-
 const leftChatAreaWrapper: any = ref(null);
 const rightChatAreaWrapper: any = ref(null);
 const {

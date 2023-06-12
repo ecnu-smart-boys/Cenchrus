@@ -59,7 +59,9 @@ request.interceptors.request.use(
     // 删除重复的请求
     removePending(config);
     // 如果repeatRequest不配置，那么该请求则不能多次请求
-    !(config as any).repeatRequest && addPending(config);
+    !(config as any).repeatRequest &&
+      config.method != "get" &&
+      addPending(config);
 
     if (store.token !== "") {
       config.headers["x-freud"] = store.token;

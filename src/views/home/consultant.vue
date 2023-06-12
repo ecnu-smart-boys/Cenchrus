@@ -6,6 +6,7 @@
           :total-consultations="totalConsultations"
           :current-count="currentMaxConsultantCount"
           :today-consultant-session="todayConsultantSession"
+          @on-change="handleChange"
         />
         <consultant-statistic
           :today-consultant-number="todayConsultantNumber"
@@ -49,6 +50,10 @@ onMounted(async () => {
   arrangementInfo.value = await personalArrangement();
   currentMaxConsultantCount.value = await getMaxConversations();
 });
+
+const handleChange = async () => {
+  currentMaxConsultantCount.value = await getMaxConversations();
+};
 
 let todayConsultantNumber = computed(() => {
   return conversationInfo.value.length;

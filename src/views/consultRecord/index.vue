@@ -39,7 +39,7 @@
       <el-table-column prop="date" label="咨询日期" width="200" />
       <el-table-column prop="rate" label="咨询评级" width="180">
         <template #default="scope">
-          <el-rate v-model="scope.row.rate" size="large" disabled />
+          <el-rate v-model="scope.row.score" size="large" disabled />
         </template>
       </el-table-column>
       <el-table-column prop="helper" label="督导求助" width="200" />
@@ -85,6 +85,7 @@ import {
   getConsultantConsultations
 } from "@/apis/conversation/conversation";
 import { parseTime, parseTimestamp } from "@/utils";
+import router from "@/router";
 const store = createStore();
 
 let searchName = ref("");
@@ -100,6 +101,45 @@ const tableData = reactive<any[]>([]);
 
 let selectDate = ref("");
 let timeStamp = ref(0);
+
+const refreshData = async () => {
+  let data;
+  if (store.role == "admin") {
+    data = await getAllConsultations({
+      current: currentPage.value,
+      size: pageSize.value,
+      name: searchName.value,
+      timestamp: timeStamp.value
+    });
+  } else if (store.role == "supervisor") {
+    data = await getBoundConsultations({
+      current: currentPage.value,
+      size: pageSize.value,
+      name: searchName.value,
+      timestamp: timeStamp.value
+    });
+  } else if (store.role == "consultant") {
+    data = await getConsultantConsultations({
+      current: currentPage.value,
+      size: pageSize.value,
+      name: searchName.value,
+      timestamp: timeStamp.value
+    });
+  }
+  tableData.splice(0);
+  totalPage.value = data.total;
+  data.records.forEach((i) => {
+    tableData.push({
+      visitorName: i.visitorName,
+      duration: parseTime((i.endTime - i.startTime) / 1000),
+      date: parseTimestamp(i.startTime),
+      score: i.score,
+      helper: i.helper,
+      comment: i.comment,
+      id: i.id
+    });
+  });
+};
 
 watchEffect(async () => {
   if (selectDate.value == null) {
@@ -118,47 +158,18 @@ watch(
     await refreshData();
   }
 );
-const handleDetail = (row) => {};
+const handleDetail = (row) => {
+  router.push({
+    path: "/conversation-detail",
+    query: {
+      conversationId: row.id,
+      from: "consult"
+    }
+  });
+};
 
 const handleExport = (row) => {};
 
-const refreshData = async () => {
-  let data;
-  if (store.role == "admin") {
-    data = await getAllConsultations({
-      current: currentPage.value,
-      size: pageSize.value,
-      name: searchName.value,
-      timestamp: 0
-    });
-  } else if (store.role == "supervisor") {
-    data = await getBoundConsultations({
-      current: currentPage.value,
-      size: pageSize.value,
-      name: searchName.value,
-      timestamp: 0
-    });
-  } else if (store.role == "consultant") {
-    data = await getConsultantConsultations({
-      current: currentPage.value,
-      size: pageSize.value,
-      name: searchName.value,
-      timestamp: 0
-    });
-  }
-  tableData.splice(0);
-  totalPage.value = data.total;
-  data.records.forEach((i) => {
-    tableData.push({
-      visitorName: i.visitorName,
-      duration: parseTime((i.endTime - i.startTime) / 1000),
-      date: parseTimestamp(i.startTime),
-      score: i.score,
-      helper: i.helper,
-      comment: i.comment
-    });
-  });
-};
 onMounted(async () => {
   await refreshData();
 });

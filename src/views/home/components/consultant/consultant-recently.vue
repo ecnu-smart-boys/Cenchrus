@@ -12,7 +12,7 @@
       <el-table-column prop="date" label="咨询日期" width="200" />
       <el-table-column prop="score" label="咨询评级" width="180">
         <template #default="scope">
-          <el-rate v-model="scope.row.rate" size="large" disabled />
+          <el-rate v-model="scope.row.score" size="large" disabled />
         </template>
       </el-table-column>
       <el-table-column prop="helper" label="督导求助" width="200" />

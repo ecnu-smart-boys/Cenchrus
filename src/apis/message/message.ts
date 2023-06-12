@@ -10,7 +10,7 @@ export function getSupervisorOwnHelpMsg(
 ): Promise<AllMsgListResp> {
   return request({
     method: "get",
-    url: "/conversation/details/supervisorOwnHelpMsg",
+    url: "/im/details/supervisorOwnHelpMsg",
     params: allMessageReq
   });
 }
@@ -21,7 +21,7 @@ export function getBoundConsultantsMsg(
 ): Promise<AllMsgListResp> {
   return request({
     method: "get",
-    url: "/conversation/details/boundConsultantsMsg",
+    url: "/im/details/boundConsultantsMsg",
     params: allMessageReq
   });
 }
@@ -32,7 +32,7 @@ export function getConsultantOwnConsultationMsg(
 ): Promise<AllMsgListResp> {
   return request({
     method: "get",
-    url: "/conversation/details/consultantOwnConsultationMsg",
+    url: "/im/details/consultantOwnConsultationMsg",
     params: allMessageReq
   });
 }
@@ -43,7 +43,7 @@ export function getAdminConsultationMsg(
 ): Promise<AllMsgListResp> {
   return request({
     method: "get",
-    url: "/conversation/details/adminConsultationMsg",
+    url: "/im/details/adminConsultationMsg",
     params: allMessageReq
   });
 }

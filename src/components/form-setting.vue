@@ -55,7 +55,11 @@ const submitForm = async () => {
   });
   emits("onSubmit", form);
 };
-defineExpose({ submitForm });
+
+const resetMaxCount = (c: number) => {
+  form.maxCount = String(c);
+};
+defineExpose({ submitForm, resetMaxCount });
 </script>
 
 <style scoped lang="scss"></style>
