@@ -116,6 +116,17 @@ watchEffect(async () => {
     } else if (msg.type === "endConsultation") {
       await getConversationData();
       store.setWebSocketMessage(null);
+    } else if (msg.type === "startHelp") {
+      const content = msg.content as OnlineConversation;
+      conversationData.push({
+        ...content,
+        unRead: 0
+      });
+      ElNotification({
+        title: "Info",
+        message: "您有一个新求助",
+        type: "info"
+      });
     }
   }
 });

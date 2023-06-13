@@ -143,7 +143,7 @@
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
-import { nextTick, onMounted, ref, watchEffect } from "vue";
+import { nextTick, onMounted, ref, watch, watchEffect } from "vue";
 import { Back, Collection } from "@element-plus/icons-vue";
 import router from "@/router";
 import {
@@ -172,8 +172,6 @@ import FileSaver from "file-saver";
 
 const route = useRoute();
 const store = createStore();
-
-const query: any = route.query;
 
 const leftChatAreaWrapper: any = ref(null);
 const rightChatAreaWrapper: any = ref(null);
@@ -248,37 +246,45 @@ const handleExport = async () => {
   let conversationInfo: WebConversationInfoResp;
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {
-    conversationId: query.conversationId,
+    conversationId: (route.query as any).conversationId,
     consultationCurrent: 1,
     consultationSize: 100000,
     helpCurrent: 1,
     helpSize: 100000
   };
-  if (query.from == "help") {
+  if ((route.query as any).from == "help") {
     allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
-    conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
-  } else if (query.from === "list") {
+    conversationInfo = await getSupervisorOwnHelpInfo(
+      (route.query as any).conversationId
+    );
+  } else if ((route.query as any).from === "list") {
     if (store.role === "supervisor") {
       allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
-      conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+      conversationInfo = await getSupervisorOwnHelpInfo(
+        (route.query as any).conversationId
+      );
     } else if (store.role === "consultant") {
       allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
       conversationInfo = await getConsultantOwnConsultationInfo(
-        query.conversationId
+        (route.query as any).conversationId
       );
     }
   } else {
     if (store.role === "supervisor") {
       allMsgList = await getBoundConsultantsMsg(allMsgReq);
-      conversationInfo = await getBoundConsultantsInfo(query.conversationId);
+      conversationInfo = await getBoundConsultantsInfo(
+        (route.query as any).conversationId
+      );
     } else if (store.role === "consultant") {
       allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
       conversationInfo = await getConsultantOwnConsultationInfo(
-        query.conversationId
+        (route.query as any).conversationId
       );
     } else if (store.role === "admin") {
       allMsgList = await getAdminConsultationMsg(allMsgReq);
-      conversationInfo = await getAdminConsultationInfo(query.conversationId);
+      conversationInfo = await getAdminConsultationInfo(
+        (route.query as any).conversationId
+      );
     }
   }
   const data = preExport(conversationInfo, allMsgList);
@@ -308,25 +314,33 @@ const pageSize = 15;
 
 const getInfo = async () => {
   let conversationInfo: WebConversationInfoResp;
-  if (query.from === "help") {
-    conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
-  } else if (query.from === "list") {
+  if ((route.query as any).from === "help") {
+    conversationInfo = await getSupervisorOwnHelpInfo(
+      (route.query as any).conversationId
+    );
+  } else if ((route.query as any).from === "list") {
     if (store.role === "supervisor") {
-      conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+      conversationInfo = await getSupervisorOwnHelpInfo(
+        (route.query as any).conversationId
+      );
     } else if (store.role === "consultant") {
       conversationInfo = await getConsultantOwnConsultationInfo(
-        query.conversationId
+        (route.query as any).conversationId
       );
     }
   } else {
     if (store.role === "supervisor") {
-      conversationInfo = await getBoundConsultantsInfo(query.conversationId);
+      conversationInfo = await getBoundConsultantsInfo(
+        (route.query as any).conversationId
+      );
     } else if (store.role === "consultant") {
       conversationInfo = await getConsultantOwnConsultationInfo(
-        query.conversationId
+        (route.query as any).conversationId
       );
     } else if (store.role === "admin") {
-      conversationInfo = await getAdminConsultationInfo(query.conversationId);
+      conversationInfo = await getAdminConsultationInfo(
+        (route.query as any).conversationId
+      );
     }
   }
   allInfo.value = conversationInfo;
@@ -338,15 +352,15 @@ const getMsg = async (
 ): Promise<AllMsgListResp> => {
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {
-    conversationId: query.conversationId,
+    conversationId: (route.query as any).conversationId,
     consultationCurrent: consultationCurrent.value,
     consultationSize: pageSize,
     helpCurrent: helpCurrent.value,
     helpSize: pageSize
   };
-  if (query.from === "help") {
+  if ((route.query as any).from === "help") {
     allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
-  } else if (query.from === "list") {
+  } else if ((route.query as any).from === "list") {
     if (store.role === "supervisor") {
       allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
     } else if (store.role === "consultant") {
@@ -369,6 +383,22 @@ const getMsg = async (
   }
   return allMsgList;
 };
+
+watch(route, async (newValue, oldValue) => {
+  console.log("watch");
+  await getInfo();
+  const data = await getMsg(true, true);
+  data.consultation?.reverse();
+  data.help?.reverse();
+  allMsg.value = data;
+  // 滑动到最底部
+  await nextTick(() => {
+    leftReflow();
+    setLeftScrollTop(leftScrollHeight.value - leftClientHeight.value);
+    rightReflow();
+    setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
+  });
+});
 
 onMounted(async () => {
   await getInfo();

@@ -133,7 +133,7 @@
 
 <script lang="ts" setup>
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import { onMounted, onUnmounted, reactive, ref, watchEffect } from "vue";
+import { onMounted, onUnmounted, reactive, ref, watch, watchEffect } from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import { Check, User } from "@element-plus/icons-vue";
@@ -159,16 +159,20 @@ let leftEndBtnShown = ref(true);
 let rightHelpWrapperShown = ref(false);
 let rightHelpBtnShown = ref(false);
 
-const conversationId = route.query.conversationId as string;
-
 let timer;
 let helpTimer;
+let currentTime = ref(new Date().getTime());
+let currentHelpTime = ref(new Date().getTime());
+let leftIsEnd = ref(false);
+let rightIsEnd = ref(false);
 
 const refreshData = async () => {
   timer && clearInterval(timer);
   helpTimer && clearInterval(helpTimer);
   try {
-    const data = await getOnlineConsultationInfo(conversationId);
+    const data = await getOnlineConsultationInfo(
+      (route.query as any).conversationId
+    );
     allInfo.value = data;
     if (data.helpInfo != null) {
       leftHelpBtnShown.value = false;
@@ -227,7 +231,7 @@ const handleHelp = async () => {
 
 const handleSubmit = async () => {
   await callHelp({
-    conversationId: conversationId,
+    conversationId: (route.query as any).conversationId,
     toId: form.supervisor
   });
   await refreshData();
@@ -237,17 +241,12 @@ const handleSubmit = async () => {
 // 所有信息
 let allInfo = ref<WebConversationInfoResp>();
 let allMsg = ref<AllMsgListResp>();
-let currentTime = ref(new Date().getTime());
-let currentHelpTime = ref(new Date().getTime());
-
-let leftIsEnd = ref(false);
-let rightIsEnd = ref(false);
 
 const handleStop = async () => {
   timer && clearInterval(timer);
   helpTimer && clearInterval(helpTimer);
   await endConsultation({
-    conversationId: conversationId
+    conversationId: (route.query as any).conversationId
   });
   leftIsEnd.value = true;
   rightIsEnd.value = true;
@@ -259,7 +258,6 @@ const handleStopHelp = async () => {
   await endHelp({
     conversationId: <string>allInfo.value?.helpInfo?.helpId
   });
-
   await refreshData();
   rightIsEnd.value = true;
   rightHelpBtnShown.value = false;
@@ -274,10 +272,14 @@ watchEffect(async () => {
   if (store.websocketMessage != null) {
     const msg = store.websocketMessage as WebSocketResponse;
     if (msg.type === "endConsultation") {
+      await refreshData();
       leftIsEnd.value = true;
       rightIsEnd.value = true;
-      timer && clearInterval(timer);
-      helpTimer && clearInterval(helpTimer);
+    } else if (msg.type === "endHelp") {
+      await refreshData();
+      rightIsEnd.value = true;
+      rightHelpBtnShown.value = false;
+      store.setWebSocketMessage(null);
     }
   }
 });

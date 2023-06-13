@@ -25,42 +25,54 @@
         </template>
         <template #middle>
           <div style="margin: 10px 0; font-size: 20px; font-weight: bold">
-            正在咨询中
+            {{ allInfo?.consultationInfo.end ? "咨询已完成" : "正在咨询中" }}
           </div>
           <div style="margin: 10px 0; font-size: 20px">已咨询时间</div>
-          <div style="margin: 10px 0; font-size: 40px">00:13:13</div>
-        </template>
-        <template #bottom>
-          <el-divider />
-          <el-button
-            size="large"
-            :icon="User"
-            style="margin: 0 20px; font-size: 20px"
-            color="#337ecc"
-            @click="handleHelp"
-          >
-            请求督导
-          </el-button>
-          <el-divider />
-          <el-button
-            size="large"
-            :icon="Check"
-            style="margin: 0 20px; font-size: 20px"
-            color="#337ecc"
-            @click="stopConversion"
-          >
-            结束咨询
-          </el-button>
+          <div style="margin: 10px 0; font-size: 40px">
+            {{
+              parseTime(
+                (currentTime - allInfo?.consultationInfo.startTime) / 1000
+              )
+            }}
+          </div>
         </template>
       </conversation-info>
     </div>
-    <im-component :is-left="true">
+    <im-component :is-left="true" :is-end="leftIsEnd">
       <template #left>
-        <supervisor-to-consultant :is-show-btn="true">
+        <supervisor-to-consultant
+          :is-show-btn="leftHelpBtnShown"
+          @on-stop="handleStopHelp"
+        >
           <template #left>
-            <div style="font-size: 25px">督导A</div>
-            <div>正在求助中</div>
-            <div style="font-size: 30px">00:13:13</div>
+            <img
+              :src="allInfo?.helpInfo?.avatar"
+              class="avatar"
+              alt=""
+              onerror="this.src='/src/assets/defaultAvatar.jpg'"
+            />
+            <div
+              style="
+                margin-left: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+              "
+            >
+              <div style="font-size: 25px">
+                {{ allInfo?.consultationInfo.consultantName }}
+              </div>
+              <div>
+                {{ allInfo?.helpInfo?.end ? "求助已完成" : "正在求助中" }}
+              </div>
+              <div style="font-size: 30px">
+                {{
+                  parseTime(
+                    (currentHelpTime - allInfo?.helpInfo?.startTime) / 1000
+                  )
+                }}
+              </div>
+            </div>
           </template>
         </supervisor-to-consultant>
       </template>
@@ -80,43 +92,97 @@
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
-import { onMounted, ref } from "vue";
-import { Check, User } from "@element-plus/icons-vue";
+import { onMounted, onUnmounted, ref, watchEffect } from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
-import { mosaic } from "@/utils";
+import { mosaic, parseTime } from "@/utils";
 import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
-import {
-  endConsultation,
-  getOnlineHelpInfo
-} from "@/apis/conversation/conversation";
+import { endHelp, getOnlineHelpInfo } from "@/apis/conversation/conversation";
 import { AllMsgListResp } from "@/apis/message/message-interface";
 import { useRoute } from "vue-router";
+import { WebSocketResponse } from "@/apis/schema";
+import createStore from "@/store";
 const consultantSupervisorData = ref([]);
 const route = useRoute();
-const conversationId = route.query.conversationId as string;
-const userId = route.query.userId as string;
-const handleHelp = () => {};
-const stopConversion = () => {};
+const store = createStore();
+
+let leftHelpBtnShown = ref(false);
+
+let timer;
+let helpTimer;
+let leftIsEnd = ref(false);
 
 // 所有信息
 let allInfo = ref<WebConversationInfoResp>();
 let allMsg = ref<AllMsgListResp>();
 let currentTime = ref(new Date().getTime());
-let leftIsEnd = ref(false);
-let timer;
-const handleStop = async () => {
-  await endConsultation({
-    conversationId: conversationId,
-    myId: userId
-  });
-  leftIsEnd.value = true;
-  clearInterval(timer);
+let currentHelpTime = ref(new Date().getTime());
+
+const refreshData = async () => {
+  timer && clearInterval(timer);
+  helpTimer && clearInterval(helpTimer);
+  try {
+    const data = await getOnlineHelpInfo((route.query as any).conversationId);
+    allInfo.value = data;
+    if (data.helpInfo != null) {
+      if (!data.helpInfo.end) {
+        leftHelpBtnShown.value = true;
+      }
+    }
+    if (data.consultationInfo.end) {
+      // 结束了啥也不展示
+      currentTime.value = data.consultationInfo.lastTime;
+      currentHelpTime.value = <number>data.helpInfo?.endTime;
+      leftIsEnd.value = true;
+    } else {
+      timer = setInterval(() => {
+        currentTime.value = new Date().getTime();
+      }, 1000);
+      if (!data.helpInfo?.end) {
+        helpTimer = setInterval(() => {
+          currentHelpTime.value = new Date().getTime();
+        }, 1000);
+      }
+    }
+  } catch (e) {
+    leftIsEnd.value = true;
+    currentTime.value = 0;
+    currentHelpTime.value = 0;
+  }
 };
+
 onMounted(async () => {
-  allInfo.value = await getOnlineHelpInfo(conversationId);
-  timer = setInterval(() => {
-    currentTime.value = new Date().getTime();
-  }, 1000);
+  await refreshData();
+});
+
+const handleStopHelp = async () => {
+  helpTimer && clearInterval(helpTimer);
+  await endHelp({
+    conversationId: <string>allInfo.value?.helpInfo?.helpId
+  });
+  await refreshData();
+  leftIsEnd.value = true;
+  leftHelpBtnShown.value = false;
+};
+
+watchEffect(async () => {
+  // 是对方结束会话
+  if (store.websocketMessage != null) {
+    const msg = store.websocketMessage as WebSocketResponse;
+    if (msg.type === "endConsultation") {
+      await refreshData();
+      leftIsEnd.value = true;
+    } else if (msg.type === "endHelp") {
+      await refreshData();
+      leftIsEnd.value = true;
+      leftHelpBtnShown.value = false;
+      store.setWebSocketMessage(null);
+    }
+  }
+});
+
+onUnmounted(() => {
+  timer && clearInterval(timer);
+  helpTimer && clearInterval(helpTimer);
 });
 </script>
 
