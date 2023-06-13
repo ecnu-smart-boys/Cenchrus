@@ -10,6 +10,7 @@
         :icon="Check"
         style="margin: 0 20px; font-size: 20px"
         color="#1e5a96"
+        @click="handleClick"
       >
         结束求助
       </el-button>
@@ -22,6 +23,13 @@ import { Check } from "@element-plus/icons-vue";
 const props = defineProps<{
   isShowBtn: boolean;
 }>();
+
+const emits = defineEmits<{
+  (event: "onStop"): void;
+}>();
+const handleClick = () => {
+  emits("onStop");
+};
 </script>
 
 <style scoped lang="scss">

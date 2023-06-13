@@ -2,6 +2,7 @@ import request from "@/apis/http";
 import {
   availableSupervisorsResp,
   CallHelpReq,
+  callHelpResp,
   CommentReq,
   ConsultRecordListReq,
   ConsultRecordsResp,
@@ -206,7 +207,7 @@ export function availableSupervisors(): Promise<availableSupervisorsResp[]> {
 }
 
 // 求助督导
-export function callHelp(callHelpReq: CallHelpReq): Promise<any> {
+export function callHelp(callHelpReq: CallHelpReq): Promise<callHelpResp> {
   return request({
     method: "post",
     url: "/conversation/callHelp",

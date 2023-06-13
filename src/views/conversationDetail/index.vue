@@ -56,6 +56,7 @@
           </div>
         </template>
         <template #bottom>
+          <el-divider />
           <el-button
             size="large"
             :icon="Collection"

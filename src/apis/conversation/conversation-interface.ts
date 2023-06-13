@@ -1,3 +1,5 @@
+import { callHelp } from "@/apis/conversation/conversation";
+
 export interface ConversationInfo {
   conversationId: string;
   startTime: number;
@@ -51,7 +53,6 @@ export interface ConsultRecordListReq {
 
 export interface EndReq {
   conversationId: string;
-  myId: string;
 }
 
 export interface CallHelpReq {
@@ -116,6 +117,7 @@ export interface HelpInfo {
   startTime: number;
   endTime: number;
   end: boolean;
+  helpId: string;
 }
 export interface WebConversationInfoResp {
   consultationInfo: ConsultationInfo;
@@ -128,4 +130,12 @@ export interface WebConversationInfoResp {
 
 export interface RemoveConversationReq {
   conversationId: string;
+}
+
+export interface callHelpResp {
+  conversationId: string;
+  userId: string;
+  name: string;
+  avatar: string;
+  isEnd: boolean;
 }

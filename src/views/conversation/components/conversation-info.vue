@@ -10,7 +10,6 @@
       </div>
     </div>
     <div style="padding: 20px; display: flex; flex-direction: column">
-      <el-divider />
       <slot name="bottom"></slot>
     </div>
   </div>

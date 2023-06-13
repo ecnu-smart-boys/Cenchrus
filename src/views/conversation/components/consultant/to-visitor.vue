@@ -37,6 +37,7 @@
           </div>
         </template>
         <template #bottom>
+          <el-divider v-if="leftHelpBtnShown" />
           <el-button
             v-if="leftHelpBtnShown"
             size="large"
@@ -70,7 +71,10 @@
       :is-end="rightIsEnd"
     >
       <template #left>
-        <supervisor-to-consultant :is-show-btn="rightHelpBtnShown">
+        <supervisor-to-consultant
+          :is-show-btn="rightHelpBtnShown"
+          @on-stop="handleStopHelp"
+        >
           <template #left>
             <img
               :src="allInfo?.helpInfo?.avatar"
@@ -129,7 +133,7 @@
 
 <script lang="ts" setup>
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import { onMounted, reactive, ref, watchEffect } from "vue";
+import { onMounted, onUnmounted, reactive, ref, watchEffect } from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import { Check, User } from "@element-plus/icons-vue";
@@ -138,6 +142,7 @@ import {
   availableSupervisors,
   callHelp,
   endConsultation,
+  endHelp,
   getOnlineConsultationInfo
 } from "@/apis/conversation/conversation";
 import { AllMsgListResp } from "@/apis/message/message-interface";
@@ -155,55 +160,13 @@ let rightHelpWrapperShown = ref(false);
 let rightHelpBtnShown = ref(false);
 
 const conversationId = route.query.conversationId as string;
-const userId = route.query.userId as string;
 
-// 添加督导相关
-const form = reactive({
-  supervisor: ""
-});
-
-const options = reactive([]);
-
-const handleHelp = async () => {
-  const data = await availableSupervisors();
-  options.splice(0);
-  data.forEach((i) => {
-    options.push({
-      value: i.id,
-      label: i.name
-    });
-  });
-  dialogVisible.value = true;
-};
-
-const handleSubmit = async () => {
-  await callHelp({
-    conversationId: conversationId,
-    toId: form.supervisor
-  });
-  leftHelpBtnShown.value = false;
-};
-// 所有信息
-let allInfo = ref<WebConversationInfoResp>();
-let allMsg = ref<AllMsgListResp>();
-let currentTime = ref(new Date().getTime());
-let currentHelpTime = ref(new Date().getTime());
-
-let leftIsEnd = ref(false);
-let rightIsEnd = ref(false);
 let timer;
 let helpTimer;
-const handleStop = async () => {
-  await endConsultation({
-    conversationId: conversationId,
-    myId: userId
-  });
-  leftIsEnd.value = true;
-  rightIsEnd.value = true;
+
+const refreshData = async () => {
   timer && clearInterval(timer);
   helpTimer && clearInterval(helpTimer);
-};
-onMounted(async () => {
   try {
     const data = await getOnlineConsultationInfo(conversationId);
     allInfo.value = data;
@@ -241,6 +204,69 @@ onMounted(async () => {
     currentTime.value = 0;
     currentHelpTime.value = 0;
   }
+};
+
+// 添加督导相关
+const form = reactive({
+  supervisor: ""
+});
+
+const options = reactive([]);
+
+const handleHelp = async () => {
+  const data = await availableSupervisors();
+  options.splice(0);
+  data.forEach((i) => {
+    options.push({
+      value: i.id,
+      label: i.name
+    });
+  });
+  dialogVisible.value = true;
+};
+
+const handleSubmit = async () => {
+  await callHelp({
+    conversationId: conversationId,
+    toId: form.supervisor
+  });
+  await refreshData();
+  dialogVisible.value = false;
+};
+
+// 所有信息
+let allInfo = ref<WebConversationInfoResp>();
+let allMsg = ref<AllMsgListResp>();
+let currentTime = ref(new Date().getTime());
+let currentHelpTime = ref(new Date().getTime());
+
+let leftIsEnd = ref(false);
+let rightIsEnd = ref(false);
+
+const handleStop = async () => {
+  timer && clearInterval(timer);
+  helpTimer && clearInterval(helpTimer);
+  await endConsultation({
+    conversationId: conversationId
+  });
+  leftIsEnd.value = true;
+  rightIsEnd.value = true;
+  leftEndBtnShown.value = false;
+};
+
+const handleStopHelp = async () => {
+  helpTimer && clearInterval(helpTimer);
+  await endHelp({
+    conversationId: <string>allInfo.value?.helpInfo?.helpId
+  });
+
+  await refreshData();
+  rightIsEnd.value = true;
+  rightHelpBtnShown.value = false;
+};
+
+onMounted(async () => {
+  await refreshData();
 });
 
 watchEffect(async () => {
@@ -250,9 +276,15 @@ watchEffect(async () => {
     if (msg.type === "endConsultation") {
       leftIsEnd.value = true;
       rightIsEnd.value = true;
-      clearInterval(timer);
+      timer && clearInterval(timer);
+      helpTimer && clearInterval(helpTimer);
     }
   }
+});
+
+onUnmounted(() => {
+  timer && clearInterval(timer);
+  helpTimer && clearInterval(helpTimer);
 });
 </script>
 

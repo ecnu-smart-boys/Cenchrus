@@ -31,6 +31,7 @@
           <div style="margin: 10px 0; font-size: 40px">00:13:13</div>
         </template>
         <template #bottom>
+          <el-divider />
           <el-button
             size="large"
             :icon="User"
