@@ -256,6 +256,16 @@ const handleExport = async () => {
   if (query.from == "help") {
     allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
     conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+  } else if (query.from === "list") {
+    if (store.role === "supervisor") {
+      allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+      conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+    } else if (store.role === "consultant") {
+      allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
+      conversationInfo = await getConsultantOwnConsultationInfo(
+        query.conversationId
+      );
+    }
   } else {
     if (store.role === "supervisor") {
       allMsgList = await getBoundConsultantsMsg(allMsgReq);
@@ -299,6 +309,14 @@ const getInfo = async () => {
   let conversationInfo: WebConversationInfoResp;
   if (query.from === "help") {
     conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+  } else if (query.from === "list") {
+    if (store.role === "supervisor") {
+      conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+    } else if (store.role === "consultant") {
+      conversationInfo = await getConsultantOwnConsultationInfo(
+        query.conversationId
+      );
+    }
   } else {
     if (store.role === "supervisor") {
       conversationInfo = await getBoundConsultantsInfo(query.conversationId);
@@ -327,6 +345,12 @@ const getMsg = async (
   };
   if (query.from === "help") {
     allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+  } else if (query.from === "list") {
+    if (store.role === "supervisor") {
+      allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+    } else if (store.role === "consultant") {
+      allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
+    }
   } else {
     if (store.role === "supervisor") {
       allMsgList = await getBoundConsultantsMsg(allMsgReq);

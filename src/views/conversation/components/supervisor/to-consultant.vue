@@ -2,6 +2,27 @@
   <div style="display: flex">
     <div>
       <conversation-info>
+        <template #head>
+          <img
+            :src="allInfo?.consultationInfo.visitorAvatar"
+            class="avatar"
+            alt=""
+            onerror="this.src='/src/assets/defaultAvatar.jpg'"
+          />
+          <div
+            style="
+              margin-left: 20px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+            "
+          >
+            <div style="font-size: 25px">
+              {{ allInfo?.consultationInfo.visitorName }}
+            </div>
+            <div>{{ mosaic(allInfo?.consultationInfo.phone) }}</div>
+          </div>
+        </template>
         <template #middle>
           <div style="margin: 10px 0; font-size: 20px; font-weight: bold">
             正在咨询中
@@ -15,7 +36,7 @@
             :icon="User"
             style="margin: 0 20px; font-size: 20px"
             color="#337ecc"
-            @click="askHelp"
+            @click="handleHelp"
           >
             请求督导
           </el-button>
@@ -58,12 +79,44 @@
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Check, User } from "@element-plus/icons-vue";
 import ImComponent from "@/imComponent/im-component.vue";
+import { mosaic } from "@/utils";
+import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
+import {
+  endConsultation,
+  getOnlineHelpInfo
+} from "@/apis/conversation/conversation";
+import { AllMsgListResp } from "@/apis/message/message-interface";
+import { useRoute } from "vue-router";
 const consultantSupervisorData = ref([]);
-const askHelp = () => {};
+const route = useRoute();
+const conversationId = route.query.conversationId as string;
+const userId = route.query.userId as string;
+const handleHelp = () => {};
 const stopConversion = () => {};
+
+// 所有信息
+let allInfo = ref<WebConversationInfoResp>();
+let allMsg = ref<AllMsgListResp>();
+let currentTime = ref(new Date().getTime());
+let leftIsEnd = ref(false);
+let timer;
+const handleStop = async () => {
+  await endConsultation({
+    conversationId: conversationId,
+    myId: userId
+  });
+  leftIsEnd.value = true;
+  clearInterval(timer);
+};
+onMounted(async () => {
+  allInfo.value = await getOnlineHelpInfo(conversationId);
+  timer = setInterval(() => {
+    currentTime.value = new Date().getTime();
+  }, 1000);
+});
 </script>
 
 <style scoped lang="scss">

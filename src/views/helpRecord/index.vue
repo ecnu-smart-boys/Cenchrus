@@ -102,6 +102,27 @@ let isLoading = ref(false);
 let selectDate = ref("");
 let timeStamp = ref(0);
 
+const refreshData = async () => {
+  isLoading.value = true;
+  const data = await getSupervisorHelpRecords({
+    current: currentPage.value,
+    size: pageSize.value,
+    name: searchName.value,
+    timestamp: timeStamp.value
+  });
+  tableData.splice(0);
+  totalPage.value = data.total;
+  data.records.forEach((i) => {
+    tableData.push({
+      consultantName: i.consultantName,
+      duration: parseTime((i.endTime - i.startTime) / 1000),
+      date: parseTimestamp(i.startTime),
+      id: i.id
+    });
+  });
+  isLoading.value = false;
+};
+
 watchEffect(async () => {
   if (selectDate.value == null) {
     timeStamp.value = 0;
@@ -169,25 +190,6 @@ const handleExport = async (row) => {
   });
 };
 
-const refreshData = async () => {
-  isLoading.value = true;
-  const data = await getSupervisorHelpRecords({
-    current: currentPage.value,
-    size: pageSize.value,
-    name: searchName.value,
-    timestamp: timeStamp.value
-  });
-  tableData.splice(0);
-  totalPage.value = data.total;
-  data.records.forEach((i) => {
-    tableData.push({
-      consultantName: i.consultantName,
-      duration: parseTime((i.endTime - i.startTime) / 1000),
-      date: parseTimestamp(i.startTime)
-    });
-  });
-  isLoading.value = false;
-};
 onMounted(async () => {
   await refreshData();
 });
