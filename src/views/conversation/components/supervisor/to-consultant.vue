@@ -92,14 +92,18 @@
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
-import { onMounted, onUnmounted, ref, watchEffect } from "vue";
+import { onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
 import { mosaic, parseTime } from "@/utils";
 import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
 import { endHelp, getOnlineHelpInfo } from "@/apis/conversation/conversation";
 import { AllMsgListResp } from "@/apis/message/message-interface";
 import { useRoute } from "vue-router";
-import { WebSocketResponse } from "@/apis/schema";
+import {
+  EndConsultationNotification,
+  EndHelpNotification,
+  WebSocketResponse
+} from "@/apis/schema";
 import createStore from "@/store";
 const consultantSupervisorData = ref([]);
 const route = useRoute();
@@ -150,6 +154,10 @@ const refreshData = async () => {
   }
 };
 
+watch(route, async () => {
+  await refreshData();
+});
+
 onMounted(async () => {
   await refreshData();
 });
@@ -169,9 +177,19 @@ watchEffect(async () => {
   if (store.websocketMessage != null) {
     const msg = store.websocketMessage as WebSocketResponse;
     if (msg.type === "endConsultation") {
+      const content = msg.content as EndConsultationNotification;
+      if (
+        content.consultationId !== allInfo.value?.consultationInfo.consultantId
+      ) {
+        return;
+      }
       await refreshData();
       leftIsEnd.value = true;
     } else if (msg.type === "endHelp") {
+      const content = msg.content as EndHelpNotification;
+      if (content.helpId !== allInfo.value?.helpInfo?.helpId) {
+        return;
+      }
       await refreshData();
       leftIsEnd.value = true;
       leftHelpBtnShown.value = false;

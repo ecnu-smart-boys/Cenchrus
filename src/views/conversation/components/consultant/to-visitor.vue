@@ -133,7 +133,15 @@
 
 <script lang="ts" setup>
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import { onMounted, onUnmounted, reactive, ref, watch, watchEffect } from "vue";
+import {
+  nextTick,
+  onMounted,
+  onUnmounted,
+  reactive,
+  ref,
+  watch,
+  watchEffect
+} from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import { Check, User } from "@element-plus/icons-vue";
@@ -148,7 +156,11 @@ import {
 import { AllMsgListResp } from "@/apis/message/message-interface";
 import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
 import { mosaic, parseTime } from "@/utils";
-import { WebSocketResponse } from "@/apis/schema";
+import {
+  EndConsultationNotification,
+  EndHelpNotification,
+  WebSocketResponse
+} from "@/apis/schema";
 import createStore from "@/store";
 const store = createStore();
 const route = useRoute();
@@ -263,6 +275,10 @@ const handleStopHelp = async () => {
   rightHelpBtnShown.value = false;
 };
 
+watch(route, async () => {
+  await refreshData();
+});
+
 onMounted(async () => {
   await refreshData();
 });
@@ -272,10 +288,20 @@ watchEffect(async () => {
   if (store.websocketMessage != null) {
     const msg = store.websocketMessage as WebSocketResponse;
     if (msg.type === "endConsultation") {
+      const content = msg.content as EndConsultationNotification;
+      if (
+        content.consultationId !== allInfo.value?.consultationInfo.consultantId
+      ) {
+        return;
+      }
       await refreshData();
       leftIsEnd.value = true;
       rightIsEnd.value = true;
     } else if (msg.type === "endHelp") {
+      const content = msg.content as EndHelpNotification;
+      if (content.helpId !== allInfo.value?.helpInfo?.helpId) {
+        return;
+      }
       await refreshData();
       rightIsEnd.value = true;
       rightHelpBtnShown.value = false;

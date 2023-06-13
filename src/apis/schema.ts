@@ -9,7 +9,11 @@ export interface BaseResponse {
 
 export interface WebSocketResponse {
   type: string;
-  content: OnlineConversation | any;
+  content:
+    | OnlineConversation
+    | EndHelpNotification
+    | EndConsultationNotification
+    | any;
 }
 
 export interface OnlineConversation {
@@ -18,4 +22,19 @@ export interface OnlineConversation {
   name: string;
   avatar: string;
   end: boolean;
+}
+
+export interface EndHelpNotification {
+  conversationId: string;
+  helpId: string;
+  consultantName: string;
+  supervisorName: string;
+}
+
+export interface EndConsultationNotification {
+  consultationId: string;
+  helpId: string;
+  visitorName: string;
+  consultantName: string;
+  supervisorName: string;
 }

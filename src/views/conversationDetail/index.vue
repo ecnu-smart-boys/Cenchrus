@@ -384,8 +384,7 @@ const getMsg = async (
   return allMsgList;
 };
 
-watch(route, async (newValue, oldValue) => {
-  console.log("watch");
+watch(route, async () => {
   await getInfo();
   const data = await getMsg(true, true);
   data.consultation?.reverse();

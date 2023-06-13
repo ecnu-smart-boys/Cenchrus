@@ -33,7 +33,12 @@ import { onMounted, reactive, watchEffect } from "vue";
 import router from "@/router";
 import useRightClick from "@/hooks/userRightClick";
 import createStore from "@/store";
-import { OnlineConversation, WebSocketResponse } from "@/apis/schema";
+import {
+  EndConsultationNotification,
+  EndHelpNotification,
+  OnlineConversation,
+  WebSocketResponse
+} from "@/apis/schema";
 import {
   getOnlineConversationsList,
   removeConversation
@@ -114,6 +119,12 @@ watchEffect(async () => {
       });
       store.setWebSocketMessage(null);
     } else if (msg.type === "endConsultation") {
+      const content = msg.content as EndConsultationNotification;
+      ElNotification({
+        title: "Info",
+        message: `与访客${content.visitorName}的会话已结束`,
+        type: "info"
+      });
       await getConversationData();
       store.setWebSocketMessage(null);
     } else if (msg.type === "startHelp") {
@@ -127,6 +138,21 @@ watchEffect(async () => {
         message: "您有一个新求助",
         type: "info"
       });
+    } else if (msg.type === "endHelp") {
+      const content = msg.content as EndHelpNotification;
+      if (store.role === "supervisor") {
+        ElNotification({
+          title: "Info",
+          message: `与咨询师${content.consultantName}的求助已结束`,
+          type: "info"
+        });
+      } else if (store.role === "consultant") {
+        ElNotification({
+          title: "Info",
+          message: `与督导${content.supervisorName}的求助已结束`,
+          type: "info"
+        });
+      }
     }
   }
 });
