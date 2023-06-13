@@ -1,5 +1,6 @@
 import request from "@/apis/http";
 import {
+  availableSupervisorsResp,
   CallHelpReq,
   CommentReq,
   ConsultRecordListReq,
@@ -193,6 +194,14 @@ export function endConsultation(endReq: EndReq): Promise<any> {
     method: "post",
     url: "/conversation/endConsultation",
     data: endReq
+  });
+}
+
+// 获得可选择的督导
+export function availableSupervisors(): Promise<availableSupervisorsResp[]> {
+  return request({
+    method: "get",
+    url: "/conversation/availableSupervisors"
   });
 }
 

@@ -1,7 +1,7 @@
 <template>
   <ul id="chat_list_wrapper" ref="UL">
     <li v-for="item in currentMessage" :key="item.ID" class="clearfix">
-      <div class="timestamp">{{ parseTimestamp(item.clientTime) }}</div>
+      <div class="timestamp">{{ parseTimestamp(item.clientTime * 1000) }}</div>
       <div
         v-if="!item.isRevoked"
         :class="item.flow == MSG_FLOW.OUT ? 'textRight' : 'textLeft'"

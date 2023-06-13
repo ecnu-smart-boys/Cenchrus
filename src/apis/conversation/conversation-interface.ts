@@ -56,7 +56,6 @@ export interface EndReq {
 
 export interface CallHelpReq {
   toId: string;
-  myId: string;
   conversationId: string;
 }
 
@@ -101,7 +100,13 @@ export interface ConsultationInfo {
   visitorId: string;
   startTime: number;
   lastTime: number;
-  isEnd: boolean;
+  end: boolean;
+}
+
+export interface availableSupervisorsResp {
+  avatar: string;
+  name: string;
+  id: string;
 }
 
 export interface HelpInfo {
@@ -110,7 +115,7 @@ export interface HelpInfo {
   supervisorId: string;
   startTime: number;
   endTime: number;
-  isEnd: boolean;
+  end: boolean;
 }
 export interface WebConversationInfoResp {
   consultationInfo: ConsultationInfo;

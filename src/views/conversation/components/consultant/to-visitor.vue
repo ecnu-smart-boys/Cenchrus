@@ -25,7 +25,7 @@
         </template>
         <template #middle>
           <div style="margin: 10px 0; font-size: 20px; font-weight: bold">
-            正在咨询中
+            {{ allInfo?.consultationInfo.end ? "咨询已完成" : "正在咨询中" }}
           </div>
           <div style="margin: 10px 0; font-size: 20px">已咨询时间</div>
           <div style="margin: 10px 0; font-size: 40px">
@@ -38,6 +38,7 @@
         </template>
         <template #bottom>
           <el-button
+            v-if="leftHelpBtnShown"
             size="large"
             :icon="User"
             style="margin: 0 20px; font-size: 20px"
@@ -46,8 +47,9 @@
           >
             请求督导
           </el-button>
-          <el-divider />
+          <el-divider v-if="leftEndBtnShown" />
           <el-button
+            v-if="leftEndBtnShown"
             size="large"
             :icon="Check"
             style="margin: 0 20px; font-size: 20px"
@@ -61,9 +63,14 @@
     </div>
     <im-component :is-left="true" to-id="2_1" :is-end="leftIsEnd">
     </im-component>
-    <im-component :is-left="false" to-id="3_1" :is-end="rightIsEnd">
+    <im-component
+      v-if="rightHelpWrapperShown"
+      :is-left="false"
+      to-id="3_1"
+      :is-end="rightIsEnd"
+    >
       <template #left>
-        <supervisor-to-consultant :is-show-btn="true">
+        <supervisor-to-consultant :is-show-btn="rightHelpBtnShown">
           <template #left>
             <img
               :src="allInfo?.helpInfo?.avatar"
@@ -79,25 +86,57 @@
                 justify-content: center;
               "
             >
-              <div style="font-size: 25px">督导A</div>
-              <div>正在求助中</div>
-              <div style="font-size: 30px">00:13:13</div>
+              <div style="font-size: 25px">
+                {{ allInfo?.helpInfo?.supervisorName }}
+              </div>
+              <div>
+                {{ allInfo?.helpInfo?.end ? "求助已完成" : "正在求助中" }}
+              </div>
+              <div style="font-size: 30px">
+                {{
+                  parseTime(
+                    (currentHelpTime - allInfo?.helpInfo?.startTime) / 1000
+                  )
+                }}
+              </div>
             </div>
           </template>
         </supervisor-to-consultant>
       </template>
     </im-component>
   </div>
+  <el-dialog v-model="dialogVisible" title="选择督导" width="400px">
+    <el-form :model="form" label-width="120px" label-position="top" status-icon>
+      <el-form-item label="选择督导" prop="supervisor">
+        <el-select v-model="form.supervisor" style="width: 100%">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false"> 取消 </el-button>
+        <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, reactive, ref, watchEffect } from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import { Check, User } from "@element-plus/icons-vue";
 import { useRoute } from "vue-router";
 import {
+  availableSupervisors,
+  callHelp,
   endConsultation,
   getOnlineConsultationInfo
 } from "@/apis/conversation/conversation";
@@ -107,22 +146,53 @@ import { mosaic, parseTime } from "@/utils";
 import { WebSocketResponse } from "@/apis/schema";
 import createStore from "@/store";
 const store = createStore();
-let isHelping = ref(false);
 const route = useRoute();
+
+let dialogVisible = ref(false);
+let leftHelpBtnShown = ref(true);
+let leftEndBtnShown = ref(true);
+let rightHelpWrapperShown = ref(false);
+let rightHelpBtnShown = ref(false);
 
 const conversationId = route.query.conversationId as string;
 const userId = route.query.userId as string;
-const handleHelp = () => {
-  isHelping.value = !isHelping.value;
+
+// 添加督导相关
+const form = reactive({
+  supervisor: ""
+});
+
+const options = reactive([]);
+
+const handleHelp = async () => {
+  const data = await availableSupervisors();
+  options.splice(0);
+  data.forEach((i) => {
+    options.push({
+      value: i.id,
+      label: i.name
+    });
+  });
+  dialogVisible.value = true;
+};
+
+const handleSubmit = async () => {
+  await callHelp({
+    conversationId: conversationId,
+    toId: form.supervisor
+  });
+  leftHelpBtnShown.value = false;
 };
 // 所有信息
 let allInfo = ref<WebConversationInfoResp>();
 let allMsg = ref<AllMsgListResp>();
 let currentTime = ref(new Date().getTime());
+let currentHelpTime = ref(new Date().getTime());
 
 let leftIsEnd = ref(false);
 let rightIsEnd = ref(false);
 let timer;
+let helpTimer;
 const handleStop = async () => {
   await endConsultation({
     conversationId: conversationId,
@@ -130,13 +200,47 @@ const handleStop = async () => {
   });
   leftIsEnd.value = true;
   rightIsEnd.value = true;
-  clearInterval(timer);
+  timer && clearInterval(timer);
+  helpTimer && clearInterval(helpTimer);
 };
 onMounted(async () => {
-  allInfo.value = await getOnlineConsultationInfo(conversationId);
-  timer = setInterval(() => {
-    currentTime.value = new Date().getTime();
-  }, 1000);
+  try {
+    const data = await getOnlineConsultationInfo(conversationId);
+    allInfo.value = data;
+    if (data.helpInfo != null) {
+      leftHelpBtnShown.value = false;
+      rightHelpWrapperShown.value = true;
+      if (!data.helpInfo.end) {
+        rightHelpBtnShown.value = true;
+      }
+    }
+    if (data.consultationInfo.end) {
+      // 结束了啥也不展示
+      currentTime.value = data.consultationInfo.lastTime;
+      currentHelpTime.value = <number>data.helpInfo?.endTime;
+      leftIsEnd.value = true;
+      rightIsEnd.value = true;
+      leftEndBtnShown.value = false;
+      leftHelpBtnShown.value = false;
+    } else {
+      timer = setInterval(() => {
+        currentTime.value = new Date().getTime();
+      }, 1000);
+      if (!data.helpInfo?.end) {
+        helpTimer = setInterval(() => {
+          currentHelpTime.value = new Date().getTime();
+        }, 1000);
+      }
+    }
+  } catch (e) {
+    // 报错啥也不展示
+    leftEndBtnShown.value = false;
+    leftHelpBtnShown.value = false;
+    leftIsEnd.value = true;
+    rightIsEnd.value = true;
+    currentTime.value = 0;
+    currentHelpTime.value = 0;
+  }
 });
 
 watchEffect(async () => {
