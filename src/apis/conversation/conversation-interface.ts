@@ -101,6 +101,7 @@ export interface ConsultationInfo {
   visitorId: string;
   startTime: number;
   lastTime: number;
+  isEnd: boolean;
 }
 
 export interface HelpInfo {
@@ -118,4 +119,8 @@ export interface WebConversationInfoResp {
   visitorText: string;
   tag: string;
   consultantText: string;
+}
+
+export interface RemoveConversationReq {
+  conversationId: string;
 }

@@ -34,6 +34,7 @@ import {
 } from "@/apis/conversation/conversation-interface";
 import {
   getMaxConversations,
+  getOnlineConversationNumber,
   getRecentConsultations,
   getTodayOwnConsultations
 } from "@/apis/conversation/conversation";
@@ -44,11 +45,13 @@ const conversationInfo = ref<ConversationInfo[]>([]);
 const consultRecords = ref<ConsultRecordsResp>();
 const arrangementInfo = ref<number[]>([]);
 let currentMaxConsultantCount = ref(0);
+let todayConsultantSession = ref(0);
 onMounted(async () => {
   conversationInfo.value = await getTodayOwnConsultations();
   consultRecords.value = await getRecentConsultations();
   arrangementInfo.value = await personalArrangement();
   currentMaxConsultantCount.value = await getMaxConversations();
+  todayConsultantSession.value = await getOnlineConversationNumber();
 });
 
 const handleChange = async () => {
@@ -65,9 +68,6 @@ let todayConsultantTime = computed(() => {
   }, 0);
   return parseTime(rawTime / 1000);
 });
-
-// TODO
-let todayConsultantSession = 4;
 
 let totalConsultations = computed(() => {
   return consultRecords.value?.total;

@@ -142,7 +142,7 @@
 import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
-import { computed, nextTick, onMounted, ref, watchEffect } from "vue";
+import { nextTick, onMounted, ref, watchEffect } from "vue";
 import { Back, Collection } from "@element-plus/icons-vue";
 import router from "@/router";
 import {
@@ -192,7 +192,13 @@ const {
 } = useScroll(rightChatAreaWrapper);
 
 watchEffect(async () => {
-  if (isLeftReachTop.value && !isConsultationCompleted.value) {
+  if (
+    isLeftReachTop.value &&
+    !(
+      (consultationCurrent.value - 1) * pageSize >=
+      allMsg.value?.consultationTotal
+    )
+  ) {
     // 触发懒加载
     const data = await getMsg(true, false);
     data.consultation.forEach((i) => {
@@ -208,7 +214,10 @@ watchEffect(async () => {
 });
 
 watchEffect(async () => {
-  if (isRightReachTop.value && !isHelpCompleted.value) {
+  if (
+    isRightReachTop.value &&
+    !((helpCurrent.value - 1) * pageSize >= allMsg.value?.helpTotal)
+  ) {
     // 触发懒加载
     const data = await getMsg(false, true);
     data.help?.forEach((i) => {
@@ -280,16 +289,6 @@ const handleBack = () => {
 const consultationCurrent = ref(1);
 const helpCurrent = ref(1);
 const pageSize = 15;
-
-const isConsultationCompleted = computed(() => {
-  return (
-    consultationCurrent.value * pageSize >= allMsg.value?.consultationTotal
-  );
-});
-
-const isHelpCompleted = computed(() => {
-  return helpCurrent.value * pageSize >= allMsg.value?.helpTotal;
-});
 
 const getInfo = async () => {
   let conversationInfo: WebConversationInfoResp;

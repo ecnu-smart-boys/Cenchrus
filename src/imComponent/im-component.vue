@@ -16,7 +16,7 @@
         @change="handleDown"
         >有新消息↓
       </el-check-tag>
-      <chat-input :to-id="toId" @on-send="handleSend" />
+      <chat-input v-if="!isEnd" :to-id="toId" @on-send="handleSend" />
     </div>
   </div>
 </template>
@@ -34,6 +34,7 @@ const store = createStore();
 const props = defineProps<{
   isLeft: boolean;
   toId: string;
+  isEnd: boolean;
 }>();
 
 const ChatAreaRef: any = ref(null);
@@ -143,23 +144,18 @@ watchEffect(async () => {
     if (props.isLeft) {
       const data = await imGetMessageList(props.toId);
       nextReqMessageID = data.data.nextReqMessageID;
-      console.log(props.isLeft);
-      console.log(data.data);
       store.leftMessageListCallback((list: any[]) => {
         list.splice(0);
         list.push(...data.data.messageList);
       });
-      console.log(store.leftMessage.leftMessageList);
     } else {
       await Promise.resolve();
       const data = await imGetMessageList(props.toId);
       nextReqMessageID = data.data.nextReqMessageID;
-      console.log(data);
       store.rightMessageListCallback((list: any[]) => {
         list.splice(0);
         list.push(...data.data.messageList);
       });
-      console.log(store.rightMessage.rightMessageList);
     }
 
     // 滑动到最底部

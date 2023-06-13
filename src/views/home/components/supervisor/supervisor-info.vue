@@ -25,7 +25,7 @@
     />
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="settingDialogVisible = false"> 取消 </el-button>
+        <el-button @click="handleCancel"> 取消 </el-button>
         <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
       </span>
     </template>
@@ -36,7 +36,7 @@
 import FormSetting from "@/components/form-setting.vue";
 import { setting } from "@/apis/conversation/conversation";
 import { ElMessage } from "element-plus";
-import { ref } from "vue";
+import { nextTick, ref, watchEffect } from "vue";
 
 const props = defineProps<{
   currentCount: number;
@@ -44,8 +44,23 @@ const props = defineProps<{
 
 const settingForm: any = ref(null);
 let settingDialogVisible = ref(false);
+
+const currentCountData = ref(0);
+
+watchEffect(() => {
+  currentCountData.value = props.currentCount;
+});
+
+const emits = defineEmits<{
+  (event: "onChange"): void;
+}>();
+
 const handleClick = () => {
+  currentCountData.value = props.currentCount;
   settingDialogVisible.value = true;
+  nextTick(() => {
+    settingForm.value.resetMaxCount(props.currentCount);
+  });
 };
 const handleSubmit = async (data) => {
   await setting({
@@ -56,7 +71,12 @@ const handleSubmit = async (data) => {
     type: "success",
     duration: 5 * 1000
   });
+  handleCancel();
+};
+
+const handleCancel = () => {
   settingDialogVisible.value = false;
+  emits("onChange");
 };
 const submitAddForm = async () => {
   try {

@@ -33,10 +33,21 @@
 </template>
 
 <script setup lang="ts">
-import { HelpRecordsResp } from "@/apis/conversation/conversation-interface";
+import {
+  HelpRecordsResp,
+  WebConversationInfoResp
+} from "@/apis/conversation/conversation-interface";
 import router from "@/router";
 import { reactive, watchEffect } from "vue";
-import { parseTime, parseTimestamp } from "@/utils";
+import { parseTime, parseTimestamp, preExport } from "@/utils";
+import {
+  AllMessageReq,
+  AllMsgListResp
+} from "@/apis/message/message-interface";
+import { getSupervisorOwnHelpMsg } from "@/apis/message/message";
+import { getSupervisorOwnHelpInfo } from "@/apis/conversation/conversation";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 
 const props = defineProps<{
   helpRecords: HelpRecordsResp | undefined;
@@ -50,7 +61,8 @@ watchEffect(() => {
       recent.push({
         consultantName: i.consultantName,
         duration: parseTime((i.endTime - i.startTime) / 1000),
-        date: parseTimestamp(i.startTime)
+        date: parseTimestamp(i.startTime),
+        id: i.id
       });
     });
   }
@@ -60,9 +72,44 @@ const handleAll = () => {
   router.push({ path: "/help-record" });
 };
 
-const handleDetail = (row) => {};
+const handleDetail = (row) => {
+  router.push({
+    path: "/conversation-detail",
+    query: {
+      conversationId: row.id,
+      from: "help"
+    }
+  });
+};
 
-const handleExport = (row) => {};
+const handleExport = async (row) => {
+  let conversationInfo: WebConversationInfoResp;
+  let allMsgList: AllMsgListResp;
+  const allMsgReq: AllMessageReq = {
+    conversationId: row.id,
+    consultationCurrent: 1,
+    consultationSize: 100000,
+    helpCurrent: 1,
+    helpSize: 100000
+  };
+  allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+  conversationInfo = await getSupervisorOwnHelpInfo(row.id);
+  const data = preExport(conversationInfo, allMsgList);
+  const zip = new JSZip();
+  zip.file(
+    `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.consultationInfo.visitorName}.txt`,
+    data[0]
+  );
+  if (data.length > 1) {
+    zip.file(
+      `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.helpInfo?.supervisorName}.txt`,
+      data[1]
+    );
+  }
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    FileSaver(content, `${new Date().getTime()}.zip`);
+  });
+};
 </script>
 
 <style scoped lang="scss">

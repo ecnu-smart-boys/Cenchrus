@@ -34,7 +34,10 @@ import router from "@/router";
 import useRightClick from "@/hooks/userRightClick";
 import createStore from "@/store";
 import { OnlineConversation, WebSocketResponse } from "@/apis/schema";
-import { getOnlineConversationsList } from "@/apis/conversation/conversation";
+import {
+  getOnlineConversationsList,
+  removeConversation
+} from "@/apis/conversation/conversation";
 import { ElNotification } from "element-plus";
 const store = createStore();
 const { rightMenuVisible, position, rightClickItem, openMenu } =
@@ -45,7 +48,7 @@ const conversationData = reactive<
     name: string;
     userId: string;
     conversationId: string;
-    isEnd: boolean;
+    end: boolean;
     unRead: number;
   }[]
 >([]);
@@ -66,7 +69,7 @@ onMounted(async () => {
 });
 
 const handleClick = (index: any) => {
-  if (conversationData[index].isEnd) {
+  if (conversationData[index].end) {
     router.push({
       path: "/conversation-detail",
       query: {
@@ -74,28 +77,29 @@ const handleClick = (index: any) => {
         from: "list"
       }
     });
+  } else {
+    router.push({
+      path: "/conversation",
+      query: {
+        conversationId: conversationData[index].conversationId,
+        userId: conversationData[index].userId
+      }
+    });
+    conversationData[index].unRead = 0;
   }
-  router.push({
-    path: "/conversation",
-    query: {
-      conversationId: conversationData[index].conversationId,
-      userId: conversationData[index].userId
-    }
-  });
   // TODO MAYBE USE API
-  conversationData[index].unRead = 0;
 };
 
-const handleDelete = () => {
-  // TODO DELETE API
-  console.log(rightClickItem.value);
+const handleDelete = async () => {
+  await removeConversation(rightClickItem.value);
+  await getConversationData();
 };
 
 const handleContextMenu = (e: any, item: any) => {
   openMenu(e, item);
 };
 
-watchEffect(() => {
+watchEffect(async () => {
   if (store.websocketMessage != null) {
     const msg = store.websocketMessage as WebSocketResponse;
     if (msg.type === "start") {
@@ -109,6 +113,9 @@ watchEffect(() => {
         message: "您有一个新会话",
         type: "info"
       });
+      store.setWebSocketMessage(null);
+    } else if (msg.type === "endConsultation") {
+      await getConversationData();
       store.setWebSocketMessage(null);
     }
   }

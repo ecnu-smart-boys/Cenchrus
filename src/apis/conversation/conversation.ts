@@ -11,6 +11,7 @@ import {
   OnlineInfoResp,
   OnlineStaffListReq,
   RankResp,
+  RemoveConversationReq,
   SettingReq,
   WebConversationInfoResp
 } from "@/apis/conversation/conversation-interface";
@@ -170,6 +171,13 @@ export function getOnlineBoundConsultantInfo(
   });
 }
 
+export function getOnlineConversationNumber(): Promise<number> {
+  return request({
+    method: "get",
+    url: "/conversation/onlineConversationNumber"
+  });
+}
+
 /************************* 进行在线咨询会话 *************************/
 
 // 结束咨询会话
@@ -278,7 +286,7 @@ export function getOnlineConsultationInfo(
 ): Promise<WebConversationInfoResp> {
   return request({
     method: "get",
-    url: "/conversation/onlineConsultationInfo",
+    url: "/conversation/consultationInfo",
     params: {
       conversationId
     }
@@ -291,9 +299,19 @@ export function getOnlineHelpInfo(
 ): Promise<WebConversationInfoResp> {
   return request({
     method: "get",
-    url: "/conversation/onlineHelpInfo",
+    url: "/conversation/helpInfo",
     params: {
       conversationId
     }
+  });
+}
+
+export function removeConversation(
+  removeConversationReq: RemoveConversationReq
+): Promise<any> {
+  return request({
+    method: "post",
+    url: "/conversation/remove",
+    data: removeConversationReq
   });
 }

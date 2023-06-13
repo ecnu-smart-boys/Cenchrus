@@ -17,5 +17,5 @@ export interface OnlineConversation {
   userId: string;
   name: string;
   avatar: string;
-  isEnd: boolean;
+  end: boolean;
 }

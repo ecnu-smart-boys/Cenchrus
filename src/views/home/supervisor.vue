@@ -3,7 +3,10 @@
     <div style="display: flex">
       <div>
         <div style="max-width: 700px; display: flex">
-          <supervisor-info :current-count="currentMaxConsultantCount" />
+          <supervisor-info
+            :current-count="currentMaxConsultantCount"
+            @on-change="handleChange"
+          />
           <supervisor-statistic
             :today-consultant-number="todayConsultantNumber"
             :today-consultant-time="todayConsultantTime"
@@ -60,6 +63,10 @@ let todayConsultantTime = computed(() => {
   }, 0);
   return parseTime(rawTime / 1000);
 });
+
+const handleChange = async () => {
+  currentMaxConsultantCount.value = await getMaxConversations();
+};
 </script>
 
 <style scoped lang="scss"></style>
