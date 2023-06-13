@@ -5,7 +5,7 @@
     @click="handleClick(index)"
     @contextmenu.prevent="handleContextMenu($event, conversation)"
   >
-    <div class="list-wrapper">
+    <div :id="conversation.conversationId" class="list-wrapper">
       <img src="/src/assets/defaultAvatar.jpg" class="avatar" alt="" />
       <div class="right-wrapper">
         <div>{{ conversation.name }}</div>
@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, watchEffect } from "vue";
+import { nextTick, onMounted, reactive, watchEffect } from "vue";
 import router from "@/router";
 import useRightClick from "@/hooks/userRightClick";
 import createStore from "@/store";
@@ -106,6 +106,7 @@ const handleContextMenu = (e: any, item: any) => {
 watchEffect(async () => {
   if (store.websocketMessage != null) {
     const msg = store.websocketMessage as WebSocketResponse;
+    let node;
     if (msg.type === "start") {
       const content = msg.content as OnlineConversation;
       conversationData.push({
@@ -117,6 +118,15 @@ watchEffect(async () => {
         message: "您有一个新会话",
         type: "info"
       });
+      await nextTick(() => {
+        const node = document.getElementById(`${content.conversationId}`);
+        if (node) {
+          node.style.background = "#ecf5ff";
+          setTimeout(() => {
+            node.style.background = "";
+          }, 1500);
+        }
+      });
       store.setWebSocketMessage(null);
     } else if (msg.type === "endConsultation") {
       const content = msg.content as EndConsultationNotification;
@@ -125,6 +135,11 @@ watchEffect(async () => {
         message: `与访客 ${content.visitorName} 的会话已结束`,
         type: "info"
       });
+      if (store.role == "consultant") {
+        node = document.getElementById(`${content.consultationId}`);
+      } else if (store.role == "supervisor") {
+        node = document.getElementById(`${content.helpId}`);
+      }
       await getConversationData();
       store.setWebSocketMessage(null);
     } else if (msg.type === "startHelp") {
@@ -138,6 +153,15 @@ watchEffect(async () => {
         message: "您有一个新求助",
         type: "info"
       });
+      await nextTick(() => {
+        const node = document.getElementById(`${content.conversationId}`);
+        if (node) {
+          node.style.background = "#ecf5ff";
+          setTimeout(() => {
+            node.style.background = "";
+          }, 1500);
+        }
+      });
     } else if (msg.type === "endHelp") {
       const content = msg.content as EndHelpNotification;
       if (store.role === "supervisor") {
@@ -146,13 +170,21 @@ watchEffect(async () => {
           message: `与咨询师 ${content.consultantName} 的求助已结束`,
           type: "info"
         });
+        node = document.getElementById(`${content.helpId}`);
       } else if (store.role === "consultant") {
         ElNotification({
           title: "Info",
           message: `与督导 ${content.supervisorName} 的求助已结束`,
           type: "info"
         });
+        node = document.getElementById(`${content.consultationId}`);
       }
+    }
+    if (node) {
+      node.style.background = "#ecf5ff";
+      setTimeout(() => {
+        node.style.background = "";
+      }, 1500);
     }
   }
 });

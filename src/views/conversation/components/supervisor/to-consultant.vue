@@ -156,6 +156,7 @@ const refreshData = async () => {
 
 watch(route, async () => {
   if (!(route.query as any).conversationId) return;
+  if (route.path !== "/conversation") return;
   await refreshData();
 });
 

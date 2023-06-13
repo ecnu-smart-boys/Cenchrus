@@ -386,6 +386,7 @@ const getMsg = async (
 
 watch(route, async () => {
   if (!(route.query as any).conversationId) return;
+  if (route.path !== "/conversation-detail") return;
   await getInfo();
   const data = await getMsg(true, true);
   data.consultation?.reverse();

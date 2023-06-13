@@ -25,7 +25,7 @@ export interface OnlineConversation {
 }
 
 export interface EndHelpNotification {
-  conversationId: string;
+  consultationId: string;
   helpId: string;
   consultantName: string;
   supervisorName: string;
