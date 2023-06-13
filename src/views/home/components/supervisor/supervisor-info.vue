@@ -3,6 +3,8 @@
     <div class="card-wrapper">
       <img
         src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
+        alt=""
+        onerror="this.src='/src/assets/defaultAvatar.jpg'"
       />
       <div class="middle-wrapper">
         <div class="name-wrapper">

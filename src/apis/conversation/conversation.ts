@@ -178,6 +178,13 @@ export function getOnlineConversationNumber(): Promise<number> {
   });
 }
 
+export function getAvgComment(): Promise<number> {
+  return request({
+    method: "get",
+    url: "/conversation/avgComment"
+  });
+}
+
 /************************* 进行在线咨询会话 *************************/
 
 // 结束咨询会话

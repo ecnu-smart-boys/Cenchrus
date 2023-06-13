@@ -23,7 +23,7 @@
               <el-icon><icon-menu /></el-icon>
               <span>咨询记录</span>
             </el-menu-item>
-            <el-menu-item index="help-record">
+            <el-menu-item v-if="role == 'supervisor'" index="help-record">
               <el-icon><icon-menu /></el-icon>
               <span>求助记录</span>
             </el-menu-item>
@@ -44,7 +44,7 @@
               <span>用户管理</span>
             </el-menu-item>
           </el-menu>
-          <conversation-list />
+          <conversation-list v-if="role !== 'admin'" />
         </el-aside>
         <el-main body-style="padding: 0;">
           <router-view :key="`${route.path}${route.query?.userId}`" />

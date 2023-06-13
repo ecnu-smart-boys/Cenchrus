@@ -253,17 +253,22 @@ const handleExport = async () => {
     helpCurrent: 1,
     helpSize: 100000
   };
-  if (store.role === "supervisor") {
-    allMsgList = await getBoundConsultantsMsg(allMsgReq);
-    conversationInfo = await getBoundConsultantsInfo(query.conversationId);
-  } else if (store.role === "consultant") {
-    allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
-    conversationInfo = await getConsultantOwnConsultationInfo(
-      query.conversationId
-    );
-  } else if (store.role === "admin") {
-    allMsgList = await getAdminConsultationMsg(allMsgReq);
-    conversationInfo = await getAdminConsultationInfo(query.conversationId);
+  if (query.from == "help") {
+    allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+    conversationInfo = await getSupervisorOwnHelpInfo(query.conversationId);
+  } else {
+    if (store.role === "supervisor") {
+      allMsgList = await getBoundConsultantsMsg(allMsgReq);
+      conversationInfo = await getBoundConsultantsInfo(query.conversationId);
+    } else if (store.role === "consultant") {
+      allMsgList = await getConsultantOwnConsultationMsg(allMsgReq);
+      conversationInfo = await getConsultantOwnConsultationInfo(
+        query.conversationId
+      );
+    } else if (store.role === "admin") {
+      allMsgList = await getAdminConsultationMsg(allMsgReq);
+      conversationInfo = await getAdminConsultationInfo(query.conversationId);
+    }
   }
   const data = preExport(conversationInfo, allMsgList);
   const zip = new JSZip();

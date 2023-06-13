@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <el-table :data="tableData" style="width: 100%">
+    <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
       <el-table-column fixed prop="consultantName" label="咨询师" width="400" />
       <el-table-column prop="duration" label="咨询时长" width="400" />
       <el-table-column prop="date" label="咨询日期" width="400" />
@@ -72,8 +72,20 @@
 <script setup lang="ts">
 import { Search } from "@element-plus/icons-vue";
 import { onMounted, reactive, ref, watch, watchEffect } from "vue";
-import { getSupervisorHelpRecords } from "@/apis/conversation/conversation";
-import { parseTime, parseTimestamp } from "@/utils";
+import {
+  getSupervisorHelpRecords,
+  getSupervisorOwnHelpInfo
+} from "@/apis/conversation/conversation";
+import { parseTime, parseTimestamp, preExport } from "@/utils";
+import router from "@/router";
+import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
+import {
+  AllMessageReq,
+  AllMsgListResp
+} from "@/apis/message/message-interface";
+import { getSupervisorOwnHelpMsg } from "@/apis/message/message";
+import JSZip from "jszip";
+import FileSaver from "file-saver";
 
 let searchName = ref("");
 
@@ -86,6 +98,7 @@ const handleCurrentChange = async (val) => {
 
 const tableData = reactive<any[]>([]);
 
+let isLoading = ref(false);
 let selectDate = ref("");
 let timeStamp = ref(0);
 
@@ -107,11 +120,57 @@ watch(
   }
 );
 
-const handleDetail = (row) => {};
+const handleDetail = (row) => {
+  router.push({
+    path: "/conversation-detail",
+    query: {
+      conversationId: row.id,
+      from: "help"
+    }
+  });
+};
 
-const handleExport = (row) => {};
+watchEffect(async () => {
+  if (selectDate.value == null) {
+    timeStamp.value = 0;
+  } else if (selectDate.value instanceof Date) {
+    timeStamp.value = selectDate.value.getTime();
+  }
+  currentPage.value = 1;
+  await refreshData();
+});
+
+const handleExport = async (row) => {
+  let conversationInfo: WebConversationInfoResp;
+  let allMsgList: AllMsgListResp;
+  const allMsgReq: AllMessageReq = {
+    conversationId: row.id,
+    consultationCurrent: 1,
+    consultationSize: 100000,
+    helpCurrent: 1,
+    helpSize: 100000
+  };
+  allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+  conversationInfo = await getSupervisorOwnHelpInfo(row.id);
+  const data = preExport(conversationInfo, allMsgList);
+  const zip = new JSZip();
+  zip.file(
+    `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.consultationInfo.visitorName}.txt`,
+    data[0]
+  );
+  if (data.length > 1) {
+    zip.file(
+      `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.helpInfo?.supervisorName}.txt`,
+      data[1]
+    );
+  }
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    FileSaver(content, `${new Date().getTime()}.zip`);
+  });
+};
 
 const refreshData = async () => {
+  isLoading.value = true;
   const data = await getSupervisorHelpRecords({
     current: currentPage.value,
     size: pageSize.value,
@@ -127,6 +186,7 @@ const refreshData = async () => {
       date: parseTimestamp(i.startTime)
     });
   });
+  isLoading.value = false;
 };
 onMounted(async () => {
   await refreshData();

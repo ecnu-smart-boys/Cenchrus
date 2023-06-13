@@ -6,6 +6,7 @@
           :total-consultations="totalConsultations"
           :current-count="currentMaxConsultantCount"
           :today-consultant-session="todayConsultantSession"
+          :avg-comment="avgComment"
           @on-change="handleChange"
         />
         <consultant-statistic
@@ -33,6 +34,7 @@ import {
   ConversationInfo
 } from "@/apis/conversation/conversation-interface";
 import {
+  getAvgComment,
   getMaxConversations,
   getOnlineConversationNumber,
   getRecentConsultations,
@@ -46,12 +48,14 @@ const consultRecords = ref<ConsultRecordsResp>();
 const arrangementInfo = ref<number[]>([]);
 let currentMaxConsultantCount = ref(0);
 let todayConsultantSession = ref(0);
+let avgComment = ref(0);
 onMounted(async () => {
   conversationInfo.value = await getTodayOwnConsultations();
   consultRecords.value = await getRecentConsultations();
   arrangementInfo.value = await personalArrangement();
   currentMaxConsultantCount.value = await getMaxConversations();
   todayConsultantSession.value = await getOnlineConversationNumber();
+  avgComment.value = await getAvgComment();
 });
 
 const handleChange = async () => {

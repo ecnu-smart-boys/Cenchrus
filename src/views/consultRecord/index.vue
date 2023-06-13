@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <el-table :data="tableData" style="width: 100%">
+    <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
       <el-table-column fixed prop="visitorName" label="咨询人" width="140" />
       <el-table-column prop="duration" label="咨询时长" width="140" />
       <el-table-column prop="date" label="咨询日期" width="200" />
@@ -103,6 +103,7 @@ import JSZip from "jszip";
 import FileSaver from "file-saver";
 const store = createStore();
 
+let isLoading = ref(false);
 let searchName = ref("");
 
 let currentPage = ref(1);
@@ -118,6 +119,7 @@ let selectDate = ref("");
 let timeStamp = ref(0);
 
 const refreshData = async () => {
+  isLoading.value = true;
   let data;
   if (store.role == "admin") {
     data = await getAllConsultations({
@@ -154,6 +156,7 @@ const refreshData = async () => {
       id: i.id
     });
   });
+  isLoading.value = false;
 };
 
 watchEffect(async () => {

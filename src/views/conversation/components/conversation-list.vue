@@ -87,7 +87,6 @@ const handleClick = (index: any) => {
     });
     conversationData[index].unRead = 0;
   }
-  // TODO MAYBE USE API
 };
 
 const handleDelete = async () => {

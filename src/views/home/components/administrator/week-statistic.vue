@@ -5,16 +5,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, watchEffect } from "vue";
 import * as echarts from "echarts";
 import { getRecentWeek } from "@/utils";
 
 const props = defineProps<{
   weekConsultantChart: number[];
 }>();
-
+let weekChart;
 onMounted(() => {
-  const weekChart = echarts.init(document.getElementById("weekChart"));
+  weekChart = echarts.init(document.getElementById("weekChart"));
   weekChart.setOption({
     title: { text: "7日咨询数量" },
     tooltip: {},
@@ -33,6 +33,26 @@ onMounted(() => {
   });
   window.addEventListener("resize", function () {
     weekChart.resize();
+  });
+});
+watchEffect(() => {
+  console.log(props.weekConsultantChart);
+  if (!weekChart) return;
+  weekChart.setOption({
+    title: { text: "7日咨询数量" },
+    tooltip: {},
+    xAxis: {
+      data: getRecentWeek()
+    },
+    yAxis: {},
+    series: [
+      {
+        name: "咨询数量",
+        type: "line",
+        data: props.weekConsultantChart,
+        smooth: true
+      }
+    ]
   });
 });
 </script>
