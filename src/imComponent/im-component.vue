@@ -201,6 +201,7 @@ const handleDown = () => {
   border-right: 1px #e7e7e7 solid;
 }
 .chat-list-wrapper {
+  background-color: white;
   flex: 8;
   overflow: auto;
   height: 500px;

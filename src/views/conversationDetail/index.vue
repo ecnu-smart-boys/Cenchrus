@@ -140,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
+import SupervisorToConsultant from "@/views/conversation/components/supervisor-to-consultant.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import { nextTick, onMounted, ref, watch, watchEffect } from "vue";
@@ -385,6 +385,7 @@ const getMsg = async (
 };
 
 watch(route, async () => {
+  if (!(route.query as any).conversationId) return;
   await getInfo();
   const data = await getMsg(true, true);
   data.consultation?.reverse();
@@ -424,6 +425,7 @@ onMounted(async () => {
   border-right: 1px #e7e7e7 solid;
 }
 .chat-list-wrapper {
+  background-color: white;
   flex: 8;
   overflow: auto;
   height: 500px;

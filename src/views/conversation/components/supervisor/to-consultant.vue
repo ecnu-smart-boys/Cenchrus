@@ -91,7 +91,7 @@
 <script lang="ts" setup>
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
-import SupervisorToConsultant from "@/views/conversation/components/supervisor/supervisor-to-consultant.vue";
+import SupervisorToConsultant from "@/views/conversation/components/supervisor-to-consultant.vue";
 import { onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
 import ImComponent from "@/imComponent/im-component.vue";
 import { mosaic, parseTime } from "@/utils";
@@ -155,6 +155,7 @@ const refreshData = async () => {
 };
 
 watch(route, async () => {
+  if (!(route.query as any).conversationId) return;
   await refreshData();
 });
 
@@ -213,6 +214,7 @@ onUnmounted(() => {
   border-right: 1px #e7e7e7 solid;
 }
 .chat-list-wrapper {
+  background-color: white;
   flex: 8;
   overflow: auto;
   height: 500px;

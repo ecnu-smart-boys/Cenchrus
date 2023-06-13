@@ -122,7 +122,7 @@ watchEffect(async () => {
       const content = msg.content as EndConsultationNotification;
       ElNotification({
         title: "Info",
-        message: `与访客${content.visitorName}的会话已结束`,
+        message: `与访客 ${content.visitorName} 的会话已结束`,
         type: "info"
       });
       await getConversationData();
@@ -143,13 +143,13 @@ watchEffect(async () => {
       if (store.role === "supervisor") {
         ElNotification({
           title: "Info",
-          message: `与咨询师${content.consultantName}的求助已结束`,
+          message: `与咨询师 ${content.consultantName} 的求助已结束`,
           type: "info"
         });
       } else if (store.role === "consultant") {
         ElNotification({
           title: "Info",
-          message: `与督导${content.supervisorName}的求助已结束`,
+          message: `与督导 ${content.supervisorName} 的求助已结束`,
           type: "info"
         });
       }

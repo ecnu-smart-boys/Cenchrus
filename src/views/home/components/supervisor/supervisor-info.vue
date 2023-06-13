@@ -2,7 +2,7 @@
   <el-card class="box-card" body-style="padding: 0;">
     <div class="card-wrapper">
       <img
-        src="https://img1.baidu.com/it/u=4259218938,3459520686&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"
+        :src="store.userInfo.avatar"
         alt=""
         onerror="this.src='/src/assets/defaultAvatar.jpg'"
       />
@@ -39,6 +39,8 @@ import FormSetting from "@/components/form-setting.vue";
 import { setting } from "@/apis/conversation/conversation";
 import { ElMessage } from "element-plus";
 import { nextTick, ref, watchEffect } from "vue";
+import createStore from "@/store";
+const store = createStore();
 
 const props = defineProps<{
   currentCount: number;
