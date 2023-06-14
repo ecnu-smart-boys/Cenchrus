@@ -79,10 +79,7 @@
     </im-component>
     <div class="chat-wrapper">
       <div class="chat-list-wrapper">
-        <chat-area
-          :current-message="consultantSupervisorData"
-          :has-revoke="true"
-        />
+        <chat-area :current-message="consultantVisitorMsg" :has-revoke="true" />
       </div>
     </div>
   </div>
@@ -105,7 +102,7 @@ import {
   WebSocketResponse
 } from "@/apis/schema";
 import createStore from "@/store";
-const consultantSupervisorData = ref([]);
+
 const route = useRoute();
 const store = createStore();
 
@@ -118,6 +115,8 @@ let leftIsEnd = ref(false);
 // 所有信息
 let allInfo = ref<WebConversationInfoResp>();
 let allMsg = ref<AllMsgListResp>();
+// 右侧信息
+let consultantVisitorMsg = ref([]);
 let currentTime = ref(new Date().getTime());
 let currentHelpTime = ref(new Date().getTime());
 

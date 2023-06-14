@@ -62,7 +62,8 @@
         </template>
       </conversation-info>
     </div>
-    <im-component :is-left="true" to-id="2_1" :is-end="false"> </im-component>
+    <im-component :is-left="true" to-id="2_1" :is-end="leftIsEnd">
+    </im-component>
     <im-component
       v-if="rightHelpWrapperShown"
       :is-left="false"
@@ -128,7 +129,12 @@
       </span>
     </template>
   </el-dialog>
-  <el-dialog v-model="commentVisible" title="评价访客" width="400px">
+  <el-dialog
+    v-model="commentVisible"
+    title="评价访客"
+    width="400px"
+    :show-close="false"
+  >
     <el-form
       :model="commentForm"
       label-width="120px"
@@ -149,7 +155,6 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="commentVisible = false"> 取消 </el-button>
         <el-button type="primary" @click="handleComment"> 确定 </el-button>
       </span>
     </template>
@@ -174,6 +179,7 @@ import { useRoute } from "vue-router";
 import {
   availableSupervisors,
   callHelp,
+  consultantComment,
   endConsultation,
   endHelp,
   getOnlineConsultationInfo
@@ -252,7 +258,7 @@ const form = reactive({
   supervisor: ""
 });
 
-let commentVisible = ref(true);
+let commentVisible = ref(false);
 
 const commentForm = reactive({
   tag: "",
@@ -282,6 +288,20 @@ const handleSubmit = async () => {
   dialogVisible.value = false;
 };
 
+const handleComment = async () => {
+  try {
+    await consultantComment({
+      conversationId: (route.query as any).conversationId,
+      tag: commentForm.tag,
+      text: commentForm.comment
+    });
+    await refreshData();
+    commentVisible.value = false;
+  } catch (e) {
+    commentVisible.value = false;
+  }
+};
+
 // 所有信息
 let allInfo = ref<WebConversationInfoResp>();
 let allMsg = ref<AllMsgListResp>();
@@ -295,7 +315,6 @@ const handleStop = async () => {
   leftIsEnd.value = true;
   rightIsEnd.value = true;
   leftEndBtnShown.value = false;
-  commentVisible.value = true;
 };
 
 const handleStopHelp = async () => {
@@ -332,6 +351,7 @@ watchEffect(async () => {
       await refreshData();
       leftIsEnd.value = true;
       rightIsEnd.value = true;
+      commentVisible.value = true;
     } else if (msg.type === "endHelp") {
       const content = msg.content as EndHelpNotification;
       if (content.helpId !== allInfo.value?.helpInfo?.helpId) {

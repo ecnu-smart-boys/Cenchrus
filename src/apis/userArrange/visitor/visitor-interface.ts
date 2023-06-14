@@ -1,9 +1,3 @@
-export interface GetVisitorsReq {
-  current?: number;
-  name?: string;
-  size?: number;
-}
-
 export interface GetVisitorsResp {
   total: number;
   visitorInfos: VisitorInfo[];
