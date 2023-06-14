@@ -62,8 +62,7 @@
         </template>
       </conversation-info>
     </div>
-    <im-component :is-left="true" to-id="2_1" :is-end="leftIsEnd">
-    </im-component>
+    <im-component :is-left="true" to-id="2_1" :is-end="false"> </im-component>
     <im-component
       v-if="rightHelpWrapperShown"
       :is-left="false"
@@ -126,6 +125,32 @@
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false"> 取消 </el-button>
         <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
+      </span>
+    </template>
+  </el-dialog>
+  <el-dialog v-model="commentVisible" title="评价访客" width="400px">
+    <el-form
+      :model="commentForm"
+      label-width="120px"
+      label-position="top"
+      status-icon
+    >
+      <el-form-item label="添加TAG" prop="name">
+        <el-input v-model="commentForm.tag" maxlength="32" show-word-limit />
+      </el-form-item>
+      <el-form-item label="添加评论" prop="supervisor"
+        ><el-input
+          v-model="commentForm.comment"
+          :autosize="{ minRows: 2, maxRows: 3 }"
+          type="textarea"
+          maxlength="255"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="commentVisible = false"> 取消 </el-button>
+        <el-button type="primary" @click="handleComment"> 确定 </el-button>
       </span>
     </template>
   </el-dialog>
@@ -227,6 +252,13 @@ const form = reactive({
   supervisor: ""
 });
 
+let commentVisible = ref(true);
+
+const commentForm = reactive({
+  tag: "",
+  comment: ""
+});
+
 const options = reactive([]);
 
 const handleHelp = async () => {
@@ -263,6 +295,7 @@ const handleStop = async () => {
   leftIsEnd.value = true;
   rightIsEnd.value = true;
   leftEndBtnShown.value = false;
+  commentVisible.value = true;
 };
 
 const handleStopHelp = async () => {

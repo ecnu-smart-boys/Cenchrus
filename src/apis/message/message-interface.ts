@@ -1,9 +1,8 @@
 export interface AllMessageReq {
   conversationId: string;
-  consultationCurrent: number;
-  consultationSize: number;
-  helpCurrent: number;
-  helpSize: number;
+  consultationIterator: number;
+  helpIterator: number;
+  size: number;
 }
 
 export interface MessageInfo {
@@ -12,10 +11,10 @@ export interface MessageInfo {
   msgBody: string;
   time: number;
   revoked: boolean;
+  iterator: number;
 }
 export interface AllMsgListResp {
   consultation: MessageInfo[];
-  consultationTotal: number;
   help: MessageInfo[] | null;
-  helpTotal: number;
+  callHelp: boolean;
 }

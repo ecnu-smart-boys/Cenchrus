@@ -195,10 +195,9 @@ const handleExport = async (row) => {
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {
     conversationId: row.id,
-    consultationCurrent: 1,
-    consultationSize: 100000,
-    helpCurrent: 1,
-    helpSize: 100000
+    consultationIterator: -1,
+    helpIterator: -1,
+    size: 100000
   };
   if (store.role === "supervisor") {
     allMsgList = await getBoundConsultantsMsg(allMsgReq);

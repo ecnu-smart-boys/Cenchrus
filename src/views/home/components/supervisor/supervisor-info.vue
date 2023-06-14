@@ -8,7 +8,7 @@
       />
       <div class="middle-wrapper">
         <div class="name-wrapper">
-          <div class="name">咨询师</div>
+          <div class="name">{{ store.userInfo.name }}</div>
           <el-button type="primary" @click="handleClick">咨询设置</el-button>
         </div>
       </div>

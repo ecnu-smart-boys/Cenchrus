@@ -32,6 +32,7 @@ export function parseTime(time: number): string {
  * @param time
  */
 export function parseSecond(time: number): string {
+  if (time == 0) return "00'00''";
   const m = parseInt(String((time / 60) % 60));
   const ms = m < 10 ? "0" + m : m;
   const s = parseInt(String(time % 60));

@@ -158,7 +158,8 @@ import { WebConversationInfoResp } from "@/apis/conversation/conversation-interf
 import { messageAdapter, mosaic, parseTime, preExport } from "@/utils";
 import {
   AllMessageReq,
-  AllMsgListResp
+  AllMsgListResp,
+  MessageInfo
 } from "@/apis/message/message-interface";
 import {
   getAdminConsultationMsg,
@@ -175,6 +176,10 @@ const store = createStore();
 
 const leftChatAreaWrapper: any = ref(null);
 const rightChatAreaWrapper: any = ref(null);
+// 迭代器用于懒加载
+let consultationIterator = ref(-1);
+let helpIterator = ref(-1);
+
 const {
   isReachTop: isLeftReachTop,
   clientHeight: leftClientHeight,
@@ -191,18 +196,11 @@ const {
 } = useScroll(rightChatAreaWrapper);
 
 watchEffect(async () => {
-  if (
-    isLeftReachTop.value &&
-    !(
-      (consultationCurrent.value - 1) * pageSize >=
-      allMsg.value?.consultationTotal
-    )
-  ) {
+  if (isLeftReachTop.value && consultationIterator.value != 0) {
     // 触发懒加载
-    const data = await getMsg(true, false);
-    data.consultation.forEach((i) => {
-      allMsg.value?.consultation.unshift(i);
-    });
+    const data = await getMsg();
+    console.log(data);
+    allMsg.value?.consultation.unshift(...data.consultation);
     // 保证滚动条还在同一位置
     await nextTick(() => {
       const oldScrollHeight = leftScrollHeight.value;
@@ -213,15 +211,10 @@ watchEffect(async () => {
 });
 
 watchEffect(async () => {
-  if (
-    isRightReachTop.value &&
-    !((helpCurrent.value - 1) * pageSize >= allMsg.value?.helpTotal)
-  ) {
+  if (isRightReachTop.value && helpIterator.value != 0) {
     // 触发懒加载
-    const data = await getMsg(false, true);
-    data.help?.forEach((i) => {
-      allMsg.value?.help?.unshift(i);
-    });
+    const data = await getMsg();
+    allMsg.value?.help?.unshift(...data.help);
     // 保证滚动条还在同一位置
     await nextTick(() => {
       const oldScrollHeight = rightScrollHeight.value;
@@ -247,10 +240,9 @@ const handleExport = async () => {
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {
     conversationId: (route.query as any).conversationId,
-    consultationCurrent: 1,
-    consultationSize: 100000,
-    helpCurrent: 1,
-    helpSize: 100000
+    consultationIterator: -1,
+    helpIterator: -1,
+    size: 100000
   };
   if ((route.query as any).from == "help") {
     allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
@@ -308,8 +300,6 @@ const handleBack = () => {
   router.go(-1);
 };
 
-const consultationCurrent = ref(1);
-const helpCurrent = ref(1);
 const pageSize = 15;
 
 const getInfo = async () => {
@@ -346,17 +336,13 @@ const getInfo = async () => {
   allInfo.value = conversationInfo;
 };
 
-const getMsg = async (
-  hasLeft: boolean,
-  hasRight: boolean
-): Promise<AllMsgListResp> => {
+const getMsg = async (): Promise<AllMsgListResp> => {
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {
     conversationId: (route.query as any).conversationId,
-    consultationCurrent: consultationCurrent.value,
-    consultationSize: pageSize,
-    helpCurrent: helpCurrent.value,
-    helpSize: pageSize
+    consultationIterator: consultationIterator.value,
+    helpIterator: helpIterator.value,
+    size: pageSize
   };
   if ((route.query as any).from === "help") {
     allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
@@ -375,11 +361,15 @@ const getMsg = async (
       allMsgList = await getAdminConsultationMsg(allMsgReq);
     }
   }
-  if (hasLeft) {
-    consultationCurrent.value++;
+  if (allMsgList.consultation.length > 0) {
+    consultationIterator.value = allMsgList.consultation[0].iterator;
   }
-  if (hasRight) {
-    helpCurrent.value++;
+
+  if (allMsgList.callHelp) {
+    const help = <MessageInfo[]>allMsgList.help;
+    if (help.length > 0) {
+      helpIterator.value = help[0].iterator;
+    }
   }
   return allMsgList;
 };
@@ -388,10 +378,7 @@ watch(route, async () => {
   if (!(route.query as any).conversationId) return;
   if (route.path !== "/conversation-detail") return;
   await getInfo();
-  const data = await getMsg(true, true);
-  data.consultation?.reverse();
-  data.help?.reverse();
-  allMsg.value = data;
+  allMsg.value = await getMsg();
   // 滑动到最底部
   await nextTick(() => {
     leftReflow();
@@ -403,10 +390,7 @@ watch(route, async () => {
 
 onMounted(async () => {
   await getInfo();
-  const data = await getMsg(true, true);
-  data.consultation?.reverse();
-  data.help?.reverse();
-  allMsg.value = data;
+  allMsg.value = await getMsg();
   // 滑动到最底部
   await nextTick(() => {
     leftReflow();
