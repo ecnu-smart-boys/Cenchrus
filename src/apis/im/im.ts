@@ -17,6 +17,10 @@ export function imRevokeMessage(message: Message): Promise<any> {
   return tim.revokeMessage(message);
 }
 
+export function getConversationList(): Promise<any> {
+  return tim.getConversationList();
+}
+
 export function imGetMessageList(
   toUserId: string,
   nextReqMessageID?: string

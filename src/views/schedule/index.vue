@@ -115,7 +115,7 @@
           <el-button @click="addConsultantDialogVisible = false">
             取消
           </el-button>
-          <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
+          <el-button type="primary" @click="submitAddForm1"> 确定 </el-button>
         </span>
       </template>
     </el-dialog>
@@ -135,7 +135,7 @@
           <el-button @click="addSupervisorDialogVisible = false">
             取消
           </el-button>
-          <el-button type="primary" @click="submitAddForm"> 确定 </el-button>
+          <el-button type="primary" @click="submitAddForm2"> 确定 </el-button>
         </span>
       </template>
     </el-dialog>
@@ -210,9 +210,17 @@ const handleAddSupervisor = async () => {
 
 const addConsultantForm: any = ref(null);
 const addSupervisorForm: any = ref(null);
-const submitAddForm = async () => {
+const submitAddForm1 = async () => {
   try {
     await addConsultantForm.value.submitForm();
+  } catch (e) {
+    return;
+  }
+};
+
+const submitAddForm2 = async () => {
+  try {
+    await addSupervisorForm.value.submitForm();
   } catch (e) {
     return;
   }
@@ -229,7 +237,9 @@ const handleSubmit = async (data) => {
     duration: 5 * 1000
   });
   addConsultantDialogVisible.value = false;
+  addSupervisorDialogVisible.value = false;
   await refreshTableData();
+  await refreshData();
 };
 const handleRemove = async (row) => {
   await ElMessageBox.confirm("确定移除排班吗？", "警告", {
@@ -246,6 +256,8 @@ const handleRemove = async (row) => {
     type: "success",
     duration: 5 * 1000
   });
+  await refreshTableData();
+  await refreshData();
 };
 
 let currentDate = ref(new Date());
@@ -260,6 +272,24 @@ const refreshData = async () => {
   });
   data.forEach((i) => monthData.push(i));
 };
+
+watch(
+  () => currentDate.value,
+  async (newValue, oldValue) => {
+    const date = new Date(newValue);
+    const oldDate = new Date(oldValue);
+    currentMonth.value = date.getMonth() + 1;
+    currentYear.value = date.getFullYear();
+    if (
+      oldDate.getMonth() + 1 == date.getMonth() + 1 &&
+      oldDate.getFullYear() == date.getFullYear()
+    ) {
+      return;
+    }
+    await refreshData();
+    await refreshTableData();
+  }
+);
 
 const refreshTableData = async () => {
   isLoading.value = true;

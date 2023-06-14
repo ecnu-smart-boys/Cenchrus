@@ -111,6 +111,7 @@ let pageSize = ref(10);
 let totalPage = ref(10);
 const handleCurrentChange = async (val) => {
   currentPage.value = val;
+  await refreshData();
 };
 
 const tableData = reactive<any[]>([]);
@@ -159,15 +160,18 @@ const refreshData = async () => {
   isLoading.value = false;
 };
 
-watchEffect(async () => {
-  if (selectDate.value == null) {
-    timeStamp.value = 0;
-  } else if (selectDate.value instanceof Date) {
-    timeStamp.value = selectDate.value.getTime();
+watch(
+  () => selectDate,
+  async () => {
+    if (selectDate.value == null) {
+      timeStamp.value = 0;
+    } else if (selectDate.value instanceof Date) {
+      timeStamp.value = selectDate.value.getTime();
+    }
+    currentPage.value = 1;
+    await refreshData();
   }
-  currentPage.value = 1;
-  await refreshData();
-});
+);
 
 watch(
   () => searchName.value,
