@@ -79,7 +79,7 @@ const loginSubmit = async () => {
     const sig = await generateUserSig();
 
     await imLogin({
-      userID: store.userInfo.id,
+      userID: data.id,
       userSig: sig.userSig
     });
     store.setIsLogin();

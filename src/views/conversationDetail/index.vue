@@ -199,7 +199,6 @@ watchEffect(async () => {
   if (isLeftReachTop.value && consultationIterator.value != 0) {
     // 触发懒加载
     const data = await getMsg();
-    console.log(data);
     allMsg.value?.consultation.unshift(...data.consultation);
     // 保证滚动条还在同一位置
     await nextTick(() => {

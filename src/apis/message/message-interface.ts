@@ -13,8 +13,19 @@ export interface MessageInfo {
   revoked: boolean;
   iterator: number;
 }
+
 export interface AllMsgListResp {
   consultation: MessageInfo[];
   help: MessageInfo[] | null;
   callHelp: boolean;
+}
+
+export interface SynchronizeMsgReq {
+  conversationId: string;
+  iterator: number;
+  size: number;
+}
+
+export interface MsgListResp {
+  consultation: MessageInfo[];
 }

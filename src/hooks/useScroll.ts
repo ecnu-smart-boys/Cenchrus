@@ -1,7 +1,7 @@
 import { onMounted, onUnmounted, ref } from "vue";
 import { throttle } from "lodash-es";
 export default function useScroll(elRef: any) {
-  let el: any = window;
+  let el: any;
   const isReachBottom = ref(false);
   // 将其设置为false，因为默认应该在最底部，防止触发watchEffect
   const isReachTop = ref(false);
@@ -19,27 +19,27 @@ export default function useScroll(elRef: any) {
   onMounted(() => {
     if (elRef) {
       el = elRef.value;
+      el.addEventListener("scroll", scrollListenerHandler);
     }
-    el.addEventListener("scroll", scrollListenerHandler);
   });
 
   onUnmounted(() => {
-    el.removeEventListener("scroll", scrollListenerHandler);
+    if (el) {
+      el.removeEventListener("scroll", scrollListenerHandler);
+    }
   });
   const reflow = () => {
-    if (el === window) {
-      clientHeight.value = document.documentElement.clientHeight;
-      scrollHeight.value = document.documentElement.scrollHeight;
-      scrollTop.value = document.documentElement.scrollTop;
-    } else {
+    if (el) {
       clientHeight.value = el.clientHeight;
       scrollTop.value = el.scrollTop;
       scrollHeight.value = el.scrollHeight;
     }
   };
   const setScrollTop = (t: number) => {
-    el.scrollTop = t;
-    scrollTop.value = t;
+    if (el) {
+      el.scrollTop = t;
+      scrollTop.value = t;
+    }
   };
 
   return {

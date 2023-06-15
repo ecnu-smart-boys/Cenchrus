@@ -1,3 +1,5 @@
+import { MessageInfo } from "@/apis/message/message-interface";
+
 /**
  * BaseResponse«string»
  */
@@ -13,6 +15,7 @@ export interface WebSocketResponse {
     | OnlineConversation
     | EndHelpNotification
     | EndConsultationNotification
+    | newMessageNotification
     | any;
 }
 
@@ -37,4 +40,10 @@ export interface EndConsultationNotification {
   visitorName: string;
   consultantName: string;
   supervisorName: string;
+}
+
+export interface newMessageNotification {
+  helpId: string;
+  conversationId: string;
+  messageInfo: MessageInfo;
 }

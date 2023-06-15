@@ -1,6 +1,8 @@
 import {
   AllMessageReq,
-  AllMsgListResp
+  AllMsgListResp,
+  MsgListResp,
+  SynchronizeMsgReq
 } from "@/apis/message/message-interface";
 import request from "@/apis/http";
 
@@ -45,5 +47,16 @@ export function getAdminConsultationMsg(
     method: "get",
     url: "/im/details/adminConsultationMsg",
     params: allMessageReq
+  });
+}
+
+/************************* 获取在线会话的消息 *************************/
+export function synchronizeMsg(
+  synchronizeMsgReq: SynchronizeMsgReq
+): Promise<MsgListResp> {
+  return request({
+    method: "get",
+    url: "/im/synchronizeMsg",
+    params: synchronizeMsgReq
   });
 }

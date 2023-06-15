@@ -6,7 +6,6 @@
 import { onMounted, onUnmounted, watchEffect } from "vue";
 import createStore from "@/store/index";
 import { imLogin } from "@/apis/im/im";
-import { genTestUserSig } from "@/debug";
 import { generateUserSig } from "@/apis/conversation/conversation";
 const store = createStore();
 let timer;
@@ -20,11 +19,9 @@ watchEffect(() => {
       `${process.env.VUE_APP_WS_BASE_URL}/ws?x-freud=${store.token}`
     );
     websocket.onerror = () => {
-      console.log("error");
       clearInterval(timer);
     };
     websocket.onopen = () => {
-      console.log("open");
       timer = setInterval(() => {
         websocket.send("");
       }, 1000);

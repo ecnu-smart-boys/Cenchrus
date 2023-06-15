@@ -69,7 +69,7 @@
     >
     </im-component>
     <im-component
-      v-if="rightHelpWrapperShown"
+      v-if="rightHelpWrapperShown && !rightHelpIsEnd"
       :is-left="false"
       :to-id="<string>allInfo?.helpInfo?.supervisorId"
       :is-end="rightIsEnd"
@@ -112,6 +112,50 @@
         </supervisor-to-consultant>
       </template>
     </im-component>
+    <div v-if="rightHelpWrapperShown && rightHelpIsEnd" class="chat-wrapper">
+      <supervisor-to-consultant :is-show-btn="false">
+        <template #left>
+          <img
+            :src="allInfo?.helpInfo?.avatar"
+            class="avatar"
+            alt=""
+            onerror="this.src='/src/assets/defaultAvatar.jpg'"
+          />
+          <div
+            style="
+              margin-left: 20px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+            "
+          >
+            <div style="font-size: 25px">
+              {{ allInfo?.helpInfo?.supervisorName }}
+            </div>
+            <div>求助记录</div>
+            <div style="font-size: 30px">
+              {{
+                parseTime(
+                  (allInfo?.helpInfo?.endTime - allInfo?.helpInfo?.startTime) /
+                    1000
+                )
+              }}
+            </div>
+          </div>
+        </template>
+      </supervisor-to-consultant>
+      <div ref="rightChatAreaWrapper" class="chat-list-wrapper">
+        <chat-area
+          ref="rightChatArea"
+          :current-message="
+            (allMsg?.help ?? []).map((i) =>
+              messageAdapter(i, <string>allInfo?.consultationInfo.consultantId)
+            )
+          "
+          :has-revoke="false"
+        />
+      </div>
+    </div>
   </div>
   <el-dialog v-model="dialogVisible" title="选择督导" width="400px">
     <el-form :model="form" label-width="120px" label-position="top" status-icon>
@@ -167,6 +211,7 @@
 
 <script lang="ts" setup>
 import ConversationInfo from "@/views/conversation/components/conversation-info.vue";
+import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import {
   nextTick,
   onMounted,
@@ -190,13 +235,16 @@ import {
 } from "@/apis/conversation/conversation";
 import { AllMsgListResp } from "@/apis/message/message-interface";
 import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
-import { mosaic, parseTime } from "@/utils";
+import { messageAdapter, mosaic, parseTime } from "@/utils";
 import {
   EndConsultationNotification,
   EndHelpNotification,
   WebSocketResponse
 } from "@/apis/schema";
 import createStore from "@/store";
+import { deleteConversation } from "@/apis/im/im";
+import useScroll from "@/hooks/useScroll";
+import { getConsultantOwnConsultationMsg } from "@/apis/message/message";
 const store = createStore();
 const route = useRoute();
 
@@ -204,6 +252,7 @@ let dialogVisible = ref(false);
 let leftHelpBtnShown = ref(true);
 let leftEndBtnShown = ref(true);
 let rightHelpWrapperShown = ref(false);
+let rightHelpIsEnd = ref(false);
 let rightHelpBtnShown = ref(false);
 
 let timer;
@@ -212,6 +261,30 @@ let currentTime = ref(new Date().getTime());
 let currentHelpTime = ref(new Date().getTime());
 let leftIsEnd = ref(false);
 let rightIsEnd = ref(false);
+
+const rightChatArea = ref(null);
+const {
+  isReachTop: isRightReachTop,
+  clientHeight: rightClientHeight,
+  scrollHeight: rightScrollHeight,
+  reflow: rightReflow,
+  setScrollTop: setRightScrollTop
+} = useScroll(rightChatArea);
+
+// 迭代器用于懒加载
+let consultationIterator = ref(-1);
+const getMsg = async () => {
+  const data = await getConsultantOwnConsultationMsg({
+    conversationId: (route.query as any).conversationId,
+    consultationIterator: 0,
+    helpIterator: consultationIterator.value,
+    size: 15
+  });
+  if (data.help && data.help.length > 0) {
+    consultationIterator.value = data.help[0].iterator;
+  }
+  return data;
+};
 
 const refreshData = async () => {
   timer && clearInterval(timer);
@@ -222,10 +295,17 @@ const refreshData = async () => {
     );
     allInfo.value = data;
     if (data.helpInfo != null) {
+      rightHelpIsEnd.value = data.helpInfo.end;
       leftHelpBtnShown.value = false;
       rightHelpWrapperShown.value = true;
       if (!data.helpInfo.end) {
+        // 求助还没结束
         rightHelpBtnShown.value = true;
+      } else {
+        // 结束了
+        rightHelpBtnShown.value = false;
+        currentHelpTime.value = <number>data.helpInfo?.endTime;
+        allMsg.value = await getMsg();
       }
     }
     if (data.consultationInfo.end) {
@@ -256,6 +336,20 @@ const refreshData = async () => {
     currentHelpTime.value = 0;
   }
 };
+
+watchEffect(async () => {
+  if (isRightReachTop.value && consultationIterator.value != 0) {
+    // 触发懒加载
+    const data = await getMsg();
+    allMsg.value?.consultation.unshift(...data.consultation);
+    // 保证滚动条还在同一位置
+    await nextTick(() => {
+      const oldScrollHeight = rightScrollHeight.value;
+      rightReflow();
+      setRightScrollTop(rightScrollHeight.value - oldScrollHeight);
+    });
+  }
+});
 
 // 添加督导相关
 const form = reactive({
@@ -319,6 +413,8 @@ const handleStop = async () => {
   leftIsEnd.value = true;
   rightIsEnd.value = true;
   leftEndBtnShown.value = false;
+  // 本地主动结束，删除会话
+  await deleteConversation(`C2C${allInfo?.value?.consultationInfo.visitorId}`);
 };
 
 const handleStopHelp = async () => {
@@ -329,6 +425,8 @@ const handleStopHelp = async () => {
   await refreshData();
   rightIsEnd.value = true;
   rightHelpBtnShown.value = false;
+  // 本地主动结束，删除会话
+  await deleteConversation(`C2C${allInfo?.value?.helpInfo?.supervisorId}`);
 };
 
 watch(route, async () => {
@@ -339,8 +437,14 @@ watch(route, async () => {
 
 onMounted(async () => {
   await refreshData();
+  // 滑动到最底部
+  await nextTick(() => {
+    rightReflow();
+    setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
+  });
 });
 
+// ws相关
 watchEffect(async () => {
   // 是对方结束会话
   if (store.websocketMessage != null) {
@@ -364,6 +468,13 @@ watchEffect(async () => {
       await refreshData();
       rightIsEnd.value = true;
       rightHelpBtnShown.value = false;
+      store.setWebSocketMessage(null);
+    } else if (msg.type === "comment") {
+      const content = msg.content as string;
+      if (content != allInfo.value?.consultationInfo?.consultantId) {
+        return;
+      }
+      await refreshData();
       store.setWebSocketMessage(null);
     }
   }

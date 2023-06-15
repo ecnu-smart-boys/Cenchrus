@@ -17,6 +17,10 @@ export function imRevokeMessage(message: Message): Promise<any> {
   return tim.revokeMessage(message);
 }
 
+export function deleteConversation(conversation: string): Promise<any> {
+  return tim.deleteConversation(conversation);
+}
+
 export function getConversationList(): Promise<any> {
   return tim.getConversationList();
 }
