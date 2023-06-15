@@ -25,6 +25,7 @@
           <img
             :src="captchaUrl"
             style="width: 120px; height: 40px"
+            alt=""
             @click="refreshCaptcha"
           />
         </div>
@@ -45,7 +46,9 @@ import { md5 } from "@/utils";
 import useStore from "@/store";
 import router from "@/router";
 import { ElMessage } from "element-plus";
-const { setUserInfo } = useStore();
+import { imLogin } from "@/apis/im/im";
+import { generateUserSig } from "@/apis/conversation/conversation";
+const store = useStore();
 
 let captchaId;
 let captchaUrl = ref("");
@@ -73,13 +76,20 @@ const loginSubmit = async () => {
       captchaId,
       captcha: form.captcha
     });
-    setUserInfo(data);
+    const sig = await generateUserSig();
+
+    await imLogin({
+      userID: store.userInfo.id,
+      userSig: sig.userSig
+    });
+    store.setIsLogin();
+    store.setUserInfo(data);
     ElMessage({
       message: "登录成功",
       type: "success",
       duration: 5 * 1000
     });
-    router.push({ path: "/" });
+    await router.push({ path: "/" });
   } catch (e) {
     await refreshCaptcha();
   }

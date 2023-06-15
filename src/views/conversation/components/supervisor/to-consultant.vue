@@ -38,7 +38,11 @@
         </template>
       </conversation-info>
     </div>
-    <im-component :is-left="true" :is-end="leftIsEnd">
+    <im-component
+      :is-left="true"
+      :is-end="leftIsEnd"
+      :to-id="<string>allInfo?.consultationInfo.consultantId"
+    >
       <template #left>
         <supervisor-to-consultant
           :is-show-btn="leftHelpBtnShown"

@@ -139,3 +139,7 @@ export interface callHelpResp {
   avatar: string;
   isEnd: boolean;
 }
+
+export interface UserSigResp {
+  userSig: string;
+}

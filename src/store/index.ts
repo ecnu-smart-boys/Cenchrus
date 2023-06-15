@@ -11,12 +11,16 @@ const useStore = defineStore("main", {
       // 左侧消息
       leftMessage: {
         leftMessageList: [],
-        leftHasNewMessage: false
+        leftHasNewMessage: false,
+        fromId: "",
+        toId: ""
       },
       // 右侧消息
       rightMessage: {
         rightMessageList: [],
-        rightHasNewMessage: false
+        rightHasNewMessage: false,
+        fromId: "",
+        toId: ""
       },
       // 全局websocket 相关
       websocketMessage: null
@@ -34,10 +38,15 @@ const useStore = defineStore("main", {
     setLeftMessage(o: { leftMessageList: any[]; leftHasNewMessage: boolean }) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      this.leftMessage = o;
+      this.leftMessage.leftMessageList = o.leftMessageList;
+      this.leftMessage.leftHasNewMessage = o.leftHasNewMessage;
     },
     setLeftHasNewMessage(b: boolean) {
       this.leftMessage.leftHasNewMessage = b;
+    },
+    setLeftId(fromId: string, toId: string) {
+      this.leftMessage.fromId = fromId;
+      this.leftMessage.toId = toId;
     },
     leftMessageListCallback(fn: (list: any[]) => void) {
       fn.call(this, this.leftMessage.leftMessageList);
@@ -48,10 +57,15 @@ const useStore = defineStore("main", {
     }) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      this.rightMessage = o;
+      this.rightMessage.rightMessageList = o.rightMessageList;
+      this.rightMessage.rightHasNewMessage = o.rightHasNewMessage;
     },
     setRightHasNewMessage(b: boolean) {
       this.rightMessage.rightHasNewMessage = b;
+    },
+    setRightId(fromId: string, toId: string) {
+      this.rightMessage.fromId = fromId;
+      this.rightMessage.toId = toId;
     },
     rightMessageListCallback(fn: (list: any[]) => void) {
       fn.call(this, this.rightMessage.rightMessageList);

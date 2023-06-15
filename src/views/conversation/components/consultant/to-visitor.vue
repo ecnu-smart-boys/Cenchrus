@@ -62,12 +62,16 @@
         </template>
       </conversation-info>
     </div>
-    <im-component :is-left="true" to-id="2_1" :is-end="leftIsEnd">
+    <im-component
+      :is-left="true"
+      :to-id="<string>allInfo?.consultationInfo.visitorId"
+      :is-end="leftIsEnd"
+    >
     </im-component>
     <im-component
       v-if="rightHelpWrapperShown"
       :is-left="false"
-      to-id="3_1"
+      :to-id="<string>allInfo?.helpInfo?.supervisorId"
       :is-end="rightIsEnd"
     >
       <template #left>

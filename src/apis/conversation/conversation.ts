@@ -15,9 +15,17 @@ import {
   RankResp,
   RemoveConversationReq,
   SettingReq,
-  WebConversationInfoResp
+  WebConversationInfoResp,
+  UserSigResp
 } from "@/apis/conversation/conversation-interface";
 import { OnlineConversation } from "@/apis/schema";
+
+export function generateUserSig(): Promise<UserSigResp> {
+  return request({
+    method: "get",
+    url: "/im/generateUserSig"
+  });
+}
 
 /************************* 获得已经结束的会话记录列表接口 *************************/
 

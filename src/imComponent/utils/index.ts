@@ -14,45 +14,72 @@ const options = {
 
 const tim = TIM.create(options);
 
-tim.setLogLevel(1); // 普通级别，日志量较多，接入时建议使用
-// tim.setLogLevel(1); // release级别，SDK 输出关键信息，生产环境时建议使用
+tim.setLogLevel(1);
 
-// 注册腾讯云即时通信 IM 上传插件，即时通信 IM SDK 发送图片、语音、视频、文件等消息需要使用上传插件，将文件上传到腾讯云对象存储
 tim.registerPlugin({ "tim-upload-plugin": TIMUploadPlugin });
 
-// 注册腾讯云即时通信 IM 本地审核插件
 tim.registerPlugin({ "tim-profanity-filter-plugin": TIMProfanityFilterPlugin });
 
-// 监听事件，如：
 tim.on(TIM.EVENT.SDK_READY, function (event: any) {
   createStore().setIsTimReady();
 });
 
 tim.on(TIM.EVENT.MESSAGE_RECEIVED, function (event: any) {
-  // 收到推送的单聊、群聊、群提示、群系统通知的新消息，可通过遍历 event.data 获取消息列表数据并渲染到页面
-  // event.name - TIM.EVENT.MESSAGE_RECEIVED
-  // event.data - 存储 Message 对象的数组 - [Message]
-  // TODO 目前仅仅考虑leftMessageList
   const store = createStore();
-
-  store.setLeftMessage({
-    leftMessageList: [...store.leftMessage.leftMessageList, ...event.data],
-    leftHasNewMessage: true
-  });
-});
-
-tim.on(TIM.EVENT.MESSAGE_MODIFIED, function (event: any) {
-  // 收到消息被第三方回调修改的通知，消息发送方可通过遍历 event.data 获取消息列表数据并更新页面上同 ID 消息的内容（v2.12.1起支持）
-  // event.name - TIM.EVENT.MESSAGE_MODIFIED
-  // event.data - 存储被第三方回调修改过的 Message 对象的数组 - [Message]
+  if (event.data && event.data.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // 根据消息的from和to来判断是否是当前聊天页面，是否需要插入数据
+    event.data.forEach((i) => {
+      if (
+        (i.from == store.leftMessage.fromId &&
+          i.to == store.leftMessage.toId) ||
+        (i.from == store.leftMessage.toId && i.to == store.leftMessage.fromId)
+      ) {
+        // 当前左侧有新消息
+        store.setLeftMessage({
+          leftMessageList: [...store.leftMessage.leftMessageList, i],
+          leftHasNewMessage: true
+        });
+      } else if (
+        (i.from == store.rightMessage.fromId &&
+          i.to == store.rightMessage.toId) ||
+        (i.from == store.rightMessage.toId && i.to == store.rightMessage.fromId)
+      ) {
+        // 当前右侧有新消息
+        store.setRightMessage({
+          rightMessageList: [...store.rightMessage.rightMessageList, i],
+          rightHasNewMessage: true
+        });
+      }
+    });
+  }
 });
 
 tim.on(TIM.EVENT.MESSAGE_REVOKED, function (event: any) {
-  // 收到消息被撤回的通知。使用前需要将SDK版本升级至v2.4.0或更高版本
-  // event.name - TIM.EVENT.MESSAGE_REVOKED
-  // event.data - 存储 Message 对象的数组 - [Message] - 每个 Message 对象的 isRevoked 属性值为 true
-  console.log(event.name);
-  console.log(event.data);
+  const store = createStore();
+  if (event.data && event.data.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // 根据消息的from和to来判断是否是当前聊天页面，是否需要改变
+    event.data.forEach((i) => {
+      if (
+        (i.from == store.leftMessage.fromId &&
+          i.to == store.leftMessage.toId) ||
+        (i.from == store.leftMessage.toId && i.to == store.leftMessage.fromId)
+      ) {
+        // 当前左侧发生撤回
+        // maybe do nothing
+      } else if (
+        (i.from == store.rightMessage.fromId &&
+          i.to == store.rightMessage.toId) ||
+        (i.from == store.rightMessage.toId && i.to == store.rightMessage.fromId)
+      ) {
+        // 当前右侧发生撤回
+        // maybe do nothing
+      }
+    });
+  }
 });
 
 tim.on(TIM.EVENT.CONVERSATION_LIST_UPDATED, function (event: any) {
