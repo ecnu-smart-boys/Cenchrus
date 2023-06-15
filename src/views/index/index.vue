@@ -73,8 +73,12 @@ const handleUpperSelect = async (key: string) => {
   if (key == "1") {
     clearUserInfo();
     clearToken();
-    await logout();
-    await imLogout();
+    try {
+      await logout();
+      await imLogout();
+    } catch (e) {
+      console.log(e);
+    }
     if (router.hasRoute("supervisor")) {
       router.removeRoute("supervisor");
     }

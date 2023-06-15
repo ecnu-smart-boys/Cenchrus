@@ -48,6 +48,7 @@ import router from "@/router";
 import { ElMessage } from "element-plus";
 import { imLogin } from "@/apis/im/im";
 import { generateUserSig } from "@/apis/conversation/conversation";
+import { genTestUserSig } from "@/debug";
 const store = useStore();
 
 let captchaId;
@@ -76,11 +77,14 @@ const loginSubmit = async () => {
       captchaId,
       captcha: form.captcha
     });
-    const sig = await generateUserSig();
-
     await imLogin({
       userID: data.id,
-      userSig: sig.userSig
+      userSig: genTestUserSig({
+        SDKAppID: 1400810468,
+        secretKey:
+          "d14df58bc7f5f87424981ca2165867287e2c4ad3ba021709bfdd50edf37daaa0",
+        userID: data.id
+      }).userSig
     });
     store.setIsLogin();
     store.setUserInfo(data);

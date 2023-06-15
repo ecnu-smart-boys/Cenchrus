@@ -165,6 +165,7 @@ import {
 } from "@/apis/message/message";
 import useScroll from "@/hooks/useScroll";
 import { deleteConversation } from "@/apis/im/im";
+import router from "@/router";
 
 const route = useRoute();
 const store = createStore();
@@ -218,7 +219,7 @@ const getLeftMsg = async () => {
   }
   return data;
 };
-const refreshData = async () => {
+const refreshData = async (isEnd = false) => {
   timer && clearInterval(timer);
   helpTimer && clearInterval(helpTimer);
   try {
@@ -241,6 +242,10 @@ const refreshData = async () => {
       currentHelpTime.value = <number>data.helpInfo?.endTime;
       leftIsEnd.value = true;
     } else {
+      if (isEnd) {
+        // 不需要开计时器了
+        return;
+      }
       timer = setInterval(() => {
         currentTime.value = new Date().getTime();
       }, 1000);
@@ -285,6 +290,14 @@ onMounted(async () => {
     rightReflow();
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
   });
+  store.setLeftId(
+    <string>allInfo.value?.helpInfo?.supervisorId,
+    <string>allInfo.value?.consultationInfo.consultantId
+  );
+  store.setRightId(
+    <string>allInfo.value?.consultationInfo.consultantId,
+    <string>allInfo.value?.consultationInfo.visitorId
+  );
 });
 
 const handleStopHelp = async () => {
@@ -292,13 +305,7 @@ const handleStopHelp = async () => {
   await endHelp({
     conversationId: <string>allInfo.value?.helpInfo?.helpId
   });
-  await refreshData();
-  leftIsEnd.value = true;
-  leftHelpBtnShown.value = false;
-  // 本地主动结束，删除会话
-  await deleteConversation(
-    `C2C${allInfo?.value?.consultationInfo.consultantId}`
-  );
+  // 剩下的工作交给ws
 };
 
 // ws相关
@@ -309,32 +316,46 @@ watchEffect(async () => {
     if (msg.type === "endConsultation") {
       const content = msg.content as EndConsultationNotification;
       if (
-        content.consultationId !==
-        allInfo.value?.consultationInfo.consultationId
+        content.consultationId != allInfo.value?.consultationInfo.consultationId
       ) {
         return;
       }
-      await refreshData();
       leftIsEnd.value = true;
+      // 直接跳转到detail中
+      await router.push({
+        path: "/conversation-detail",
+        query: {
+          conversationId: allInfo.value?.helpInfo?.helpId,
+          from: "help"
+        }
+      });
     } else if (msg.type === "endHelp") {
       const content = msg.content as EndHelpNotification;
-      if (content.helpId !== allInfo.value?.helpInfo?.helpId) {
+      if (content.helpId != allInfo.value?.helpInfo?.helpId) {
         return;
       }
       await refreshData();
       leftIsEnd.value = true;
       leftHelpBtnShown.value = false;
+      // 删除求助会话
+      try {
+        await deleteConversation(
+          `C2C${allInfo?.value?.consultationInfo.consultantId}`
+        );
+      } catch (e) {
+        /* empty */
+      }
       store.setWebSocketMessage(null);
     } else if (msg.type === "newMsg") {
       const content = msg.content as newMessageNotification;
-      if (content.helpId !== allInfo.value?.helpInfo?.helpId) {
+      if (content.helpId != allInfo.value?.helpInfo?.helpId) {
         return;
       }
       allMsg.value?.consultation.push(content.messageInfo);
       store.setWebSocketMessage(null);
     } else if (msg.type === "revoke") {
       const content = msg.content as newMessageNotification;
-      if (content.helpId !== allInfo.value?.helpInfo?.helpId) {
+      if (content.helpId != allInfo.value?.helpInfo?.helpId) {
         return;
       }
       const it = content.messageInfo.iterator;
@@ -350,8 +371,15 @@ watchEffect(async () => {
       if (content != allInfo.value?.consultationInfo?.consultationId) {
         return;
       }
-      await refreshData();
       store.setWebSocketMessage(null);
+      // 有comment说明已经结束了，直接跳转到detail中
+      await router.push({
+        path: "/conversation-detail",
+        query: {
+          conversationId: allInfo.value?.helpInfo?.helpId,
+          from: "help"
+        }
+      });
     }
   }
 });

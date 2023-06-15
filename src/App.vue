@@ -5,8 +5,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, watchEffect } from "vue";
 import createStore from "@/store/index";
-import { imLogin } from "@/apis/im/im";
+import { imLogin, imLogout } from "@/apis/im/im";
 import { generateUserSig } from "@/apis/conversation/conversation";
+import { genTestUserSig } from "@/debug";
 const store = createStore();
 let timer;
 
@@ -45,19 +46,34 @@ watchEffect(() => {
 });
 onMounted(async () => {
   if (store.token && store.userInfo && !store.isLogin) {
-    const sig = await generateUserSig();
-    await imLogin({
+    imLogin({
       userID: store.userInfo.id,
-      userSig: sig.userSig
+      userSig: genTestUserSig({
+        SDKAppID: 1400810468,
+        secretKey:
+          "d14df58bc7f5f87424981ca2165867287e2c4ad3ba021709bfdd50edf37daaa0",
+        userID: store.userInfo.id
+      }).userSig
+    }).then(() => {
+      store.setIsLogin();
     });
-    store.setIsLogin();
   }
 });
-onUnmounted(() => {
+window.onbeforeunload = () => {
   if (isOpen) {
+    isOpen = false;
     clearInterval(timer);
     websocket.close();
   }
+  imLogout();
+};
+onUnmounted(async () => {
+  if (isOpen) {
+    isOpen = false;
+    clearInterval(timer);
+    websocket.close();
+  }
+  await imLogout();
 });
 </script>
 

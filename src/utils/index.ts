@@ -7,17 +7,14 @@ import {
   SoundElem,
   TextElem
 } from "@/apis/im/im-backend-interface";
-import {
-  HelpInfo,
-  WebConversationInfoResp
-} from "@/apis/conversation/conversation-interface";
-import { left } from "@popperjs/core";
+import { WebConversationInfoResp } from "@/apis/conversation/conversation-interface";
 
 /**
  * convert time to 00:00:00
  * @param time
  */
 export function parseTime(time: number): string {
+  if (time == 0 || Number.isNaN(time)) return "00:00:00";
   const h = parseInt(String((time / 60 / 60) % 24));
   const hs = h < 10 ? "0" + h : h;
   const m = parseInt(String((time / 60) % 60));
@@ -32,7 +29,7 @@ export function parseTime(time: number): string {
  * @param time
  */
 export function parseSecond(time: number): string {
-  if (time == 0) return "00'00''";
+  if (time == 0 || Number.isNaN(time)) return "00'00''";
   const m = parseInt(String((time / 60) % 60));
   const ms = m < 10 ? "0" + m : m;
   const s = parseInt(String(time % 60));

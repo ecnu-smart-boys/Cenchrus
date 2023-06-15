@@ -245,6 +245,7 @@ import createStore from "@/store";
 import { deleteConversation } from "@/apis/im/im";
 import useScroll from "@/hooks/useScroll";
 import { getConsultantOwnConsultationMsg } from "@/apis/message/message";
+import router from "@/router";
 const store = createStore();
 const route = useRoute();
 
@@ -286,7 +287,7 @@ const getMsg = async () => {
   return data;
 };
 
-const refreshData = async () => {
+const refreshData = async (isEnd = false) => {
   timer && clearInterval(timer);
   helpTimer && clearInterval(helpTimer);
   try {
@@ -317,6 +318,9 @@ const refreshData = async () => {
       leftEndBtnShown.value = false;
       leftHelpBtnShown.value = false;
     } else {
+      if (isEnd) {
+        return;
+      }
       timer = setInterval(() => {
         currentTime.value = new Date().getTime();
       }, 1000);
@@ -384,6 +388,10 @@ const handleSubmit = async () => {
   });
   await refreshData();
   dialogVisible.value = false;
+  store.setRightId(
+    <string>allInfo.value?.consultationInfo.consultantId,
+    <string>allInfo.value?.helpInfo?.supervisorId
+  );
 };
 
 const handleComment = async () => {
@@ -393,8 +401,15 @@ const handleComment = async () => {
       tag: commentForm.tag,
       text: commentForm.comment
     });
-    await refreshData();
     commentVisible.value = false;
+    // 有comment说明已经结束了，直接跳转到detail中
+    await router.push({
+      path: "/conversation-detail",
+      query: {
+        conversationId: allInfo.value?.consultationInfo.consultationId,
+        from: "consultant"
+      }
+    });
   } catch (e) {
     commentVisible.value = false;
   }
@@ -410,11 +425,7 @@ const handleStop = async () => {
   await endConsultation({
     conversationId: (route.query as any).conversationId
   });
-  leftIsEnd.value = true;
-  rightIsEnd.value = true;
-  leftEndBtnShown.value = false;
-  // 本地主动结束，删除会话
-  await deleteConversation(`C2C${allInfo?.value?.consultationInfo.visitorId}`);
+  // 剩下的收尾工作交给ws
 };
 
 const handleStopHelp = async () => {
@@ -422,11 +433,7 @@ const handleStopHelp = async () => {
   await endHelp({
     conversationId: <string>allInfo.value?.helpInfo?.helpId
   });
-  await refreshData();
-  rightIsEnd.value = true;
-  rightHelpBtnShown.value = false;
-  // 本地主动结束，删除会话
-  await deleteConversation(`C2C${allInfo?.value?.helpInfo?.supervisorId}`);
+  // 剩下的收尾工作交给ws
 };
 
 watch(route, async () => {
@@ -442,6 +449,16 @@ onMounted(async () => {
     rightReflow();
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
   });
+  store.setLeftId(
+    <string>allInfo.value?.consultationInfo.consultantId,
+    <string>allInfo.value?.consultationInfo.visitorId
+  );
+  if (allInfo.value?.helpInfo) {
+    store.setRightId(
+      <string>allInfo.value?.consultationInfo.consultantId,
+      <string>allInfo.value?.helpInfo?.supervisorId
+    );
+  }
 });
 
 // ws相关
@@ -456,26 +473,50 @@ watchEffect(async () => {
       ) {
         return;
       }
-      await refreshData();
+      // 本地主动结束，删除会话
+      try {
+        await deleteConversation(
+          `C2C${allInfo?.value?.consultationInfo.visitorId}`
+        );
+      } catch (e) {
+        /* empty */
+      }
       leftIsEnd.value = true;
       rightIsEnd.value = true;
       commentVisible.value = true;
+      // 还不能跳转到detail，因为可能有commentDialog
+      await refreshData();
     } else if (msg.type === "endHelp") {
       const content = msg.content as EndHelpNotification;
-      if (content.helpId !== allInfo.value?.helpInfo?.helpId) {
+      if (content.helpId != allInfo.value?.helpInfo?.helpId) {
         return;
       }
       await refreshData();
       rightIsEnd.value = true;
       rightHelpBtnShown.value = false;
+      // 删除会话
+      try {
+        await deleteConversation(
+          `C2C${allInfo?.value?.helpInfo?.supervisorId}`
+        );
+      } catch (e) {
+        /* empty */
+      }
       store.setWebSocketMessage(null);
     } else if (msg.type === "comment") {
       const content = msg.content as string;
       if (content != allInfo.value?.consultationInfo?.consultationId) {
         return;
       }
-      await refreshData();
       store.setWebSocketMessage(null);
+      // 有comment说明已经结束了，直接跳转到detail中
+      await router.push({
+        path: "/conversation-detail",
+        query: {
+          conversationId: allInfo.value?.consultationInfo.consultationId,
+          from: "consultant"
+        }
+      });
     }
   }
 });

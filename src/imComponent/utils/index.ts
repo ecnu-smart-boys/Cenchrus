@@ -24,13 +24,18 @@ tim.on(TIM.EVENT.SDK_READY, function (event: any) {
   createStore().setIsTimReady();
 });
 
+let id = "";
 tim.on(TIM.EVENT.MESSAGE_RECEIVED, function (event: any) {
   const store = createStore();
   if (event.data && event.data.length > 0) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // 根据消息的from和to来判断是否是当前聊天页面，是否需要插入数据
-    event.data.forEach((i) => {
+    if (id == event.data[0].id) {
+      return;
+    }
+    id = event.data[0].id;
+    event.data.forEach((i: any) => {
       if (
         (i.from == store.leftMessage.fromId &&
           i.to == store.leftMessage.toId) ||
@@ -139,7 +144,7 @@ tim.on(TIM.EVENT.NET_STATE_CHANGE, (event: any) => {
   if (event.data.state === TIM.TYPES.NET_STATE_CONNECTING) {
     ElNotification({
       title: "Warning",
-      message: "当前网络不稳定",
+      message: "连接中......",
       type: "warning"
     });
   } else if (event.data.state === TIM.TYPES.NET_STATE_DISCONNECTED) {

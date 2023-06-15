@@ -27,18 +27,21 @@
           <TextContent
             v-if="item.type === MSG_ELEMENT_TYPE.TEXT"
             :text="item.payload.text"
-          ></TextContent>
+          />
           <ImageContent
             v-if="item.type === MSG_ELEMENT_TYPE.IMAGE"
             v-viewer="{ movable: false }"
             :payload="item.payload"
-          >
-          </ImageContent>
+          />
           <AudioContent
             v-if="item.type === MSG_ELEMENT_TYPE.AUDIO"
             :payload="item.payload"
-          >
-          </AudioContent>
+          />
+          <CustomContent
+            v-if="item.type === MSG_ELEMENT_TYPE.CUSTOM"
+            :payload="item.payload"
+            :should-loop="true"
+          />
         </div>
 
         <div v-if="item.flow == MSG_FLOW.OUT" class="headImage">
@@ -82,6 +85,7 @@ import {
   MSG_ELEMENT_TYPE,
   MSG_FLOW
 } from "@/imComponent/components/SendJSONData";
+import CustomContent from "@/imComponent/components/chatArea/CustomContent.vue";
 const { rightMenuVisible, position, rightClickItem, openMenu } =
   useRightClick();
 const props = defineProps<{

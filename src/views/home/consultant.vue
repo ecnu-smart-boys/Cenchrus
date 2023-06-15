@@ -35,6 +35,7 @@ import {
 } from "@/apis/conversation/conversation-interface";
 import {
   getAvgComment,
+  getConsultantConsultations,
   getMaxConversations,
   getOnlineConversationNumber,
   getRecentConsultations,
@@ -48,6 +49,7 @@ const consultRecords = ref<ConsultRecordsResp>();
 const arrangementInfo = ref<number[]>([]);
 let currentMaxConsultantCount = ref(0);
 let todayConsultantSession = ref(0);
+let totalConsultations = ref(0);
 let avgComment = ref(0);
 onMounted(async () => {
   conversationInfo.value = await getTodayOwnConsultations();
@@ -56,6 +58,14 @@ onMounted(async () => {
   currentMaxConsultantCount.value = await getMaxConversations();
   todayConsultantSession.value = await getOnlineConversationNumber();
   avgComment.value = await getAvgComment();
+  totalConsultations.value = (
+    await getConsultantConsultations({
+      current: 1,
+      size: 15,
+      name: "",
+      timestamp: 0
+    })
+  ).total;
 });
 
 const handleChange = async () => {
@@ -71,10 +81,6 @@ let todayConsultantTime = computed(() => {
     return before + item.endTime - item.startTime;
   }, 0);
   return parseTime(rawTime / 1000);
-});
-
-let totalConsultations = computed(() => {
-  return consultRecords.value?.total;
 });
 </script>
 

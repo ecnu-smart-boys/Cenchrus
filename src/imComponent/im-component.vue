@@ -94,6 +94,9 @@ watchEffect(() => {
           reflow();
           setScrollTop(scrollHeight.value - clientHeight.value);
         });
+      } else if (clientHeight.value >= scrollHeight.value) {
+        // 没有滚动条，也不用弹出气泡
+        store.setLeftHasNewMessage(false);
       } else {
         // 否则弹出气泡，提示有新消息
         nextTick(() => {
