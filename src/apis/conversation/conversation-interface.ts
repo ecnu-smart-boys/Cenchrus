@@ -102,6 +102,7 @@ export interface ConsultationInfo {
   startTime: number;
   lastTime: number;
   end: boolean;
+  consultationId: number;
 }
 
 export interface availableSupervisorsResp {

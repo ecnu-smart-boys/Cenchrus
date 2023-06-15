@@ -196,7 +196,7 @@ let currentHelpTime = ref(new Date().getTime());
 
 const getMsg = async () => {
   const data = await synchronizeMsg({
-    conversationId: (route.query as any).conversationId,
+    conversationId: <string>allInfo.value?.consultationInfo.consultationId,
     iterator: consultationIterator.value,
     size: 15
   });
@@ -309,7 +309,8 @@ watchEffect(async () => {
     if (msg.type === "endConsultation") {
       const content = msg.content as EndConsultationNotification;
       if (
-        content.consultationId !== allInfo.value?.consultationInfo.consultantId
+        content.consultationId !==
+        allInfo.value?.consultationInfo.consultationId
       ) {
         return;
       }
@@ -346,7 +347,7 @@ watchEffect(async () => {
       store.setWebSocketMessage(null);
     } else if (msg.type === "comment") {
       const content = msg.content as string;
-      if (content != allInfo.value?.consultationInfo?.consultantId) {
+      if (content != allInfo.value?.consultationInfo?.consultationId) {
         return;
       }
       await refreshData();

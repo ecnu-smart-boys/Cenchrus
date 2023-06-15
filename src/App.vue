@@ -24,7 +24,7 @@ watchEffect(() => {
     websocket.onopen = () => {
       timer = setInterval(() => {
         websocket.send("");
-      }, 1000);
+      }, 15000);
     };
     websocket.onmessage = (e) => {
       if (e.data !== "") {

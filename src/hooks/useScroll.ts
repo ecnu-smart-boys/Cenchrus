@@ -19,13 +19,16 @@ export default function useScroll(elRef: any) {
   onMounted(() => {
     if (elRef) {
       el = elRef.value;
-      el.addEventListener("scroll", scrollListenerHandler);
+      el &&
+        el.addEventListener &&
+        el.addEventListener("scroll", scrollListenerHandler);
     }
   });
 
   onUnmounted(() => {
     if (el) {
-      el.removeEventListener("scroll", scrollListenerHandler);
+      el.removeEventListener &&
+        el.removeEventListener("scroll", scrollListenerHandler);
     }
   });
   const reflow = () => {
