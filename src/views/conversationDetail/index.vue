@@ -89,6 +89,7 @@
             )
           "
           :has-revoke="false"
+          :should-loop="true"
         />
       </div>
     </div>
@@ -133,6 +134,7 @@
             )
           "
           :has-revoke="false"
+          :should-loop="true"
         />
       </div>
     </div>

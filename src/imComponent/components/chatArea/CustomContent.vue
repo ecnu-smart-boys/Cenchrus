@@ -1,13 +1,20 @@
 <template>
   <div class="wrapper" @click="handleClick">
-    <div style="font-size: 20px">历史消息</div>
-    <div>{{ excerpt }}</div>
+    <div style="font-size: 15px">
+      {{ "历史消息-" + info?.consultationInfo.consultantName }}
+    </div>
+    <div style="color: grey; white-space: pre-wrap">{{ excerpt }}</div>
   </div>
 
-  <el-dialog v-model="dialogTableVisible" title="历史消息">
+  <el-dialog v-model="dialogTableVisible" append-to-body>
     <chat-area
-      :current-message="(allMsg ?? []).map((i) => messageAdapter(i, ''))"
+      :current-message="
+        allMsg.map((i) =>
+          messageAdapter(i, info?.consultationInfo.visitorId ?? '')
+        )
+      "
       :has-revoke="false"
+      :should-loop="false"
     />
   </el-dialog>
 </template>
@@ -17,6 +24,7 @@ import { MessageInfo } from "@/apis/message/message-interface";
 import { MessageBackend, TextElem } from "@/apis/im/im-backend-interface";
 import { messageAdapter } from "@/utils";
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
+import { ConsultationInfo } from "@/apis/conversation/conversation-interface";
 
 const props = defineProps<{
   payload: {
@@ -27,15 +35,24 @@ const props = defineProps<{
   shouldLoop: boolean;
 }>();
 
+const info = ref<{
+  consultationInfo: ConsultationInfo;
+  messageInfo: MessageInfo[];
+}>();
 const allMsg = reactive<MessageInfo[]>([]);
 const excerpt = ref("");
 const dialogTableVisible = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
   allMsg.splice(0);
-  allMsg.push(...JSON.parse(props.payload.data));
+  const json: {
+    consultationInfo: ConsultationInfo;
+    messageInfo: MessageInfo[];
+  } = JSON.parse(props.payload.data);
+  info.value = json;
+  allMsg.push(...json.messageInfo);
   allMsg.forEach((i) => {
-    const data = JSON.parse(i.msgBody) as MessageBackend;
+    const data = JSON.parse(i.msgBody)[0] as MessageBackend;
     if (data.MsgType === "TIMTextElem") {
       const payload = data.MsgContent as TextElem;
       excerpt.value += `${i.fromId}: ${payload.Text}\n`;
@@ -50,12 +67,13 @@ onMounted(() => {
 });
 
 const handleClick = () => {
+  if (!props.shouldLoop) return;
   dialogTableVisible.value = true;
 };
 </script>
 <style lang="scss" scoped>
 .wrapper {
-  width: 300px;
+  width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;

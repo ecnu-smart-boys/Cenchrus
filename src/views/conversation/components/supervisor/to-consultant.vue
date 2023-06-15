@@ -124,6 +124,7 @@
             )
           "
           :has-revoke="false"
+          :should-loop="true"
         />
       </div>
     </div>
@@ -135,6 +136,7 @@
               messageAdapter(i, <string>allInfo?.consultationInfo.consultantId)
             )"
           :has-revoke="true"
+          :should-loop="true"
         />
       </div>
     </div>

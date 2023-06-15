@@ -6,7 +6,6 @@
 import { onMounted, onUnmounted, watchEffect } from "vue";
 import createStore from "@/store/index";
 import { imLogin, imLogout } from "@/apis/im/im";
-import { generateUserSig } from "@/apis/conversation/conversation";
 import { genTestUserSig } from "@/debug";
 const store = createStore();
 let timer;

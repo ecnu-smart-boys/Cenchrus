@@ -153,6 +153,7 @@
             )
           "
           :has-revoke="false"
+          :should-loop="true"
         />
       </div>
     </div>

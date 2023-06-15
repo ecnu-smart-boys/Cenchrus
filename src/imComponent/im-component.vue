@@ -6,6 +6,7 @@
         ref="ChatAreaRef"
         :current-message="consultantSupervisorData"
         :has-revoke="true"
+        :should-loop="true"
       />
     </div>
     <div class="chat-input-wrapper">

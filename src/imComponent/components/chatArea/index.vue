@@ -40,7 +40,7 @@
           <CustomContent
             v-if="item.type === MSG_ELEMENT_TYPE.CUSTOM"
             :payload="item.payload"
-            :should-loop="true"
+            :should-loop="shouldLoop"
           />
         </div>
 
@@ -91,6 +91,7 @@ const { rightMenuVisible, position, rightClickItem, openMenu } =
 const props = defineProps<{
   currentMessage: MessageList[];
   hasRevoke: boolean;
+  shouldLoop: boolean;
 }>();
 const handleRevoke = async () => {
   try {
@@ -159,7 +160,6 @@ li {
     border-radius: 7px;
     background-color: #a6e860;
     padding: 8px 10px 8px 10px;
-    z-index: 1;
     display: inline-block;
     font-size: 12px;
     color: #333;
