@@ -389,6 +389,13 @@ watch(route, async () => {
   });
 });
 
+watch(route, async () => {
+  if (!(route.query as any).conversationId) return;
+  if (route.path !== "/conversation-detail") return;
+  consultationIterator.value = -1;
+  helpIterator.value = -1;
+});
+
 onMounted(async () => {
   await getInfo();
   allMsg.value = await getMsg();

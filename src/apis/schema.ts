@@ -45,5 +45,5 @@ export interface EndConsultationNotification {
 export interface newMessageNotification {
   helpId: string;
   conversationId: string;
-  messageInfo: MessageInfo;
+  info: MessageInfo;
 }

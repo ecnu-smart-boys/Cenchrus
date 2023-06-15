@@ -235,7 +235,19 @@ const refreshData = async (isEnd = false) => {
         // 结束了
         leftHelpBtnShown.value = false;
         currentHelpTime.value = <number>data.helpInfo?.endTime;
-        leftMsg.value = await getLeftMsg();
+        // todo has bugs
+        if (leftMsg.value) {
+          const data = await getLeftMsg();
+          if (data.help && leftMsg.value?.help) {
+            (leftMsg.value as AllMsgListResp).help?.push(...data.help);
+          }
+          (leftMsg.value as AllMsgListResp).consultation.push(
+            ...data.consultation
+          );
+          (leftMsg.value as AllMsgListResp).callHelp = data.callHelp;
+        } else {
+          leftMsg.value = await getLeftMsg();
+        }
       }
     }
     if (data.consultationInfo.end) {
@@ -282,6 +294,8 @@ watchEffect(async () => {
 watch(route, async () => {
   if (!(route.query as any).conversationId) return;
   if (route.path !== "/conversation") return;
+  consultationIterator.value = -1;
+  helpIterator.value = -1;
   await refreshData();
 });
 
@@ -353,14 +367,14 @@ watchEffect(async () => {
       if (content.helpId != allInfo.value?.helpInfo?.helpId) {
         return;
       }
-      allMsg.value?.consultation.push(content.messageInfo);
+      allMsg.value?.consultation.push(content.info);
       store.setWebSocketMessage(null);
     } else if (msg.type === "revoke") {
       const content = msg.content as newMessageNotification;
       if (content.helpId != allInfo.value?.helpInfo?.helpId) {
         return;
       }
-      const it = content.messageInfo.iterator;
+      const it = content.info.iterator;
       for (let i = 0; i < allMsg.value?.consultation.length; i++) {
         if (allMsg.value?.consultation[i].iterator === it) {
           (allMsg.value as MsgListResp).consultation[i].revoked = true;

@@ -186,9 +186,9 @@ export function preExport(
     if (m.type == "TIMTextElem") {
       leftString += m.payload.text + "\n";
     } else if (m.type == "TIMImageElem") {
-      leftString += `![图片](${m.payload.ImageInfoArray[0].url})\n`;
+      leftString += `![图片](${m.payload.imageInfoArray[0].url})\n`;
     } else if (m.type == "TIMSoundElem") {
-      leftString += `[语音](${m.payload.ImageInfoArray[0].url})\n`;
+      leftString += `[语音](${m.payload.url})\n`;
     }
     leftString += "\n";
   }

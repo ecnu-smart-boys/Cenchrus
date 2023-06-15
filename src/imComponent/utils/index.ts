@@ -24,17 +24,12 @@ tim.on(TIM.EVENT.SDK_READY, function (event: any) {
   createStore().setIsTimReady();
 });
 
-let id = "";
 tim.on(TIM.EVENT.MESSAGE_RECEIVED, function (event: any) {
   const store = createStore();
   if (event.data && event.data.length > 0) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // 根据消息的from和to来判断是否是当前聊天页面，是否需要插入数据
-    if (id == event.data[0].id) {
-      return;
-    }
-    id = event.data[0].id;
     event.data.forEach((i: any) => {
       if (
         (i.from == store.leftMessage.fromId &&

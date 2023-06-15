@@ -307,7 +307,18 @@ const refreshData = async (isEnd = false) => {
         // 结束了
         rightHelpBtnShown.value = false;
         currentHelpTime.value = <number>data.helpInfo?.endTime;
-        allMsg.value = await getMsg();
+        if (allMsg.value) {
+          const data = await getMsg();
+          if (data.help && allMsg.value?.help) {
+            (allMsg.value as AllMsgListResp).help?.push(...data.help);
+          }
+          (allMsg.value as AllMsgListResp).consultation.push(
+            ...data.consultation
+          );
+          (allMsg.value as AllMsgListResp).callHelp = data.callHelp;
+        } else {
+          allMsg.value = await getMsg();
+        }
       }
     }
     if (data.consultationInfo.end) {
@@ -440,6 +451,7 @@ const handleStopHelp = async () => {
 watch(route, async () => {
   if (!(route.query as any).conversationId) return;
   if (route.path !== "/conversation") return;
+  consultationIterator.value = -1;
   await refreshData();
 });
 
