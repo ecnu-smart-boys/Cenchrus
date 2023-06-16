@@ -13,7 +13,7 @@ export default defineConfig({
   define: {
     "process.env": {
       VUE_APP_API_BASE_URL: "https://ecnu.xhpolaris.com/api",
-      VUE_APP_WS_BASE_URL: "wss://ecnu.xhpolaris.com",
+      VUE_APP_WS_BASE_URL: "wss://ecnu.xhpolaris.com/api",
       VUE_APP_ENV: "production"
     }
   }
