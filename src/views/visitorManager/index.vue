@@ -18,7 +18,7 @@
       </div>
     </div>
     <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
-      <el-table-column fixed prop="name" label="姓名" width="150">
+      <el-table-column fixed prop="name" label="姓名" width="200">
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <img
@@ -31,17 +31,16 @@
         </template>
       </el-table-column>
       <el-table-column prop="gender" label="性别" width="100" />
-      <el-table-column prop="username" label="用户名" width="200" />
-      <el-table-column prop="phone" label="联系电话" width="180" />
-      <el-table-column prop="emergencyName" label="紧急联系人" width="150" />
+      <el-table-column prop="age" label="年龄" width="150" />
+      <el-table-column prop="phone" label="联系电话" width="250" />
+      <el-table-column prop="emergencyName" label="紧急联系人" width="250" />
       <el-table-column
         prop="emergencyPhone"
         label="紧急联系人电话"
         width="200"
       />
-      <el-table-column prop="time" label="注册时间" width="150" />
       <el-table-column prop="state" label="状态" width="120" />
-      <el-table-column fixed="right" label="操作" width="180">
+      <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
           <el-button
             link
@@ -82,6 +81,7 @@ interface FormVisitor {
   gender: string;
   username: string;
   phone: string;
+  age: number;
   emergencyName: string;
   emergencyPhone: string;
   time: string;
@@ -147,6 +147,7 @@ const refreshData = async () => {
       emergencyName: c.emergencyContact,
       emergencyPhone: c.emergencyPhone,
       time: "",
+      age: c.age,
       state: c.disabled ? "禁用" : "正常"
     };
     tableData.push(i);
