@@ -243,7 +243,7 @@ import {
   WebSocketResponse
 } from "@/apis/schema";
 import createStore from "@/store";
-import { deleteConversation } from "@/apis/im/im";
+import { deleteConversation, setMessageRead } from "@/apis/im/im";
 import useScroll from "@/hooks/useScroll";
 import { getConsultantOwnConsultationMsg } from "@/apis/message/message";
 import router from "@/router";
@@ -312,9 +312,6 @@ const refreshData = async (isEnd = false) => {
           if (data.help && allMsg.value?.help) {
             (allMsg.value as AllMsgListResp).help?.push(...data.help);
           }
-          (allMsg.value as AllMsgListResp).consultation.push(
-            ...data.consultation
-          );
           (allMsg.value as AllMsgListResp).callHelp = data.callHelp;
         } else {
           allMsg.value = await getMsg();
@@ -453,6 +450,10 @@ watch(route, async () => {
   if (route.path !== "/conversation") return;
   consultationIterator.value = -1;
   await refreshData();
+  await setMessageRead(`C2C${allInfo.value?.consultationInfo.visitorId}`);
+  if (allInfo.value?.helpInfo) {
+    await setMessageRead(`C2C${<string>allInfo.value?.helpInfo?.supervisorId}`);
+  }
 });
 
 onMounted(async () => {
@@ -462,6 +463,10 @@ onMounted(async () => {
     rightReflow();
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
   });
+  await setMessageRead(`C2C${allInfo.value?.consultationInfo.visitorId}`);
+  if (allInfo.value?.helpInfo) {
+    await setMessageRead(`C2C${<string>allInfo.value?.helpInfo?.supervisorId}`);
+  }
   store.setLeftId(
     <string>allInfo.value?.consultationInfo.consultantId,
     <string>allInfo.value?.consultationInfo.visitorId

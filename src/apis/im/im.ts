@@ -25,6 +25,9 @@ export function getConversationList(): Promise<any> {
   return tim.getConversationList();
 }
 
+export function setMessageRead(conversation: string): Promise<any> {
+  return tim.setMessageRead({ conversationID: conversation });
+}
 export function imGetMessageList(
   toUserId: string,
   nextReqMessageID?: string

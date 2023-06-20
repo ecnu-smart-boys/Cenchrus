@@ -166,7 +166,7 @@ import {
   synchronizeMsg
 } from "@/apis/message/message";
 import useScroll from "@/hooks/useScroll";
-import { deleteConversation } from "@/apis/im/im";
+import { deleteConversation, setMessageRead } from "@/apis/im/im";
 import router from "@/router";
 
 const route = useRoute();
@@ -241,9 +241,6 @@ const refreshData = async (isEnd = false) => {
           if (data.help && leftMsg.value?.help) {
             (leftMsg.value as AllMsgListResp).help?.push(...data.help);
           }
-          (leftMsg.value as AllMsgListResp).consultation.push(
-            ...data.consultation
-          );
           (leftMsg.value as AllMsgListResp).callHelp = data.callHelp;
         } else {
           leftMsg.value = await getLeftMsg();
@@ -297,6 +294,9 @@ watch(route, async () => {
   consultationIterator.value = -1;
   helpIterator.value = -1;
   await refreshData();
+  await setMessageRead(
+    `C2C${<string>allInfo.value?.consultationInfo.consultantId}`
+  );
 });
 
 onMounted(async () => {
@@ -306,6 +306,9 @@ onMounted(async () => {
     rightReflow();
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
   });
+  await setMessageRead(
+    `C2C${<string>allInfo.value?.consultationInfo.consultantId}`
+  );
   store.setLeftId(
     <string>allInfo.value?.helpInfo?.supervisorId,
     <string>allInfo.value?.consultationInfo.consultantId

@@ -26,7 +26,7 @@
 import ChatInput from "@/imComponent/components/ChatInput.vue";
 import ChatArea from "@/imComponent/components/chatArea/index.vue";
 import { nextTick, ref, watchEffect } from "vue";
-import { imGetMessageList } from "@/apis/im/im";
+import { imGetMessageList, setMessageRead } from "@/apis/im/im";
 import createStore from "@/store/index";
 import useScroll from "@/hooks/useScroll";
 
@@ -83,7 +83,7 @@ watchEffect(() => {
   }
 });
 
-watchEffect(() => {
+watchEffect(async () => {
   // 有新消息
   if (props.isLeft) {
     if (store.leftMessage.leftHasNewMessage) {
@@ -91,7 +91,7 @@ watchEffect(() => {
       if (isReachBottom.value) {
         // 新消息已读
         store.setLeftHasNewMessage(false);
-        nextTick(() => {
+        await nextTick(() => {
           reflow();
           setScrollTop(scrollHeight.value - clientHeight.value);
         });
@@ -100,10 +100,11 @@ watchEffect(() => {
         store.setLeftHasNewMessage(false);
       } else {
         // 否则弹出气泡，提示有新消息
-        nextTick(() => {
+        await nextTick(() => {
           reflow();
         });
       }
+      await setMessageRead(`C2C${props.toId}`);
     }
     if (
       consultantSupervisorData.value.length !==
@@ -120,16 +121,17 @@ watchEffect(() => {
       if (isReachBottom.value) {
         // 新消息已读
         store.setRightHasNewMessage(false);
-        nextTick(() => {
+        await nextTick(() => {
           reflow();
           setScrollTop(scrollHeight.value - clientHeight.value);
         });
       } else {
         // 否则弹出气泡，提示有新消息
-        nextTick(() => {
+        await nextTick(() => {
           reflow();
         });
       }
+      await setMessageRead(`C2C${props.toId}`);
     }
     if (
       consultantSupervisorData.value.length !==
@@ -161,16 +163,16 @@ watchEffect(async () => {
         list.push(...data.data.messageList);
       });
     }
-
     // 滑动到最底部
     await nextTick(() => {
       reflow();
       setScrollTop(scrollHeight.value - clientHeight.value);
     });
+    await setMessageRead(`C2C${props.toId}`);
   }
 });
 
-const handleSend = (data) => {
+const handleSend = async (data) => {
   if (props.isLeft) {
     store.leftMessageListCallback((list: any[]) => {
       list.push(data.data.message);
@@ -180,10 +182,11 @@ const handleSend = (data) => {
       list.push(data.data.message);
     });
   }
-  nextTick(() => {
+  await nextTick(() => {
     reflow();
     ChatAreaWrapper.value.scrollTop = scrollHeight.value - clientHeight.value;
   });
+  await setMessageRead(`C2C${props.toId}`);
 };
 
 const handleDown = () => {
