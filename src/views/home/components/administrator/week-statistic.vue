@@ -36,6 +36,8 @@ onMounted(() => {
   });
 });
 watchEffect(() => {
+  // don't delete
+  console.log(props.weekConsultantChart);
   if (!weekChart) return;
   weekChart.setOption({
     title: { text: "7日咨询数量" },
