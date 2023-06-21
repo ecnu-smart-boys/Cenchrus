@@ -1,39 +1,51 @@
 <template>
   <div>
-    <div style="display: flex">
-      <div
-        style="
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin: 0 20px;
-        "
-      >
-        <div style="margin-bottom: 10px">搜索姓名</div>
-        <el-input
-          v-model="searchName"
-          placeholder="输入姓名进行搜索"
-          :prefix-icon="Search"
-        />
+    <div
+      style="display: flex; align-items: center; justify-content: space-between"
+    >
+      <div style="display: flex; align-items: center">
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 20px;
+          "
+        >
+          <div style="margin-bottom: 10px">搜索姓名</div>
+          <el-input
+            v-model="searchName"
+            placeholder="输入姓名进行搜索"
+            :prefix-icon="Search"
+          />
+        </div>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 20px;
+          "
+        >
+          <div style="margin-bottom: 10px">搜索日期</div>
+          <el-date-picker
+            v-model="selectDate"
+            type="date"
+            placeholder="请选择日期"
+          />
+        </div>
       </div>
-      <div
-        style="
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin: 0 20px;
-        "
-      >
-        <div style="margin-bottom: 10px">搜索日期</div>
-        <el-date-picker
-          v-model="selectDate"
-          type="date"
-          placeholder="请选择日期"
-        />
-      </div>
+      <el-button type="primary" @click="handleAll">批量导出</el-button>
     </div>
 
-    <el-table v-loading="isLoading" :data="tableData" style="width: 100%">
+    <el-table
+      ref="multipleTableRef"
+      v-loading="isLoading"
+      :data="tableData"
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column fixed prop="consultantName" label="咨询师" width="400" />
       <el-table-column prop="duration" label="咨询时长" width="400" />
       <el-table-column prop="date" label="咨询日期" width="400" />
@@ -86,6 +98,53 @@ import {
 import { getSupervisorOwnHelpMsg } from "@/apis/message/message";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
+import { ElTable } from "element-plus";
+
+const multipleTableRef = ref<InstanceType<typeof ElTable>>();
+const multipleSelection = ref<any[]>([]);
+
+const handleSelectionChange = (val: any[]) => {
+  multipleSelection.value = val;
+};
+
+const handleAll = async () => {
+  const zip = new JSZip();
+  const name = `${new Date().getTime()}`;
+  const zipFolder = <JSZip>zip.folder(name);
+
+  for (let row of multipleSelection.value) {
+    let conversationInfo: WebConversationInfoResp;
+    let allMsgList: AllMsgListResp;
+    const allMsgReq: AllMessageReq = {
+      conversationId: row.id,
+      consultationIterator: -1,
+      helpIterator: -1,
+      size: 100000
+    };
+    allMsgList = await getSupervisorOwnHelpMsg(allMsgReq);
+    conversationInfo = await getSupervisorOwnHelpInfo(row.id);
+    const data = preExport(conversationInfo, allMsgList);
+    let innerFolder = <JSZip>(
+      zipFolder.folder(
+        `${conversationInfo.consultationInfo.startTime}-${conversationInfo.consultationInfo.consultantName}-${conversationInfo.consultationInfo.visitorName}`
+      )
+    );
+    innerFolder.file(
+      `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.consultationInfo.visitorName}.txt`,
+      data[0]
+    );
+    if (data.length > 1) {
+      innerFolder.file(
+        `${conversationInfo.consultationInfo.consultantName}-${conversationInfo.helpInfo?.supervisorName}.txt`,
+        data[1]
+      );
+    }
+  }
+
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    FileSaver(content, `${name}.zip`);
+  });
+};
 
 let searchName = ref("");
 
