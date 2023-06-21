@@ -9,7 +9,7 @@
       <div class="middle-wrapper">
         <div class="name-wrapper">
           <div style="display: flex; align-items: center">
-            <div class="name">咨询师</div>
+            <div class="name">{{ store.userInfo.name }}</div>
             <div class="dot"></div>
             <div style="color: #409dfd">在线</div>
           </div>

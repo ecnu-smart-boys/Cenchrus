@@ -9,7 +9,10 @@
           "本月共" +
           calendarRange[1].getDate() +
           "天，需值班" +
-          arrangementInfo.length +
+          arrangementInfo.reduce((a, b) => {
+            if (b != 0) a += b;
+            return a;
+          }, 0) +
           "天"
         }}</span>
       </template>
@@ -39,7 +42,7 @@
             style="color: #40a8ff"
           >
             <div
-              v-if="arrangementInfo.includes(parseInt(data.day.split('-')[2]))"
+              v-if="arrangementInfo[parseInt(data.day.split('-')[2]) - 1] != 0"
             >
               <el-icon><UserFilled /></el-icon>
             </div>
