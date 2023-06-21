@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-import { getOnlineConsultantInfo } from "@/apis/conversation/conversation";
+import { getOnlineSupervisorInfo } from "@/apis/conversation/conversation";
 
 let currentPage = ref(1);
 let pageSize = ref(3);
@@ -52,7 +52,7 @@ const handleCurrentChange = async (val) => {
 let liveConversations = ref(0);
 const staffs = reactive<any[]>([]);
 const refreshData = async () => {
-  const data = await getOnlineConsultantInfo({
+  const data = await getOnlineSupervisorInfo({
     size: pageSize.value,
     current: currentPage.value
   });

@@ -50,7 +50,7 @@
 import { onMounted, reactive, ref } from "vue";
 import {
   getOnlineBoundConsultantInfo,
-  getOnlineSupervisorInfo
+  getOnlineConsultantInfo
 } from "@/apis/conversation/conversation";
 import createStore from "@/store/index";
 const store = createStore();
@@ -68,7 +68,7 @@ const staffs = reactive<any[]>([]);
 const refreshData = async () => {
   let data;
   if (store.role === "admin") {
-    data = await getOnlineSupervisorInfo({
+    data = await getOnlineConsultantInfo({
       size: pageSize.value,
       current: currentPage.value
     });
