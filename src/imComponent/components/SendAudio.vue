@@ -6,7 +6,7 @@
           style="
             border-radius: 50%;
             background-color: #e8e8e8;
-            background-image: url('/src/assets/microphone.png');
+            background-image: url('/microphone.png');
             background-repeat: no-repeat;
             background-position: center center;
             background-size: 60% 60%;

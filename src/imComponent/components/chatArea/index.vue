@@ -10,7 +10,7 @@
           <img
             width="40"
             height="40"
-            src="/src/assets/defaultAvatar.jpg"
+            src="/defaultAvatar.jpg"
             alt=""
             style="border-radius: 50%"
           />
@@ -48,7 +48,7 @@
           <img
             width="40"
             height="40"
-            src="/src/assets/defaultAvatar.jpg"
+            src="/defaultAvatar.jpg"
             alt=""
             style="border-radius: 50%"
           />

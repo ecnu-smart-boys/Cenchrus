@@ -1,6 +1,6 @@
 <template>
   <span ref="audioContent" class="TextContent" @click="handlePlay">
-    <img src="/src/assets/voice.png" class="icon" alt="" />&nbsp;&nbsp;
+    <img src="/voice.png" class="icon" alt="" />&nbsp;&nbsp;
     {{ parseSecond(payload.second) }}
     <audio ref="audioRef">
       <source :src="payload.url" />

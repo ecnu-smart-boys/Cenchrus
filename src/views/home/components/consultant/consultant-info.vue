@@ -4,7 +4,7 @@
       <img
         :src="store.userInfo.avatar"
         alt=""
-        onerror="this.src='/src/assets/defaultAvatar.jpg'"
+        onerror="this.src='/defaultAvatar.jpg'"
       />
       <div class="middle-wrapper">
         <div class="name-wrapper">

@@ -29,7 +29,7 @@
             <img
               :src="scope.row.avatar"
               class="avatar"
-              onerror="this.src='/src/assets/defaultAvatar.jpg'"
+              onerror="this.src='/defaultAvatar.jpg'"
             />
             <div style="margin-left: 10px">{{ scope.row.name }}</div>
           </div>

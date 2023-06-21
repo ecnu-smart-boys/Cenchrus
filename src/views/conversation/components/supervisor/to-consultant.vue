@@ -7,7 +7,7 @@
             :src="allInfo?.consultationInfo.visitorAvatar"
             class="avatar"
             alt=""
-            onerror="this.src='/src/assets/defaultAvatar.jpg'"
+            onerror="this.src='/defaultAvatar.jpg'"
           />
           <div
             style="
@@ -54,7 +54,7 @@
               :src="allInfo?.helpInfo?.avatar"
               class="avatar"
               alt=""
-              onerror="this.src='/src/assets/defaultAvatar.jpg'"
+              onerror="this.src='/defaultAvatar.jpg'"
             />
             <div
               style="
@@ -89,7 +89,7 @@
             :src="allInfo?.helpInfo?.avatar"
             class="avatar"
             alt=""
-            onerror="this.src='/src/assets/defaultAvatar.jpg'"
+            onerror="this.src='/defaultAvatar.jpg'"
           />
           <div
             style="

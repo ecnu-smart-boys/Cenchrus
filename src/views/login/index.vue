@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-box">
       <div class="avatar-box">
-        <img src="@/assets/vue.svg" alt="" />
+        <img src="/vue.svg" alt="" />
       </div>
       <div style="height: 60px; width: 100%"></div>
       <el-form

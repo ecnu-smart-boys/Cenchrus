@@ -6,7 +6,7 @@
     @contextmenu.prevent="handleContextMenu($event, conversation)"
   >
     <div :id="conversation.conversationId" class="list-wrapper">
-      <img src="/src/assets/defaultAvatar.jpg" class="avatar" alt="" />
+      <img src="/defaultAvatar.jpg" class="avatar" alt="" />
       <div class="right-wrapper">
         <div>{{ conversation.name }}</div>
         <div v-if="conversation.unRead != 0" class="bubble">
