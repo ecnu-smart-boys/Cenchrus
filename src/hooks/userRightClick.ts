@@ -16,7 +16,7 @@ export default function useRightClick() {
   const closeMenu = () => {
     rightMenuVisible.value = false;
   };
-  watch(rightMenuVisible, () => {
+  watch(() => rightMenuVisible.value, () => {
     if (rightMenuVisible.value) {
       document.body.addEventListener("click", closeMenu);
     } else {

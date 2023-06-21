@@ -227,7 +227,7 @@ const refreshData = async () => {
 };
 
 watch(
-  () => selectDate,
+  () => selectDate.value,
   async () => {
     if (selectDate.value == null) {
       timeStamp.value = 0;
