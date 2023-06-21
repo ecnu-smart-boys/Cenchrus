@@ -2,6 +2,7 @@ import MD5 from "crypto-js/md5";
 import { AllMsgListResp, MessageInfo } from "@/apis/message/message-interface";
 import { MessageList } from "@/apis/im/im-interface";
 import {
+  CustomElem,
   ImageElem,
   MessageBackend,
   SoundElem,
@@ -163,6 +164,13 @@ export function messageAdapter(
       url: payload.Url,
       size: payload.Size,
       second: payload.Second
+    };
+  } else if (data.MsgType == "TIMCustomElem") {
+    const payload = data.MsgContent as CustomElem;
+    defaultData.payload = {
+      data: payload.Data,
+      description: payload.Desc,
+      extension: payload.Ext
     };
   }
   return defaultData;

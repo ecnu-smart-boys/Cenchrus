@@ -1,6 +1,6 @@
 export interface MessageBackend {
   MsgType: string;
-  MsgContent: ImageElem | SoundElem | TextElem;
+  MsgContent: ImageElem | SoundElem | TextElem | CustomElem;
 }
 
 export interface ImageInfo {
@@ -22,6 +22,12 @@ export interface SoundElem {
   UUID: number;
   Second: number;
   Download_Flag: number;
+}
+
+export interface CustomElem {
+  Data: string;
+  Desc: string;
+  Ext: string;
 }
 
 export interface TextElem {
