@@ -60,7 +60,6 @@ onMounted(() => {
   });
 });
 watchEffect(() => {
-  console.log(props.todayConsultantChart);
   if (!todayChart) return;
   todayChart.setOption({
     title: { text: "今日咨询数量" },

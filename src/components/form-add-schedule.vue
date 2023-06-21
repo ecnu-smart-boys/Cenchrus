@@ -43,7 +43,7 @@ const emits = defineEmits<{
   (
     event: "onSubmit",
     form: {
-      name: string;
+      value: string;
     }
   ): void;
 }>();
@@ -69,7 +69,6 @@ const submitForm = async () => {
       throw Error();
     }
   });
-  console.log(form);
   emits("onSubmit", form);
 };
 

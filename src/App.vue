@@ -24,7 +24,11 @@ watchEffect(() => {
     websocket.onopen = () => {
       timer = setInterval(() => {
         websocket.send("");
-      }, 15000);
+      }, 2500);
+    };
+    websocket.onclose = function (e) {
+      console.error("websocket 断开");
+      console.log(e.code + " " + e.reason + " " + e.wasClean);
     };
     websocket.onmessage = (e) => {
       if (e.data !== "") {
