@@ -1,7 +1,8 @@
 import {
   AvailableSupervisorResp,
   DisableReq,
-  UpdateArrangementReq
+  UpdateArrangementReq,
+  UpdatePsdAndAvatarReq
 } from "@/apis/userArrange/user-interface";
 import request from "@/apis/http";
 
@@ -35,5 +36,15 @@ export function availableSupervisors(): Promise<AvailableSupervisorResp[]> {
   return request({
     method: "get",
     url: "/user_arrange/availableSupervisors"
+  });
+}
+
+export function updatePsdAndAvatar(
+  updatePsdAndAvatarReq: UpdatePsdAndAvatarReq
+): Promise<any> {
+  return request({
+    method: "post",
+    url: "/user/updatePsdAndAvatar",
+    data: updatePsdAndAvatarReq
   });
 }

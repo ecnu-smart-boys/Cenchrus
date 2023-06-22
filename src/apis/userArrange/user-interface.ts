@@ -18,3 +18,9 @@ export interface AvailableSupervisorResp {
   id: string;
   name: string;
 }
+
+export interface UpdatePsdAndAvatarReq {
+  avatar: string;
+  oldPsd: string;
+  newPsd: string;
+}

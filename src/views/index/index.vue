@@ -120,6 +120,7 @@ import { useRoute } from "vue-router";
 import type { UploadProps } from "element-plus";
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import { md5 } from "@/utils";
+import { updatePsdAndAvatar } from "@/apis/userArrange/user";
 
 const route = useRoute();
 const store = createStore();
@@ -140,7 +141,7 @@ const form = reactive({
 const imageUrl = ref("/defaultAvatar.jpg");
 
 const handleAvatarSuccess: UploadProps["onSuccess"] = (response, _, __) => {
-  console.log(response);
+  imageUrl.value = response.message;
 };
 
 const rules = reactive<FormRules>({
@@ -173,15 +174,24 @@ const submitForm = async () => {
       throw Error();
     }
   });
-  const output = {
-    oldPassword: md5(form.oldPassword),
-    password: md5(form.password),
+  const p = {
+    oldPsd: md5(form.oldPassword),
+    newPsd: md5(form.password),
     avatar: imageUrl.value
   };
-  // TODO push
+  console.log(p);
+  try {
+    await updatePsdAndAvatar({
+      oldPsd: md5(form.oldPassword),
+      newPsd: md5(form.password),
+      avatar: imageUrl.value
+    });
+    await handleUpperSelect("1");
+  } catch (e) {
+    ElMessage.error("修改失败");
+  }
 };
 const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
-  imageUrl.value = store.userInfo.avatar;
   if (rawFile.type !== "image/jpeg" && rawFile.type !== "image/png") {
     ElMessage.error("头像格式错误");
     return false;
@@ -237,6 +247,7 @@ onMounted(() => {
 });
 
 const handleChange = async () => {
+  imageUrl.value = store.userInfo.avatar;
   form.oldPassword = "";
   form.password = "";
   form.repeatPassword = "";
