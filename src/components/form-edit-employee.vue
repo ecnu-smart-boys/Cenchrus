@@ -47,7 +47,12 @@
       </el-col>
     </el-row>
     <el-form-item v-if="props.isConsultant" label="绑定督导" prop="supervisor">
-      <el-select v-model="form.supervisor" style="width: 100%" multiple>
+      <el-select
+        v-model="form.supervisor"
+        style="width: 100%"
+        multiple
+        @change="handleFilterSelect"
+      >
         <el-option
           v-for="item in options"
           :key="item.value"
@@ -83,7 +88,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, defineProps, watchEffect, defineEmits } from "vue";
+import {
+  reactive,
+  ref,
+  defineProps,
+  watchEffect,
+  defineEmits,
+  toRaw
+} from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import { FormData } from "@/components/schema";
 import { availableSupervisors } from "@/apis/userArrange/user";
@@ -131,7 +143,8 @@ watchEffect(() => {
   form.gender = props.editData.gender;
   form.age = String(props.editData.age);
   form.idNumber = props.editData.idNumber;
-  props.editData.supervisor && (form.supervisor = props.editData.supervisor);
+  props.editData.supervisor &&
+    (form.supervisor = toRaw(props.editData.supervisor));
   form.workPlace = props.editData.workPlace;
   form.title = props.editData.title;
   props.editData.qualification &&
@@ -139,6 +152,11 @@ watchEffect(() => {
   props.editData.qualificationNumber &&
     (form.qualificationNumber = props.editData.qualificationNumber);
 });
+
+const handleFilterSelect = (val: any[]) => {
+  const post = val.map((i) => (i.value ? i.value : i));
+  form.supervisor = Array.from(new Set(post));
+};
 
 const options: {
   value: string;

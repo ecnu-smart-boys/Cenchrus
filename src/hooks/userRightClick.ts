@@ -16,13 +16,16 @@ export default function useRightClick() {
   const closeMenu = () => {
     rightMenuVisible.value = false;
   };
-  watch(() => rightMenuVisible.value, () => {
-    if (rightMenuVisible.value) {
-      document.body.addEventListener("click", closeMenu);
-    } else {
-      document.body.removeEventListener("click", closeMenu);
+  watch(
+    () => rightMenuVisible.value,
+    () => {
+      if (rightMenuVisible.value) {
+        document.body.addEventListener("click", closeMenu);
+      } else {
+        document.body.removeEventListener("click", closeMenu);
+      }
     }
-  });
+  );
 
   return {
     rightMenuVisible,
