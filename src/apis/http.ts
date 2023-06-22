@@ -1,8 +1,10 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage } from "element-plus";
 import { BaseResponse } from "@/apis/schema";
-import createStore from "@/store";
-import router from "@/router/index";
+import createStore from "@/store/index";
+import router, { hasRoles } from "@/router/index";
+import { logout } from "@/apis/auth/auth";
+import { imLogout } from "@/apis/im/im";
 
 const pendingMap = new Map();
 
@@ -77,7 +79,7 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  (response) => {
+  async (response) => {
     const store = createStore();
     const currentToken = response.headers["x-freud"];
     if (
@@ -94,24 +96,34 @@ request.interceptors.response.use(
         type: "error",
         duration: 5 * 1000
       });
-      // TODO
-      if (res.status === 403 || res.status === 401) {
-        ElMessageBox.confirm("你已被登出，请重新登录", "确定登出", {
-          confirmButtonText: "重新登录",
-          cancelButtonText: "取消",
-          type: "warning"
-        }).then(() => {
-          store.clearToken();
-          router.push({ path: "/login" });
-        });
+      if (res.status == 403 || res.status == 401) {
+        try {
+          await logout();
+          await imLogout();
+        } catch (e) {
+          console.log(e);
+        }
+        store.clearUserInfo();
+        store.clearToken();
+        if (router.hasRoute("supervisor")) {
+          router.removeRoute("supervisor");
+        }
+        if (router.hasRoute("admin")) {
+          router.removeRoute("admin");
+        }
+        if (router.hasRoute("consultant")) {
+          router.removeRoute("consultant");
+        }
+        hasRoles.hasRoles = true;
+        await router.push({ path: "/login" });
       }
       return Promise.reject("error");
     } else {
       return res.data;
     }
   },
-  (error) => {
-    console.log("err" + error);
+  async (error) => {
+    console.log(error);
     let message = error.response?.data?.message || error.message;
     if (error.name == "CanceledError") {
       message = "取消请求";
@@ -121,6 +133,28 @@ request.interceptors.response.use(
       type: "error",
       duration: 5 * 1000
     });
+    if (error.request.status == 401 || error.request.status == 403) {
+      const store = createStore();
+      try {
+        await logout();
+        await imLogout();
+      } catch (e) {
+        console.log(e);
+      }
+      store.clearUserInfo();
+      store.clearToken();
+      if (router.hasRoute("supervisor")) {
+        router.removeRoute("supervisor");
+      }
+      if (router.hasRoute("admin")) {
+        router.removeRoute("admin");
+      }
+      if (router.hasRoute("consultant")) {
+        router.removeRoute("consultant");
+      }
+      hasRoles.hasRoles = true;
+      await router.push({ path: "/login" });
+    }
     return Promise.reject(error);
   }
 );

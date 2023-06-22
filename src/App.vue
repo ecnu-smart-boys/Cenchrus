@@ -7,6 +7,9 @@ import { onMounted, onUnmounted, watchEffect } from "vue";
 import createStore from "@/store/index";
 import { imLogin, imLogout } from "@/apis/im/im";
 import { genTestUserSig } from "@/debug";
+import { logout } from "@/apis/auth/auth";
+import router, { hasRoles } from "@/router";
+import { ElMessage } from "element-plus";
 const store = createStore();
 let timer;
 
@@ -26,9 +29,32 @@ watchEffect(() => {
         websocket.send("");
       }, 1000);
     };
-    websocket.onclose = function (e) {
-      console.error("websocket 断开");
-      console.log(e.code + " " + e.reason + " " + e.wasClean);
+    websocket.onclose = async (e) => {
+      ElMessage({
+        message: "websocket断开，您已被踢出",
+        type: "error",
+        duration: 5 * 1000
+      });
+      const store = createStore();
+      try {
+        await logout();
+        await imLogout();
+      } catch (e) {
+        console.log(e);
+      }
+      store.clearUserInfo();
+      store.clearToken();
+      if (router.hasRoute("supervisor")) {
+        router.removeRoute("supervisor");
+      }
+      if (router.hasRoute("admin")) {
+        router.removeRoute("admin");
+      }
+      if (router.hasRoute("consultant")) {
+        router.removeRoute("consultant");
+      }
+      hasRoles.hasRoles = true;
+      await router.push({ path: "/login" });
     };
     websocket.onmessage = (e) => {
       if (e.data !== "") {
