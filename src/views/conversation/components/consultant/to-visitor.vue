@@ -528,6 +528,8 @@ watchEffect(async () => {
       }
       store.setWebSocketMessage(null);
     } else if (msg.type === "comment") {
+      // 现在还在评论状态，直接忽略
+      if (commentVisible.value == true) return;
       const content = msg.content as string;
       if (content != allInfo.value?.consultationInfo?.consultationId) {
         return;
