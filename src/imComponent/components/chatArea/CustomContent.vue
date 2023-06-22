@@ -10,11 +10,13 @@
     <chat-area
       :current-message="
         allMsg.map((i) =>
-          messageAdapter(i, info?.consultationInfo.visitorId ?? '')
+          messageAdapter(i, info?.consultationInfo.consultantId ?? '')
         )
       "
       :has-revoke="false"
       :should-loop="false"
+      :my-avatar="info?.consultationInfo.consultantAvatar"
+      :other-avatar="info?.consultationInfo.visitorAvatar"
     />
   </el-dialog>
 </template>

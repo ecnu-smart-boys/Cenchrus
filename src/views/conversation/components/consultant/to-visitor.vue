@@ -66,6 +66,8 @@
       :is-left="true"
       :to-id="<string>allInfo?.consultationInfo.visitorId"
       :is-end="leftIsEnd"
+      :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+      :other-avatar="allInfo?.consultationInfo.visitorAvatar"
     >
     </im-component>
     <im-component
@@ -73,6 +75,8 @@
       :is-left="false"
       :to-id="<string>allInfo?.helpInfo?.supervisorId"
       :is-end="rightIsEnd"
+      :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+      :other-avatar="allInfo?.helpInfo?.avatar"
     >
       <template #left>
         <supervisor-to-consultant
@@ -154,6 +158,8 @@
           "
           :has-revoke="false"
           :should-loop="true"
+          :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+          :other-avatar="allInfo?.helpInfo?.avatar"
         />
       </div>
     </div>

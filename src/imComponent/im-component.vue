@@ -7,6 +7,8 @@
         :current-message="consultantSupervisorData"
         :has-revoke="true"
         :should-loop="true"
+        :my-avatar="myAvatar"
+        :other-avatar="otherAvatar"
       />
     </div>
     <div class="chat-input-wrapper">
@@ -36,6 +38,8 @@ const props = defineProps<{
   isLeft: boolean;
   toId: string;
   isEnd: boolean;
+  myAvatar?: string;
+  otherAvatar?: string;
 }>();
 
 const ChatAreaRef: any = ref(null);

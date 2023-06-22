@@ -47,7 +47,6 @@ import useStore from "@/store";
 import router from "@/router";
 import { ElMessage } from "element-plus";
 import { imLogin } from "@/apis/im/im";
-import { generateUserSig } from "@/apis/conversation/conversation";
 import { genTestUserSig } from "@/debug";
 const store = useStore();
 
@@ -59,8 +58,18 @@ const form = reactive({
   captcha: ""
 });
 const rules = reactive({
-  username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
-  password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    {
+      validator: (rule, value) => /^[a-zA-Z_]{1,32}$/.test(value),
+      message: "请输入合法用户名",
+      trigger: "blur"
+    }
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 6, max: 32, message: "密码长度为6-32个字符", trigger: "blur" }
+  ],
   captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }]
 });
 const loginForm: any = ref(null);

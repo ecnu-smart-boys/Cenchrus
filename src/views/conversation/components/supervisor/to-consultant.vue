@@ -43,6 +43,8 @@
       :is-left="true"
       :is-end="leftIsEnd"
       :to-id="<string>allInfo?.consultationInfo.consultantId"
+      :other-avatar="allInfo?.consultationInfo.consultantAvatar"
+      :my-avatar="allInfo?.helpInfo?.avatar"
     >
       <template #left>
         <supervisor-to-consultant
@@ -120,11 +122,13 @@
           ref="rightChatArea"
           :current-message="
             (leftMsg?.help ?? []).map((i) =>
-              messageAdapter(i, <string>allInfo?.helpInfo?.helpId)
+              messageAdapter(i, <string>allInfo?.helpInfo?.supervisorId)
             )
           "
           :has-revoke="false"
           :should-loop="true"
+          :other-avatar="allInfo?.consultationInfo.consultantAvatar"
+          :my-avatar="allInfo?.helpInfo?.avatar"
         />
       </div>
     </div>
@@ -137,6 +141,8 @@
             )"
           :has-revoke="true"
           :should-loop="true"
+          :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+          :other-avatar="allInfo?.consultationInfo.visitorAvatar"
         />
       </div>
     </div>

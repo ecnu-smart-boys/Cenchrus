@@ -10,9 +10,10 @@
           <img
             width="40"
             height="40"
-            src="/defaultAvatar.jpg"
+            :src="props.otherAvatar ?? '/defaultAvatar.jpg'"
             alt=""
             style="border-radius: 50%"
+            onerror="this.src='/defaultAvatar.jpg'"
           />
         </div>
         <div
@@ -48,9 +49,10 @@
           <img
             width="40"
             height="40"
-            src="/defaultAvatar.jpg"
+            :src="props.myAvatar ?? '/defaultAvatar.jpg'"
             alt=""
             style="border-radius: 50%"
+            onerror="this.src='/defaultAvatar.jpg'"
           />
         </div>
       </div>
@@ -92,6 +94,8 @@ const props = defineProps<{
   currentMessage: MessageList[];
   hasRevoke: boolean;
   shouldLoop: boolean;
+  myAvatar?: string;
+  otherAvatar?: string;
 }>();
 const handleRevoke = async () => {
   try {

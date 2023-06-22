@@ -7,7 +7,7 @@
           mode="horizontal"
           @select="handleUpperSelect"
         >
-          <el-menu-item index="0">心理学院热线咨询</el-menu-item>
+          <el-menu-item index="0">心晴帮帮-心理热线咨询平台</el-menu-item>
           <div class="flex-grow" />
           <el-menu-item index="1">登出</el-menu-item>
         </el-menu></el-header

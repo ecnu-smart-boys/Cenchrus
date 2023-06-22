@@ -90,6 +90,8 @@
           "
           :has-revoke="false"
           :should-loop="true"
+          :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+          :other-avatar="allInfo?.consultationInfo.visitorAvatar"
         />
       </div>
     </div>
@@ -135,6 +137,8 @@
           "
           :has-revoke="false"
           :should-loop="true"
+          :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+          :other-avatar="allInfo?.helpInfo?.avatar"
         />
       </div>
     </div>
@@ -172,6 +176,7 @@ import {
 import useScroll from "@/hooks/useScroll";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
+import ImComponent from "@/imComponent/im-component.vue";
 
 const route = useRoute();
 const store = createStore();
