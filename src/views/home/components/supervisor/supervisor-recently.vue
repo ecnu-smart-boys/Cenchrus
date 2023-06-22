@@ -48,6 +48,8 @@ import { getSupervisorOwnHelpMsg } from "@/apis/message/message";
 import { getSupervisorOwnHelpInfo } from "@/apis/conversation/conversation";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
+import { ElMessageBox } from "element-plus";
+import { p } from "@/utils/data";
 
 const props = defineProps<{
   helpRecords: HelpRecordsResp | undefined;
@@ -83,6 +85,11 @@ const handleDetail = (row) => {
 };
 
 const handleExport = async (row) => {
+  await ElMessageBox.confirm(p, "同意数据保密使用协议", {
+    confirmButtonText: "同意",
+    cancelButtonText: "不同意",
+    type: "warning"
+  });
   let conversationInfo: WebConversationInfoResp;
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {

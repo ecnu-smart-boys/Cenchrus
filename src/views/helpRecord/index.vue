@@ -98,7 +98,8 @@ import {
 import { getSupervisorOwnHelpMsg } from "@/apis/message/message";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
-import { ElTable } from "element-plus";
+import { ElMessageBox, ElTable } from "element-plus";
+import { p } from "@/utils/data";
 
 const multipleTableRef = ref<InstanceType<typeof ElTable>>();
 const multipleSelection = ref<any[]>([]);
@@ -108,6 +109,11 @@ const handleSelectionChange = (val: any[]) => {
 };
 
 const handleAll = async () => {
+  await ElMessageBox.confirm(p, "同意数据保密使用协议", {
+    confirmButtonText: "同意",
+    cancelButtonText: "不同意",
+    type: "warning"
+  });
   const zip = new JSZip();
   const name = `${new Date().getTime()}`;
   const zipFolder = <JSZip>zip.folder(name);
@@ -224,6 +230,11 @@ watchEffect(async () => {
 });
 
 const handleExport = async (row) => {
+  await ElMessageBox.confirm(p, "同意数据保密使用协议", {
+    confirmButtonText: "同意",
+    cancelButtonText: "不同意",
+    type: "warning"
+  });
   let conversationInfo: WebConversationInfoResp;
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {

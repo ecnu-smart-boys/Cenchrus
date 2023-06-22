@@ -197,6 +197,8 @@ export function preExport(
       leftString += `![图片](${m.payload.imageInfoArray[0].url})\n`;
     } else if (m.type == "TIMSoundElem") {
       leftString += `[语音](${m.payload.url})\n`;
+    } else if (m.type == "TIMCustomElem") {
+      leftString += `[转发消息]\n`;
     }
     leftString += "\n";
   }

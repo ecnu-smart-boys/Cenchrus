@@ -176,7 +176,8 @@ import {
 import useScroll from "@/hooks/useScroll";
 import JSZip from "jszip";
 import FileSaver from "file-saver";
-import ImComponent from "@/imComponent/im-component.vue";
+import { ElMessageBox } from "element-plus";
+import { p } from "@/utils/data";
 
 const route = useRoute();
 const store = createStore();
@@ -242,6 +243,11 @@ watchEffect(() => {
   }
 });
 const handleExport = async () => {
+  await ElMessageBox.confirm(p, "同意数据保密使用协议", {
+    confirmButtonText: "同意",
+    cancelButtonText: "不同意",
+    type: "warning"
+  });
   let conversationInfo: WebConversationInfoResp;
   let allMsgList: AllMsgListResp;
   const allMsgReq: AllMessageReq = {
