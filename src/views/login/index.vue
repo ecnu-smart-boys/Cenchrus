@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-box">
       <div class="avatar-box">
-        <img src="/vue.svg" alt="" />
+        <img src="/icon.png" alt="" />
       </div>
       <div style="height: 60px; width: 100%"></div>
       <el-form
@@ -159,7 +159,6 @@ onMounted(async () => {
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        background-color: #eee;
       }
     }
 
