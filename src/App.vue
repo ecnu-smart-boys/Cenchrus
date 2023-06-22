@@ -31,7 +31,7 @@ watchEffect(() => {
     };
     websocket.onclose = async (e) => {
       ElMessage({
-        message: "websocket断开，您已被踢出",
+        message: "websocket断开，您已退出",
         type: "error",
         duration: 5 * 1000
       });
