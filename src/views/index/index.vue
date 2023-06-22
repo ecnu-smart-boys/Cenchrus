@@ -174,12 +174,6 @@ const submitForm = async () => {
       throw Error();
     }
   });
-  const p = {
-    oldPsd: md5(form.oldPassword),
-    newPsd: md5(form.password),
-    avatar: imageUrl.value
-  };
-  console.log(p);
   try {
     await updatePsdAndAvatar({
       oldPsd: md5(form.oldPassword),
