@@ -241,11 +241,13 @@ onMounted(() => {
 });
 
 const handleChange = async () => {
-  imageUrl.value = store.userInfo.avatar;
-  form.oldPassword = "";
-  form.password = "";
-  form.repeatPassword = "";
-  changeDialogVisible.value = true;
+  if (store.role == "supervisor" || store.role == "consultant") {
+    imageUrl.value = store.userInfo.avatar;
+    form.oldPassword = "";
+    form.password = "";
+    form.repeatPassword = "";
+    changeDialogVisible.value = true;
+  }
 };
 </script>
 

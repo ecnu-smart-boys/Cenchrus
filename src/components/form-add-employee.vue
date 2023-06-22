@@ -102,7 +102,7 @@
     </el-row>
     <el-row v-if="!props.isConsultant" :gutter="20">
       <el-col :span="12">
-        <el-form-item label="督导资质" prop="workPlace">
+        <el-form-item label="督导资质" prop="qualification">
           <el-select v-model="form.qualification" style="width: 100%">
             <el-option
               v-for="item in qualificationOptions"
@@ -114,7 +114,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item label="资质编号" prop="title">
+        <el-form-item label="资质编号" prop="qualificationNumber">
           <el-input
             v-model="form.qualificationNumber"
             maxlength="255"
@@ -271,7 +271,12 @@ const rules = reactive<FormRules>({
     { required: true, message: "请输入督导资质", trigger: "blur" }
   ],
   qualificationNumber: [
-    { required: true, message: "请输入资质编号", trigger: "blur" }
+    { required: true, message: "请输入资质编号", trigger: "blur" },
+    {
+      validator: (rule, value) => /^((?![\\;!@#$%^&*()]).)*$/.test(value),
+      message: "资质编号不能包含特殊字符",
+      trigger: "blur"
+    }
   ]
 });
 

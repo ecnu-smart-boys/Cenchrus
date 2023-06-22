@@ -19,7 +19,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="total" label="咨询次数" width="100" />
+      <el-table-column prop="total" label="咨询次数" width="80" />
     </el-table>
   </el-card>
 </template>
