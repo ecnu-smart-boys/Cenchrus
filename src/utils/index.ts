@@ -40,6 +40,7 @@ export function parseSecond(time: number): string {
 
 export function parseTimestamp(timestamp: number): string {
   if (String(timestamp).length < 13) timestamp *= 1000;
+  if (String(timestamp).length > 13) timestamp /= 1000;
   const date = new Date(parseInt(String(timestamp)));
   const Moth =
     date.getMonth() + 1 < 10
@@ -130,6 +131,9 @@ export function messageAdapter(
     time: message.time,
     type: "TIMTextElem"
   };
+  defaultData.from = message.fromId;
+  defaultData.to = message.toId;
+  defaultData.flow = message.fromId == myId ? "out" : "in";
   if (message.msgBody == "") {
     return defaultData;
   }
@@ -144,9 +148,6 @@ export function messageAdapter(
   }
   const data = datas[0];
   defaultData.type = data.MsgType;
-  defaultData.from = message.fromId;
-  defaultData.to = message.toId;
-  defaultData.flow = message.fromId == myId ? "out" : "in";
   if (data.MsgType == "TIMTextElem") {
     const payload = data.MsgContent as TextElem;
     defaultData.payload = {
