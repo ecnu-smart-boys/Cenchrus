@@ -49,6 +49,7 @@ import {
   removeConversation
 } from "@/apis/conversation/conversation";
 import { ElNotification } from "element-plus";
+import { deleteConversation } from "@/apis/im/im";
 const store = createStore();
 const { rightMenuVisible, position, rightClickItem, openMenu } =
   useRightClick();
@@ -73,6 +74,13 @@ const getConversationData = async () => {
     });
   });
 };
+
+watchEffect(async () => {
+  // websocket有消息就刷新吧
+  if (store.websocketMessage != null) {
+    await getConversationData();
+  }
+});
 
 onMounted(async () => {
   await getConversationData();
