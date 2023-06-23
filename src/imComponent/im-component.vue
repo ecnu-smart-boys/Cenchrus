@@ -110,12 +110,7 @@ watchEffect(async () => {
       }
       await setMessageRead(`C2C${props.toId}`);
     }
-    if (
-      consultantSupervisorData.value.length !==
-      store.leftMessage.leftMessageList.length
-    ) {
-      consultantSupervisorData.value = store.leftMessage.leftMessageList;
-    }
+    consultantSupervisorData.value = store.leftMessage.leftMessageList;
     if (isReachBottom.value) {
       store.setLeftHasNewMessage(false);
     }
@@ -137,12 +132,7 @@ watchEffect(async () => {
       }
       await setMessageRead(`C2C${props.toId}`);
     }
-    if (
-      consultantSupervisorData.value.length !==
-      store.rightMessage.rightMessageList.length
-    ) {
-      consultantSupervisorData.value = store.rightMessage.rightMessageList;
-    }
+    consultantSupervisorData.value = store.rightMessage.rightMessageList;
     if (isReachBottom.value) {
       store.setRightHasNewMessage(false);
     }

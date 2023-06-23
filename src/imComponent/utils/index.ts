@@ -24,7 +24,12 @@ tim.on(TIM.EVENT.SDK_READY, function (event: any) {
   createStore().setIsTimReady();
 });
 
+let receiveId = "";
 tim.on(TIM.EVENT.MESSAGE_RECEIVED, function (event: any) {
+  if (receiveId == event.data[0].ID && event.data[0].flow == "in") return;
+  if (event.data[0].flow == "in") {
+    receiveId = event.data[0].ID;
+  }
   const store = createStore();
   if (event.data && event.data.length > 0) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -69,14 +74,40 @@ tim.on(TIM.EVENT.MESSAGE_REVOKED, function (event: any) {
         (i.from == store.leftMessage.toId && i.to == store.leftMessage.fromId)
       ) {
         // 当前左侧发生撤回
-        // maybe do nothing
+        for (const o of store.leftMessage.leftMessageList) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          if (o.ID == event.data[0].ID) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            o.isRevoked = true;
+            break;
+          }
+        }
+        store.setLeftMessage({
+          leftMessageList: [...store.leftMessage.leftMessageList],
+          leftHasNewMessage: true
+        });
       } else if (
         (i.from == store.rightMessage.fromId &&
           i.to == store.rightMessage.toId) ||
         (i.from == store.rightMessage.toId && i.to == store.rightMessage.fromId)
       ) {
         // 当前右侧发生撤回
-        // maybe do nothing
+        for (const o of store.rightMessage.rightMessageList) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          if (o.ID == event.data[0].ID) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            o.isRevoked = true;
+            break;
+          }
+        }
+        store.setRightMessage({
+          rightMessageList: [...store.rightMessage.rightMessageList],
+          rightHasNewMessage: true
+        });
       }
     });
   }
