@@ -57,6 +57,7 @@ let hasNewMessage = ref(false);
 
 let nextReqMessageID = "";
 watchEffect(async () => {
+  if (!store.isTimReady) return;
   if (isReachTop.value && nextReqMessageID !== "") {
     // 触发懒加载
     const data = await imGetMessageList(props.toId, nextReqMessageID);

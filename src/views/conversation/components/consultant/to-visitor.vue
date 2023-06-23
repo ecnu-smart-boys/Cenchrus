@@ -62,7 +62,24 @@
         </template>
       </conversation-info>
     </div>
+    <div v-if="allInfo?.consultationInfo.end" class="chat-wrapper">
+      <div ref="leftChatAreaWrapper" class="chat-list-wrapper">
+        <chat-area
+          ref="leftChatArea"
+          :current-message="
+            (allMsg?.consultation ?? []).map((i) =>
+              messageAdapter(i, <string>allInfo?.consultationInfo.consultantId)
+            )
+          "
+          :has-revoke="false"
+          :should-loop="true"
+          :my-avatar="allInfo?.consultationInfo.consultantAvatar"
+          :other-avatar="allInfo?.consultationInfo.visitorAvatar"
+        />
+      </div>
+    </div>
     <im-component
+      v-if="!allInfo?.consultationInfo.end"
       :is-left="true"
       :to-id="<string>allInfo?.consultationInfo.visitorId"
       :is-end="leftIsEnd"
@@ -253,6 +270,7 @@ import { deleteConversation, setMessageRead } from "@/apis/im/im";
 import useScroll from "@/hooks/useScroll";
 import { getConsultantOwnConsultationMsg } from "@/apis/message/message";
 import router from "@/router";
+
 const store = createStore();
 const route = useRoute();
 
@@ -270,7 +288,15 @@ let currentHelpTime = ref(new Date().getTime());
 let leftIsEnd = ref(false);
 let rightIsEnd = ref(false);
 
+const leftChatArea = ref(null);
 const rightChatArea = ref(null);
+const {
+  isReachTop: isLeftReachTop,
+  clientHeight: leftClientHeight,
+  scrollHeight: leftScrollHeight,
+  reflow: leftReflow,
+  setScrollTop: setLeftScrollTop
+} = useScroll(leftChatArea);
 const {
   isReachTop: isRightReachTop,
   clientHeight: rightClientHeight,
@@ -279,19 +305,13 @@ const {
   setScrollTop: setRightScrollTop
 } = useScroll(rightChatArea);
 
-// 迭代器用于懒加载
-let consultationIterator = ref(-1);
 const getMsg = async () => {
-  const data = await getConsultantOwnConsultationMsg({
+  return await getConsultantOwnConsultationMsg({
     conversationId: (route.query as any).conversationId,
-    consultationIterator: 0,
-    helpIterator: consultationIterator.value,
-    size: 15
+    consultationIterator: -1,
+    helpIterator: -1,
+    size: 10000
   });
-  if (data.help && data.help.length > 0) {
-    consultationIterator.value = data.help[0].iterator;
-  }
-  return data;
 };
 
 const refreshData = async (isEnd = false) => {
@@ -319,6 +339,9 @@ const refreshData = async (isEnd = false) => {
             (allMsg.value as AllMsgListResp).help?.push(...data.help);
           }
           (allMsg.value as AllMsgListResp).callHelp = data.callHelp;
+          (allMsg.value as AllMsgListResp).consultation?.push(
+            ...data.consultation
+          );
         } else {
           allMsg.value = await getMsg();
         }
@@ -332,6 +355,21 @@ const refreshData = async (isEnd = false) => {
       rightIsEnd.value = true;
       leftEndBtnShown.value = false;
       leftHelpBtnShown.value = false;
+      if (data.helpInfo == null) {
+        // 不会走上面的逻辑，所以需要再写一遍
+        if (allMsg.value) {
+          const data = await getMsg();
+          if (data.help && allMsg.value?.help) {
+            (allMsg.value as AllMsgListResp).help?.push(...data.help);
+          }
+          (allMsg.value as AllMsgListResp).callHelp = data.callHelp;
+          (allMsg.value as AllMsgListResp).consultation?.push(
+            ...data.consultation
+          );
+        } else {
+          allMsg.value = await getMsg();
+        }
+      }
     } else {
       if (isEnd) {
         return;
@@ -355,20 +393,6 @@ const refreshData = async (isEnd = false) => {
     currentHelpTime.value = 0;
   }
 };
-
-watchEffect(async () => {
-  if (isRightReachTop.value && consultationIterator.value != 0) {
-    // 触发懒加载
-    const data = await getMsg();
-    allMsg.value?.consultation.unshift(...data.consultation);
-    // 保证滚动条还在同一位置
-    await nextTick(() => {
-      const oldScrollHeight = rightScrollHeight.value;
-      rightReflow();
-      setRightScrollTop(rightScrollHeight.value - oldScrollHeight);
-    });
-  }
-});
 
 // 添加督导相关
 const form = reactive({
@@ -454,7 +478,6 @@ const handleStopHelp = async () => {
 watch(route, async () => {
   if (!(route.query as any).conversationId) return;
   if (route.path !== "/conversation") return;
-  consultationIterator.value = -1;
   await refreshData();
   await setMessageRead(`C2C${allInfo.value?.consultationInfo.visitorId}`);
   if (allInfo.value?.helpInfo) {
@@ -467,7 +490,9 @@ onMounted(async () => {
   // 滑动到最底部
   await nextTick(() => {
     rightReflow();
+    leftReflow();
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
+    setLeftScrollTop(leftScrollHeight.value - leftClientHeight.value);
   });
   await setMessageRead(`C2C${allInfo.value?.consultationInfo.visitorId}`);
   if (allInfo.value?.helpInfo) {

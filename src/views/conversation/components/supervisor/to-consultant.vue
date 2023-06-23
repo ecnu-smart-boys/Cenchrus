@@ -117,9 +117,9 @@
           </div>
         </template>
       </supervisor-to-consultant>
-      <div ref="rightChatAreaWrapper" class="chat-list-wrapper">
+      <div class="chat-list-wrapper">
         <chat-area
-          ref="rightChatArea"
+          ref="leftChatArea"
           :current-message="
             (leftMsg?.help ?? []).map((i) =>
               messageAdapter(i, <string>allInfo?.helpInfo?.supervisorId)
@@ -194,7 +194,6 @@ let helpTimer;
 let leftIsEnd = ref(false);
 // 迭代器用于懒加载
 let consultationIterator = ref(-1);
-let helpIterator = ref(-1);
 // 所有信息
 let allInfo = ref<WebConversationInfoResp>();
 let allMsg = ref<MsgListResp>();
@@ -216,16 +215,12 @@ const getMsg = async () => {
 };
 
 const getLeftMsg = async () => {
-  const data = await getSupervisorOwnHelpMsg({
+  return await getSupervisorOwnHelpMsg({
     conversationId: (route.query as any).conversationId,
-    consultationIterator: 0,
-    helpIterator: consultationIterator.value,
-    size: 15
+    consultationIterator: -1,
+    helpIterator: -1,
+    size: 10000
   });
-  if (data.help && data.help.length > 0) {
-    helpIterator.value = data.help[0].iterator;
-  }
-  return data;
 };
 const refreshData = async (isEnd = false) => {
   timer && clearInterval(timer);
@@ -241,7 +236,6 @@ const refreshData = async (isEnd = false) => {
         // 结束了
         leftHelpBtnShown.value = false;
         currentHelpTime.value = <number>data.helpInfo?.endTime;
-        // todo has bugs
         if (leftMsg.value) {
           const data = await getLeftMsg();
           if (data.help && leftMsg.value?.help) {
@@ -298,7 +292,6 @@ watch(route, async () => {
   if (!(route.query as any).conversationId) return;
   if (route.path !== "/conversation") return;
   consultationIterator.value = -1;
-  helpIterator.value = -1;
   await refreshData();
   await setMessageRead(
     `C2C${<string>allInfo.value?.consultationInfo.consultantId}`

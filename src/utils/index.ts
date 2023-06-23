@@ -130,10 +130,16 @@ export function messageAdapter(
     time: message.time,
     type: "TIMTextElem"
   };
+  if (message.msgBody == "") {
+    return defaultData;
+  }
   try {
     datas = JSON.parse(message.msgBody);
   } catch (ignored) {
     // 默认采用空白文本
+    return defaultData;
+  }
+  if (datas == null || datas.length == 0) {
     return defaultData;
   }
   const data = datas[0];
