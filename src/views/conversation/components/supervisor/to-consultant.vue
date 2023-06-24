@@ -305,9 +305,9 @@ onMounted(async () => {
     rightReflow();
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
   });
-  await setMessageRead(
-    `C2C${<string>allInfo.value?.consultationInfo.consultantId}`
-  );
+  // await setMessageRead(
+  //   `C2C${<string>allInfo.value?.consultationInfo.consultantId}`
+  // );
   store.setLeftId(
     <string>allInfo.value?.helpInfo?.supervisorId,
     <string>allInfo.value?.consultationInfo.consultantId

@@ -494,10 +494,10 @@ onMounted(async () => {
     setRightScrollTop(rightScrollHeight.value - rightClientHeight.value);
     setLeftScrollTop(leftScrollHeight.value - leftClientHeight.value);
   });
-  await setMessageRead(`C2C${allInfo.value?.consultationInfo.visitorId}`);
-  if (allInfo.value?.helpInfo) {
-    await setMessageRead(`C2C${<string>allInfo.value?.helpInfo?.supervisorId}`);
-  }
+  // await setMessageRead(`C2C${allInfo.value?.consultationInfo.visitorId}`);
+  // if (allInfo.value?.helpInfo) {
+  //   await setMessageRead(`C2C${<string>allInfo.value?.helpInfo?.supervisorId}`);
+  // }
   store.setLeftId(
     <string>allInfo.value?.consultationInfo.consultantId,
     <string>allInfo.value?.consultationInfo.visitorId

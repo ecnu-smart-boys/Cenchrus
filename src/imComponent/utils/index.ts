@@ -137,9 +137,9 @@ tim.on(TIM.EVENT.SDK_NOT_READY, function (event: any) {
 
 tim.on(TIM.EVENT.KICKED_OUT, async (event: any) => {
   const store = createStore();
+  await logout();
   store.clearUserInfo();
   store.clearToken();
-  await logout();
   let errorMsg;
   if (event.data.type === TIM.TYPES.KICKED_OUT_MULT_ACCOUNT) {
     errorMsg = "多实例登录被踢";

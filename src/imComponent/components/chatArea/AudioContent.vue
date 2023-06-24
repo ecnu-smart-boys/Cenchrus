@@ -3,7 +3,7 @@
     <img src="/voice.png" class="icon" alt="" />&nbsp;&nbsp;
     {{ parseSecond(payload.second) }}
     <audio ref="audioRef">
-      <source :src="payload.url" />
+      <source :src="payload.remoteAudioUrl ?? payload.url" />
     </audio>
   </span>
 </template>
